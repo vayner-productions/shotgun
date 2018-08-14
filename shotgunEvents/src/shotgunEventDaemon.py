@@ -52,7 +52,7 @@ if sys.platform == 'win32':
     import servicemanager
 
 import daemonizer
-import tank_vendor.shotgun_api3 as sg
+import shotgun_api3 as sg
 
 
 CURRENT_PYTHON_VERSION = StrictVersion(sys.version.split()[0])
@@ -1199,4 +1199,5 @@ def _getConfigPath():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    # sys.exit(main())
+    main()
