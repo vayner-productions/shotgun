@@ -3,3 +3,5 @@ shotgunEvents/src/examplePlugins/
 shotgunEventDaemon/
 notes/
 __init__.py
+create_project_directory.txt
+readme_shotgun_event_install.txt

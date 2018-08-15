@@ -1,13 +1,3 @@
-"""
-develop this via the command prompt
-add the following line to the command prompt:
-C:\Python27\python.exe "A:\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py" foreground
-C:\Python27\python.exe "A:\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py" start
-C:\Python27\python.exe "A:\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py" stop
-C:\Python27\python.exe "A:\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py" install
-C:\Python27\python.exe "A:\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py" remove
-python "A:\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py" debug
-"""
 import os
 import shutil
 import shotgun_api3
@@ -23,9 +13,9 @@ def registerCallbacks(reg):
     eventFilter = {
         "Shotgun_Project_Change": ["name", "sg_client", "sg_brand"]
     }
-    server = "https://vaynerproductions.shotgunstudio.com"  #os.environ["SG_SITE"]
-    script_name = os.path.basename(__file__).split(".")[0] + ".py"  # os.environ["SG_CREATE_PROJECT_DIRECTORY_NAME"]
-    script_key = file_object.readline()  # "ryaaewst4-qcseneqyuPrazmi"  # os.environ["SG_CREATE_PROJECT_DIRECTORY_KEY"]
+    server = "https://vaynerproductions.shotgunstudio.com"
+    script_name = os.path.basename(__file__).split(".")[0] + ".py"
+    script_key = file_object.readline()
 
     file_object.close()
 
