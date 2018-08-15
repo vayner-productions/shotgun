@@ -9,7 +9,6 @@ C:\Python27\python.exe "A:\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\
 python "A:\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py" debug
 """
 import os
-# import logging
 import shutil
 import shotgun_api3
 
@@ -18,12 +17,17 @@ def registerCallbacks(reg):
     """
     Register all necessary or appropriate callbacks for this plugin.
     """
+    file_object = open(r"//192.168.255.200/GenesisNX/Animation/Shotgun/System/Tools/shotgun/create_project_directory.txt",
+                       "r")
+
     eventFilter = {
         "Shotgun_Project_Change": ["name", "sg_client", "sg_brand"]
     }
-    server = os.environ["SG_SITE"]
-    script_name = os.environ["SG_CREATE_PROJECT_DIRECTORY_NAME"]
-    script_key = os.environ["SG_CREATE_PROJECT_DIRECTORY_KEY"]
+    server = "https://vaynerproductions.shotgunstudio.com"  #os.environ["SG_SITE"]
+    script_name = os.path.basename(__file__).split(".")[0] + ".py"  # os.environ["SG_CREATE_PROJECT_DIRECTORY_NAME"]
+    script_key = file_object.readline()  # "ryaaewst4-qcseneqyuPrazmi"  # os.environ["SG_CREATE_PROJECT_DIRECTORY_KEY"]
+
+    file_object.close()
 
     sg = shotgun_api3.Shotgun(server, script_name, script_key)
 
@@ -37,9 +41,6 @@ def registerCallbacks(reg):
     reg.logger.debug("Registered callback.")
 
 
-# def create_project_directory():
-#     logger.info(">> working")
-#     return
 def create_project_directory(sg, logger, event, args):
     event_id = event.get("id")
     project = event.get("entity", {})
@@ -57,7 +58,7 @@ def create_project_directory(sg, logger, event, args):
             return
         name[key] = data[f]["name"]
 
-    start = r"A:/Animation/Projects/Client/{}/{}/{}".format(
+    start = r"//192.168.255.200/GenesisNX/Animation/Projects/Client/{}/{}/{}".format(
         name["client"],
         name["brand"],
         name["project"]
@@ -67,6 +68,6 @@ def create_project_directory(sg, logger, event, args):
         logger.info(">> created project directory: {}".format(start))
         os.makedirs(start)
         os.rmdir(start)
-        template = r"A:/Animation/Directory Source/New Project/0000_Project"
+        template = r"//192.168.255.200/GenesisNX/Animation/Directory Source/New Project/0000_Project"
         shutil.copytree(template, start)
     return
