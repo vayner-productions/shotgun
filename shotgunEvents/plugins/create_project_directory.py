@@ -7,11 +7,13 @@ def registerCallbacks(reg):
     """
     Register all necessary or appropriate callbacks for this plugin.
     """
-    file_object = open(r"//192.168.255.200/GenesisNX/Animation/Shotgun/System/Tools/shotgun/create_project_directory.txt",
+    file_object = open(r"//genesisnx/genesisnx/Animation/Shotgun/System/Tools/shotgun/create_project_directory.txt",
                        "r")
 
     eventFilter = {
-        "Shotgun_Project_Change": ["name", "sg_client", "sg_brand"]
+        "Shotgun_Project_Change": ["name", "sg_client", "sg_brand"],
+        "Shotgun_Asset_Change": ["code"],
+        "Shotgun_Shot_Change": ["code"]
     }
     server = "https://vaynerproductions.shotgunstudio.com"
     script_name = os.path.basename(__file__).split(".")[0] + ".py"
@@ -32,13 +34,17 @@ def registerCallbacks(reg):
 
 
 def create_project_directory(sg, logger, event, args):
+    # check for event id and project before continuing
     event_id = event.get("id")
-    project = event.get("entity", {})
+    project = event["project"]
+    if project is None:
+        project = event.get("entity", {})
 
     if None is [event_id, project]:
         logger.warning("Missing info in event dictionary, skipping.")
         return
 
+    # check for project path by getting the client, brand, and project
     name = {"project": project["name"]}
     for f in ["sg_client", "sg_brand"]:
         key = f.split("_")[1]
@@ -48,16 +54,52 @@ def create_project_directory(sg, logger, event, args):
             return
         name[key] = data[f]["name"]
 
-    start = r"//192.168.255.200/GenesisNX/Animation/Projects/Client/{}/{}/{}".format(
+    # create project, shot, and asset directory
+    event_type = event["event_type"]
+    start = r"//genesisnx/genesisnx/Animation/Projects/Client/{}/{}/{}".format(
         name["client"],
         name["brand"],
         name["project"]
     )
 
-    if not os.path.exists(start):
-        logger.info(">> created project directory: {}".format(start))
-        os.makedirs(start)
-        os.rmdir(start)
-        template = r"//192.168.255.200/GenesisNX/Animation/Directory Source/New Project/0000_Project"
-        shutil.copytree(template, start)
+    if "Shotgun_Project_Change" == event_type:
+        if not os.path.exists(start):
+            logger.info(">> created project directory: {}".format(start))
+            os.makedirs(start)
+            os.rmdir(start)
+            template = r"//genesisnx/genesisnx/Animation/Directory Source/New Project/0000_Project"
+            shutil.copytree(template, start)
+        logger.info(">> created project directory")
+    elif "Shotgun_Shot_Change" == event_type:
+        # create shot folders for cameras, layouts, cache, lighting, animation
+        # omitting tests, assets, rigs, dynamics
+        scene_dir = r"{}/Project Directory/02_Production/04_Maya/scenes".format(start)
+        folders = []  # full path to each scene process
+        for s in ["Cameras", "Layouts", "Cache", "Lighting", "Animation"]:
+            for fld in os.listdir(scene_dir):
+                if s in fld:
+                    folders += [scene_dir + "/" + fld]
+        new_shot = event["meta"]["new_value"]
+        for pth in folders:
+            try:
+                os.makedirs(pth + "/" + new_shot)
+            except:
+                pass
+        logger.info(">> created shot directory")
+    elif "Shotgun_Asset_Change" == event_type:
+        # create asset folders assets, rigs
+        # omit tests, dynamics, cameras, layouts, cache, lighting, animation
+        scene_dir = r"{}/Project Directory/02_Production/04_Maya/scenes".format(start)
+        folders = []  # full path to each scene process
+        for s in ["Assets", "Rigs"]:
+            for fld in os.listdir(scene_dir):
+                if s in fld:
+                    folders += [scene_dir + "/" + fld]
+        new_shot = event["meta"]["new_value"]
+        for pth in folders:
+            try:
+                os.makedirs(pth + "/" + new_shot)
+            except:
+                pass
+        logger.info(">> created asset directory")
     return

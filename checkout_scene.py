@@ -43,6 +43,7 @@ def increment_and_save(current_file, entity_type="Asset", publish=0):
             str(int(current_file.split(".")[1][1:]) + 1).zfill(4)
         )
         # print ">> checked out"
+
     elif not current_file:
         processed_file = "{}/{}_processed.v0001.ma".format(
             scene_directory,
