@@ -89,17 +89,29 @@ def create_project_directory(sg, logger, event, args):
     elif "Shotgun_Asset_Change" == event_type:
         # create asset folders assets, rigs
         # omit tests, dynamics, cameras, layouts, cache, lighting, animation
+        sg_asset_type = sg.find_one(
+            "Asset",
+            [["project", "is", project],
+             ["id", "is", event["meta"]["entity_id"]]],
+            ["sg_asset_type"]
+        )["sg_asset_type"]
+
         scene_dir = r"{}/Project Directory/02_Production/04_Maya/scenes".format(start)
-        folders = []  # full path to each scene process
-        for s in ["Assets", "Rigs"]:
+        scene_folder = None
+        if "Rig" in sg_asset_type:
             for fld in os.listdir(scene_dir):
-                if s in fld:
-                    folders += [scene_dir + "/" + fld]
-        new_shot = event["meta"]["new_value"]
-        for pth in folders:
-            try:
-                os.makedirs(pth + "/" + new_shot)
-            except:
-                pass
-        logger.info(">> created asset directory")
+                if "Rig" in fld:
+                    scene_folder = fld
+                    break
+        elif "Model" in sg_asset_type:
+            for fld in os.listdir(scene_dir):
+                if "Asset" in fld:
+                    scene_folder = fld
+                    break
+        asset_folder_path = r"{}/{}/{}".format(scene_dir, scene_folder, event["meta"]["new_value"])
+        try:
+            os.makedirs(asset_folder_path)
+        except:
+            pass
+    logger.info(">> created asset directory")
     return
