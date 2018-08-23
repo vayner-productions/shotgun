@@ -36,7 +36,7 @@ publish_scene = """
 import shotgun.publish_scene as sg
 
 reload(sg)
-sg.publish_scene()
+sg.get_window()
 """
 publish_scene_item = pm.menuItem(label="Publish Scene",
                                  command=publish_scene,
