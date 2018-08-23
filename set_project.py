@@ -36,16 +36,29 @@ def get_subfolders(full_path=None, parent_folder=None):
 
 def set_project(project_path=None, scene_path=None, alembic_cache=None):
     # set workspace to project path and scene to scene path
+
+    # scenes
     workspace.open(project_path)
     if scene_path:
         workspace.fileRules["scene"] = scene_path
     else:
         workspace.fileRules["scene"] = "scenes"
+
+    # images
+    scene_path_basename = os.path.basename(scene_path)
+    if "Shot_" in scene_path_basename:
+        workspace.fileRules["images"] = "images/" + scene_path_basename
+    else:
+        workspace.fileRules["images"] = "images"
+
+    # alembic
     if alembic_cache:
         cache_folder = [fld for fld in os.listdir(workspace.path + "/scenes") if "Cache" in fld][
             0]
         alembic_directory = "{}/{}/{}".format(workspace.path, cache_folder, alembic_cache)
         workspace.fileRules["alembicCache"] = alembic_directory
+
+    # project
     mel.eval('setProject \"' + project_path + '\"')
     return project_path, scene_path
 
@@ -103,4 +116,4 @@ class MyWindow(QtWidgets.QDialog):
                     alembic_cache=ac_path)
         self.ui.close()
         print ">> project set"
-        print ">> scene directory:", self.scene_path
+        # print ">> scene directory:", self.scene_path
