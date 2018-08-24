@@ -44,13 +44,6 @@ def set_project(project_path=None, scene_path=None, alembic_cache=None):
     else:
         workspace.fileRules["scene"] = "scenes"
 
-    # images
-    scene_path_basename = os.path.basename(scene_path)
-    if "Shot_" in scene_path_basename:
-        workspace.fileRules["images"] = "images/" + scene_path_basename
-    else:
-        workspace.fileRules["images"] = "images"
-
     # alembic
     if alembic_cache:
         cache_folder = [fld for fld in os.listdir(workspace.path + "/scenes") if "Cache" in fld][
