@@ -71,20 +71,25 @@ def create_project_directory(sg, logger, event, args):
             shutil.copytree(template, start)
         logger.info(">> created project directory")
     elif "Shotgun_Shot_Change" == event_type:
-        # create shot folders for cameras, layouts, cache, lighting, animation
         # omitting tests, assets, rigs, dynamics
         scene_dir = r"{}/Project Directory/02_Production/04_Maya/scenes".format(start)
-        folders = []  # full path to each scene process
+
+        # create shot paths for cameras, layouts, cache, lighting, animation
+        new_shot = event["meta"]["new_value"]
+        folders = []  # full path to each scene process, including images
         for s in ["Cameras", "Layouts", "Cache", "Lighting", "Animation"]:
             for fld in os.listdir(scene_dir):
                 if s in fld:
-                    folders += [scene_dir + "/" + fld]
-        new_shot = event["meta"]["new_value"]
+                    new_folder = r"{}/{}/{}".format(scene_dir, fld, new_shot)
+                    folders += [new_folder]
+
+        # create folders
         for pth in folders:
             try:
-                os.makedirs(pth + "/" + new_shot)
+                os.makedirs(pth)
             except:
                 pass
+
         logger.info(">> created shot directory")
     elif "Shotgun_Asset_Change" == event_type:
         # create asset folders assets, rigs
