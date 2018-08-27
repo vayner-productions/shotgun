@@ -94,6 +94,20 @@ def get_tasks():
     return tasks
 
 
+def fail_safe():
+    scene_process = pm.workspace.fileRules["scene"].rsplit("/", 2)[1][3:]
+    fail = 1
+    if "Assets" in scene_process:
+        extra_cameras = []
+        for cam in pm.ls(type="camera"):
+            if cam not in ["frontShape", "perspShape", "sideShape", "topShape"]:
+                extra_cameras += [str(cam)]
+        if extra_cameras:
+            pm.warning("Remove extra cameras: " + ", ".join(extra_cameras))
+            fail = 0
+    return fail
+
+
 def publish_scene(addressed_tasks=[], comments=None):
     #
     # increments for the last maya ascii on sg
@@ -102,10 +116,11 @@ def publish_scene(addressed_tasks=[], comments=None):
     processed_file = checkout_scene.increment_and_save(pm.sceneName(),
                                                        entity_type=entity["type"],
                                                        publish=1)
-    original_file = "{}/published/{}/{}".format(
-        pm.workspace.path,
-        "/".join(processed_file.rsplit("/", 3)[1:3]),
-        processed_file.rsplit("/", 1)[1].replace("processed", "original"))
+    # original_file = "{}/published/{}/{}".format(
+    #     pm.workspace.path,
+    #     "/".join(processed_file.rsplit("/", 3)[1:3]),
+    #     processed_file.rsplit("/", 1)[1].replace("processed", "original"))
+    original_file = pm.sceneName().replace("scenes", "published").replace("processed", "original")
 
     original_directory = ut.path(original_file.rsplit("/", 1)[0])
     if not ut.path.exists(original_directory):
@@ -157,7 +172,7 @@ def publish_scene(addressed_tasks=[], comments=None):
         playblast_image = 0
     elif scene_process in ["Lighting"]:
         data = {
-            "sg_maya_light": {
+            "sg_maya_scene__light_": {
                 "link_type": "local",
                 "local_path": local_path
             }
@@ -208,8 +223,10 @@ def get_window():
     except:
         pass
 
-    mw = MyWindow()
-    mw.ui.show()
+    # check for errors before publishing
+    if fail_safe():
+        mw = MyWindow()
+        mw.ui.show()
 
 
 class MyWindow(QtWidgets.QDialog):
