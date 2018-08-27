@@ -61,7 +61,7 @@ def checkout_scene():
         "Assets": "sg_file",
         "Cameras": "sg_tracked_camera",
         "Animation": "sg_maya_scene",
-        "Lighting": "sg_maya_light"
+        "Lighting": "sg_maya_scene__light_"
     }
 
     entity = get_entity(scene_directory)
