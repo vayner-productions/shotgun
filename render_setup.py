@@ -2,14 +2,59 @@ import pymel.core as pm
 from PySide2 import QtCore, QtWidgets, QtUiTools
 import os
 workspace = pm.system.workspace
+import mtoa.aovs as aovs
 
 
 def aovs_setup(lights):
+    """updating render settings AOVs tab"""
+    # enable beauty
+    arnold_options = pm.PyNode("defaultArnoldRenderOptions")
+    arnold_options.aovMode.set(1)
+
+    # enable default aovs
+    default_aovs = ["diffuse_direct",
+                    "diffuse_indirect",
+                    "specular_direct",
+                    "specular_indirect",
+                    "sss_direct",
+                    "sss_indirect",
+                    "N",
+                    "P",
+                    "Z",
+                    "crypto_asset",
+                    "crypto_material",
+                    "crypto_object",
+                    "AO"]
+    default_aovs.extend(lights)
+    for aov in default_aovs:
+        if not aovs.AOVInterface().getAOVNode(aov):
+            aovs.AOVInterface().addAOV(aov)
+
+    # enable custom aovs
+    # ambient occlusion
+    ao_name = "aiAmbientOcclusion"
+    if not pm.ls(type=ao_name):
+        ao_aov = pm.PyNode("aiAOV_AO")
+        ao_shader = pm.shadingNode(ao_name, asShader=1)
+        ao_sg = pm.sets(name=ao_name + "SG", empty=1, renderable=1, noSurfaceShader=1)
+        ao_shader.outColor >> ao_aov.defaultValue
+        ao_shader.outColor >> ao_sg.surfaceShader
+
+    # create light group for each of the lights
+    for light in lights:
+        shape = pm.PyNode(light).getShape()
+        shape.aiAov.set(light)
+
+    # merge aovs
+    arnold_driver = pm.PyNode("defaultArnoldDriver")
+    arnold_driver.mergeAOVs.set(1)
+    arnold_driver.halfPrecision.set(1)
     print ">> aov setup"
     return
 
 
 def render_setup(camera):
+    """updating render settings common tab"""
     #
     # image file rule
     #
@@ -55,6 +100,7 @@ def render_setup(camera):
     #
     # render settings
     #
+
     shot_id = os.path.basename(workspace.fileRules["scene"])
     filename_prefix = "Shots/{0}/{1}/<RenderLayer>/{0}".format(shot_id, next_version)
     start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
@@ -91,15 +137,37 @@ def get_window():
     except:
         pass
 
-    mw = MyWindow()
-    mw.ui.show()
+    open = 0
+
+    for l in pm.ls(type=pm.listNodeTypes("light")):
+        light = str(l.getParent())
+        if (len(light) == 8) and ("Light_" in light) and (light[-2:].isdigit()):
+            open = 1
+            break
+
+    if not open:
+        pm.warning(">> use arnold lights with this naming convention: Light_##")
+
+    open = 0
+
+    for c in pm.ls(type="camera"):
+        camera = str(c.getParent())
+        if camera not in ["persp", "top", "front", "side"]:
+            open = 1
+            break
+
+    if not open:
+        pm.warning(">> could not find render camera in scene")
+
+    if open:
+        mw = MyWindow()
+        mw.ui.show()
 
 
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
         self.ui = self.import_ui()
         self.init_ui()
-        self.setup_ui()
 
     def import_ui(self):
         ui_path = __file__.split(".")[0] + ".ui"
@@ -111,11 +179,20 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def init_ui(self):
-        [self.ui.light_lsw.addItem(str(light)) for light in pm.ls(type=pm.listNodeTypes("light"))]
-        [self.ui.camera_lsw.addItem(str(camera)) for camera in pm.ls(type="camera")]
-        return
+        lights = set(pm.ls("Light_*", type="transform")[:-1])
+        all_maya_lights = set(light.getParent() for light in pm.ls(type="light"))
+        arnold_lights = list(lights.difference(all_maya_lights))
 
-    def setup_ui(self):
+        for light in arnold_lights:
+            light = str(light)
+            if (len(light) == 8) and ("Light_" in light) and (light[-2:].isdigit()):
+                self.ui.light_lsw.addItem(light)
+
+        for c in pm.ls(type="camera"):
+            camera = str(c.getParent())
+            if camera not in ["persp", "top", "front", "side"]:
+                self.ui.camera_lsw.addItem(camera)
+
         self.ui.render_btn.clicked.connect(self.run)
         return
 
