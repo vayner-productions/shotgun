@@ -41,15 +41,12 @@ def set_project(project_path=None, scene_path=None, alembic_cache=None):
     workspace.open(project_path)
     if scene_path:
         workspace.fileRules["scene"] = scene_path
-    else:
-        workspace.fileRules["scene"] = "scenes"
 
     # alembic
     if alembic_cache:
-        cache_folder = [fld for fld in os.listdir(workspace.path + "/scenes") if "Cache" in fld][
-            0]
-        alembic_directory = "{}/{}/{}".format(workspace.path, cache_folder, alembic_cache)
-        workspace.fileRules["alembicCache"] = alembic_directory
+        workspace.fileRules["Alembic"] = alembic_cache
+    else:
+        workspace.fileRules["Alembic"] = ""
 
     # project
     mel.eval('setProject \"' + project_path + '\"')
@@ -100,13 +97,32 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def run(self):
-        s_path, ac_path = self.scene_path, None
-        if self.ui.asset_cbx.currentText():
-            s_path = self.scene_path + "/" + self.ui.asset_cbx.currentText()
-            ac_path = self.ui.asset_cbx.currentText()
+        scene_selection = self.ui.scene_cbx.currentText()
+        asset_selection = self.ui.asset_cbx.currentText()
+
+        # relative paths
+        scene_path = "scenes/{}".format(scene_selection)
+        asset_path = None
+
+        # update scene path and set asset path
+        # if the scene is layouts, dynamics, lighting, or animation
+        if asset_selection:
+            scene_path += "/{}".format(asset_selection)
+
+        if scene_selection.split("_")[1] in ["Layouts", "Dynamics", "Lighting", "Animation"]:
+            cache_folder = None
+            for sp in self.scene_processes:
+                if "Cache" in sp:
+                    cache_folder = sp
+                    break
+
+            asset_path = "{}/{}/{}".format(cache_folder, scene_selection, asset_selection)
+
+        # set the project
         set_project(project_path=get_project_path(),
-                    scene_path=s_path,
-                    alembic_cache=ac_path)
+                    scene_path=scene_path,
+                    alembic_cache=asset_path)
+
         self.ui.close()
         print ">> project set"
-        # print ">> scene directory:", self.scene_path
+        return
