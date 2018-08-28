@@ -49,7 +49,7 @@ def set_playblast(image=True):
         )
     else:
         start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
-        file_name = pm.sceneName().rsplit("/", 1)[1].replace(".ma", ".mov").replace(".", "_", 1)
+        file_name = pm.sceneName().basename().replace(".ma", ".mov")
         media_file = pm.playblast(
             startTime=start_time,
             endTime=end_time,
@@ -70,7 +70,7 @@ def set_playblast(image=True):
 def get_alembic_file(file_path):
     alembic_file = "{}/{}.abc".format(
         pm.workspace.fileRules["alembicCache"],
-        ut.path.basename(pm.sceneName()).stripext()
+        ut.path.basename(pm.sceneName()).stripext().replace(".", "_")
     )
     mel_code = """
     AbcExport -j "-frameRange {0:.0f} {1:.0f} -dataFormat ogawa -file \\"{2}\\"";
