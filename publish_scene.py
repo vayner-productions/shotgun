@@ -11,29 +11,11 @@ project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]
 entity = checkout_scene.get_entity(pm.workspace.fileRules["scene"])
 
 
-# def set_thumbnail(entity):
-#     current_time = pm.currentTime(q=1)
-#     thumbnail_name = "{}/images/{}.jpg".format(*pm.sceneName()[:-3].rsplit("/", 3)[::3])
-#     thumbnail_file = pm.playblast(
-#         frame=current_time,
-#         format="image",
-#         completeFilename=thumbnail_name,
-#         percent=100,
-#         compression="jpg",
-#         quality=100,
-#         widthHeight=(960, 540),
-#         viewer=0,
-#     )
-#     upload_data = entity.values() + [thumbnail_file.replace("/", "\\")]
-#     sg.upload_thumbnail(*upload_data)
-#     return
-
-
 def set_playblast(image=True):
     media_file = None
     if image:
         current_time = pm.currentTime(q=1)
-        file_name = "{}/images/{}".format(*pm.sceneName().rsplit("/", 4)[::4]).replace(".", "_", 1).replace(".ma", ".jpg")
+        file_name = pm.sceneName().replace(".ma", ".jpg").replace("scenes", "published").replace(".v", "_v")
         media_file = pm.playblast(
             frame=current_time,
             format="image",
@@ -49,7 +31,8 @@ def set_playblast(image=True):
         )
     else:
         start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
-        file_name = pm.sceneName().basename().replace(".ma", ".mov")
+        file_name = pm.sceneName().replace(".ma", ".mov").replace("scenes", "published").replace(
+            ".v", "_v")
         media_file = pm.playblast(
             startTime=start_time,
             endTime=end_time,
@@ -68,8 +51,9 @@ def set_playblast(image=True):
 
 
 def get_alembic_file(file_path):
-    alembic_file = "{}/{}.abc".format(
-        pm.workspace.fileRules["alembicCache"],
+    alembic_file = "{}/{}/{}.abc".format(
+        pm.workspace.getPath(),
+        pm.workspace.fileRules["Alembic"],
         ut.path.basename(pm.sceneName()).stripext().replace(".", "_")
     )
     mel_code = """
@@ -77,7 +61,7 @@ def get_alembic_file(file_path):
     """.format(pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1), alembic_file)
     pm.mel.eval(mel_code)
     return alembic_file
-
+    return
 
 def get_tasks():
     task_filters = [
@@ -116,10 +100,7 @@ def publish_scene(addressed_tasks=[], comments=None):
     processed_file = checkout_scene.increment_and_save(pm.sceneName(),
                                                        entity_type=entity["type"],
                                                        publish=1)
-    # original_file = "{}/published/{}/{}".format(
-    #     pm.workspace.path,
-    #     "/".join(processed_file.rsplit("/", 3)[1:3]),
-    #     processed_file.rsplit("/", 1)[1].replace("processed", "original"))
+
     original_file = pm.sceneName().replace("scenes", "published").replace("processed", "original")
 
     original_directory = ut.path(original_file.rsplit("/", 1)[0])
