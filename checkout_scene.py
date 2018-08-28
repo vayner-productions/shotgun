@@ -17,12 +17,11 @@ def get_entity(file_path):
         ["code", "is", entity_name]
     ]
     entity = sg.find_one(parent_entity, filters)
-    # print ">>", entity_name
     return entity
 
 
 def increment_and_save(current_file, entity_type="Asset", publish=0):
-    scene_directory = pm.workspace.fileRules["scene"]
+    scene_directory = pm.workspace.expandName(pm.workspace.fileRules["scene"])
     file_name = scene_directory.rsplit("/", 1)[1][4:]
     if "Shot" == entity_type:
         file_name = scene_directory.rsplit("/", 1)[1]
@@ -34,7 +33,6 @@ def increment_and_save(current_file, entity_type="Asset", publish=0):
             file_name,
             str(int(current_file.split(".")[1][1:]) + 1).zfill(4)
         )
-        # print ">> publishing"
     elif current_file and not publish:
         pm.openFile(current_file, f=1)
         processed_file = "{}/{}_processed.v{}.ma".format(
@@ -55,7 +53,7 @@ def increment_and_save(current_file, entity_type="Asset", publish=0):
 
 
 def checkout_scene():
-    scene_directory = pm.workspace.fileRules["scene"]
+    scene_directory = pm.workspace.expandName(pm.workspace.fileRules["scene"])
     data = {
         "Rigs": "sg_file",
         "Assets": "sg_file",
