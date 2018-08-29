@@ -137,29 +137,33 @@ def get_window():
     except:
         pass
 
-    open = 0
+    is_light = 0
 
-    for l in pm.ls(type=pm.listNodeTypes("light")):
+    lights = list(set(pm.nodeType("shape", derived=True, isTypeName=True)).intersection(
+        pm.listNodeTypes("light")))
+    for l in pm.ls(type=lights):
         light = str(l.getParent())
         if (len(light) == 8) and ("Light_" in light) and (light[-2:].isdigit()):
-            open = 1
+            is_light = 1
+        else:
+            is_light = 0
             break
 
-    if not open:
+    if not is_light:
         pm.warning(">> use arnold lights with this naming convention: Light_##")
 
-    open = 0
+    is_camera = 0
 
     for c in pm.ls(type="camera"):
         camera = str(c.getParent())
         if camera not in ["persp", "top", "front", "side"]:
-            open = 1
+            is_camera = 1
             break
 
-    if not open:
+    if not is_camera:
         pm.warning(">> could not find render camera in scene")
 
-    if open:
+    if is_light and is_camera:
         mw = MyWindow()
         mw.ui.show()
 
@@ -212,3 +216,5 @@ class MyWindow(QtWidgets.QDialog):
             render_setup(camera)
         self.ui.close()
         return
+
+#TODO: does not recognize aiskydomelight
