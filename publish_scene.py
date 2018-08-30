@@ -63,6 +63,7 @@ def get_alembic_file(file_path):
     return alembic_file
     return
 
+
 def get_tasks():
     task_filters = [
         ["project", "is", project],
