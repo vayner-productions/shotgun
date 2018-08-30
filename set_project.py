@@ -42,10 +42,6 @@ def set_project(project_path=None, scene_path=None, alembic_cache=""):
     if scene_path:
         workspace.fileRules["scene"] = scene_path
 
-    # source images
-    source_images = "sourceimages/Assets/{}".format(os.path.basename(scene_path))
-    workspace.fileRules["sourceImages"] = source_images
-
     # alembic
     workspace.fileRules["Alembic"] = alembic_cache
 
