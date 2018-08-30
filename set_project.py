@@ -14,7 +14,7 @@ def get_project_path():
         sg.find_one("Project", [["name", "is", project_name]], [i, "name"])[i]["name"] for i in
         ["sg_client", "sg_brand"]]
     client_brand = client_brand[-8:]
-    project_path = r"A:/Animation/Projects/Client/{}/{}/{}/Project Directory/02_Production/04_Maya".format(
+    project_path = r"//genesisnx/genesisnx/Animation/Projects/Client/{}/{}/{}/Project Directory/02_Production/04_Maya".format(
         client_brand, sub_brand, project_name)
     return project_path
 
