@@ -216,5 +216,3 @@ class MyWindow(QtWidgets.QDialog):
             render_setup(camera)
         self.ui.close()
         return
-
-#TODO: does not recognize aiskydomelight
