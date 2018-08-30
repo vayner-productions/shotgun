@@ -76,6 +76,7 @@ def create_project_directory(sg, logger, event, args):
 
         # create shot paths for cameras, layouts, cache, lighting, animation
         new_shot = event["meta"]["new_value"]
+        source_images_dir = scene_dir.replace("scenes", "sourceimages/Assets/{}".format(new_shot))
         folders = []  # full path to each scene process, including images
         for s in ["Cameras", "Layouts", "Cache", "Lighting", "Animation"]:
             for fld in os.listdir(scene_dir):
@@ -89,10 +90,13 @@ def create_project_directory(sg, logger, event, args):
                 os.makedirs(pth)
             except:
                 pass
+        try:
+            os.makedirs(source_images_dir)
+        except:
+            pass
 
         logger.info(">> created shot directory")
     elif "Shotgun_Asset_Change" == event_type:
-        # create asset folders assets, rigs
         # omit tests, dynamics, cameras, layouts, cache, lighting, animation
         sg_asset_type = sg.find_one(
             "Asset",
@@ -101,6 +105,7 @@ def create_project_directory(sg, logger, event, args):
             ["sg_asset_type"]
         )["sg_asset_type"]
 
+        # create asset paths
         scene_dir = r"{}/Project Directory/02_Production/04_Maya/scenes".format(start)
         scene_folder = None
         if "Rig" in sg_asset_type:
@@ -113,9 +118,14 @@ def create_project_directory(sg, logger, event, args):
                 if "Asset" in fld:
                     scene_folder = fld
                     break
-        asset_folder_path = r"{}/{}/{}".format(scene_dir, scene_folder, event["meta"]["new_value"])
+        asset = event["meta"]["new_value"]
+        asset_folder_path = r"{}/{}/{}".format(scene_dir, scene_folder, asset)
+        source_images_dir = scene_dir.replace("scenes", "sourceimages/Assets/{}".format(asset))
+
+        # create asset folders assets, rigs
         try:
             os.makedirs(asset_folder_path)
+            os.makedirs(source_images_dir)
         except:
             pass
     logger.info(">> created asset directory")
