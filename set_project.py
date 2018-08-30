@@ -34,7 +34,7 @@ def get_subfolders(full_path=None, parent_folder=None):
     return folders
 
 
-def set_project(project_path=None, scene_path=None, alembic_cache=None):
+def set_project(project_path=None, scene_path=None, alembic_cache=""):
     # set workspace to project path and scene to scene path
 
     # scenes
@@ -42,11 +42,15 @@ def set_project(project_path=None, scene_path=None, alembic_cache=None):
     if scene_path:
         workspace.fileRules["scene"] = scene_path
 
+    # source images
+    source_images = "sourceimages/Assets/{}".format(os.path.basename(scene_path))
+    workspace.fileRules["sourceImages"] = source_images
+
     # alembic
-    if alembic_cache:
-        workspace.fileRules["Alembic"] = alembic_cache
-    else:
-        workspace.fileRules["Alembic"] = ""
+    workspace.fileRules["Alembic"] = alembic_cache
+
+    # shaders
+    workspace.fileRules["shaders"] = "data/001_Shaders"
 
     # project
     mel.eval('setProject \"' + project_path + '\"')
@@ -102,7 +106,7 @@ class MyWindow(QtWidgets.QDialog):
 
         # relative paths
         scene_path = "scenes/{}".format(scene_selection)
-        asset_path = None
+        asset_path = ""  # None doesn't work on workspace variables
 
         # update scene path and set asset path
         # if the scene is layouts, dynamics, lighting, or animation
