@@ -30,6 +30,16 @@ checkout_scene_item = pm.menuItem(label="Checkout Scene",
                                   command=checkout_scene,
                                   parent=vayner_menu)
 
+# publish scene - increment and save this file and update shotgun fields
+organize_textures = """
+import shotgun.organize_textures as sg
+
+reload(sg)
+sg.organize_textures()
+"""
+organize_textures_item = pm.menuItem(label="Organize Textures",
+                                 command=organize_textures,
+                                 parent=vayner_menu)
 
 # publish scene - increment and save this file and update shotgun fields
 publish_scene = """
