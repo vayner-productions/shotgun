@@ -2,6 +2,7 @@ import pymel.core as pm
 import pymel.util.common as ut
 import sgtk.platform
 from PySide2 import QtCore, QtWidgets, QtUiTools
+import os
 import checkout_scene
 reload(checkout_scene)
 
@@ -55,6 +56,9 @@ def get_alembic_file(file_path):
         pm.workspace.fileRules["Alembic"],
         ut.path.basename(pm.sceneName()).stripext().replace(".", "_")
     )
+    alembic_dir = os.path.dirname(alembic_file)
+    if not os.path.exists(alembic_dir):
+        os.makedirs(alembic_dir)
     mel_code = """
     AbcExport -j "-frameRange {0:.0f} {1:.0f} -dataFormat ogawa -file \\"{2}\\"";
     """.format(pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1), alembic_file)
