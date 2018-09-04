@@ -23,7 +23,7 @@ def export_shaders():
 def organize_textures():
     file_nodes = pm.ls(textures=1)
     unique_files = set([])
-    src_files = set([])  
+    src_files = set([])
     for f in file_nodes:
         try:
             file_name = f.fileTextureName.get()
