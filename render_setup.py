@@ -76,7 +76,7 @@ def render_setup(camera):
     # check version inside images/Shots
     current_version = None
     for ver in os.listdir(shots_dir):
-        if ("v" == ver[0]) and (len(ver) == 4) and (ver[1:].isdigit()):
+        if (len(ver) == 4) and (ver[1:].isdigit()):
             current_version = ver
 
     if not current_version:
@@ -88,7 +88,7 @@ def render_setup(camera):
     if not os.listdir(shots_dir + "/" + current_version):
         next_version = current_version  # use empty folder
     else:
-        next_version = "v" + str(int(current_version[1:].isdigit()) + 1).zfill(3)
+        next_version = str(int(current_version[1:].isdigit()) + 1).zfill(3)
 
     # create the next version directory
     next_version_dir = shots_dir + "/" + next_version

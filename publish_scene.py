@@ -15,7 +15,7 @@ def set_playblast(image=True):
     media_file = None
     if image:
         current_time = pm.currentTime(q=1)
-        file_name = pm.sceneName().replace(".ma", ".jpg").replace("scenes", "published").replace(".v", "_v")
+        file_name = pm.sceneName().replace(".ma", ".jpg").replace("scenes", "published")
         media_file = pm.playblast(
             frame=current_time,
             format="image",
@@ -31,8 +31,7 @@ def set_playblast(image=True):
         )
     else:
         start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
-        file_name = pm.sceneName().replace(".ma", ".mov").replace("scenes", "published").replace(
-            ".v", "_v")
+        file_name = pm.sceneName().replace(".ma", ".mov").replace("scenes", "published")
         media_file = pm.playblast(
             startTime=start_time,
             endTime=end_time,
@@ -61,7 +60,6 @@ def get_alembic_file(file_path):
     """.format(pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1), alembic_file)
     pm.mel.eval(mel_code)
     return alembic_file
-    return
 
 
 def get_tasks():
@@ -114,6 +112,7 @@ def publish_scene(addressed_tasks=[], comments=None):
     #
     scene_process = pm.workspace.fileRules["scene"].rsplit("/", 2)[1][3:]
     data, local_path = {}, original_file.replace("/", "\\")
+
     playblast_image = 1
     if scene_process == "Assets":
         data = {
@@ -243,3 +242,5 @@ class MyWindow(QtWidgets.QDialog):
                       comments=text)
         self.ui.close()
         pass
+
+
