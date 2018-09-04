@@ -3,11 +3,13 @@ from PySide2 import QtCore, QtWidgets, QtUiTools
 import os
 workspace = pm.system.workspace
 import mtoa.aovs as aovs
+from mtoa.core import createOptions
 
 
 def aovs_setup(lights):
     """updating render settings AOVs tab"""
     # enable beauty
+    createOptions()
     arnold_options = pm.PyNode("defaultArnoldRenderOptions")
     arnold_options.aovMode.set(1)
 
@@ -183,7 +185,7 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def init_ui(self):
-        lights = set(pm.ls("Light_*", type="transform")[:-1])
+        lights = set(pm.ls("Light_*", type="transform"))
         all_maya_lights = set(light.getParent() for light in pm.ls(type="light"))
         arnold_lights = list(lights.difference(all_maya_lights))
 
