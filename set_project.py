@@ -50,6 +50,7 @@ def set_project(project_path=None, scene_path=None, alembic_cache=""):
 
     # project
     mel.eval('setProject \"' + project_path + '\"')
+    print ">> project set",
     return project_path, scene_path
 
 
@@ -124,5 +125,4 @@ class MyWindow(QtWidgets.QDialog):
                     alembic_cache=asset_path)
 
         self.ui.close()
-        print ">> project set"
         return
