@@ -84,12 +84,7 @@ def get_tasks():
         ["sg_status_list", "is_not", "cmp"],
         ["sg_status_list", "is_not", "rev"],
         ["sg_status_list", "is_not", "omt"],
-        {
-            "filter_operator": "any",
-            "filters": [
-                ["step", "name_contains", step[scene_process]],
-            ]
-        }
+        ["step.Step.code", "is", step[scene_process]]
     ]
     task_fields = [
         "content"
