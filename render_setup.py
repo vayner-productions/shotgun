@@ -128,7 +128,6 @@ def render_setup(camera):
             cam.renderable.set(0)
     render_camera = pm.PyNode(camera)
     render_camera.renderable.set(1)
-    print ">> render settings"
     return
 
 
@@ -216,5 +215,6 @@ class MyWindow(QtWidgets.QDialog):
         camera = camera[0]  # only one camera selection
         if camera:
             render_setup(camera)
+        print ">> render setup complete",
         self.ui.close()
         return
