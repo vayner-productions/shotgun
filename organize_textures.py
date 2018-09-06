@@ -50,5 +50,5 @@ def organize_textures():
         pm.warning(">> Can not determine if the following are duplicates:")
         for f in src_files:
             print ">>", f
-    print ">> consolidated files"
+    print ">> consolidated files",
     return
