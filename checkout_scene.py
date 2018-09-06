@@ -74,6 +74,7 @@ def checkout_scene():
 
     if current_file:
         current_file = current_file["local_path"]
-    increment_and_save(current_file, entity_type=entity["type"])
+    new_file = increment_and_save(current_file, entity_type=entity["type"])
+    print ">> opened: {}".format(pm.util.path.basename(pm.sceneName())),
     return current_file
 
