@@ -87,7 +87,7 @@ def get_tasks():
         {
             "filter_operator": "any",
             "filters": [
-                ["step", "is", {'type': 'Step', 'id': 7, 'name': step[scene_process]}],
+                ["step", "name_contains", step[scene_process]],
             ]
         }
     ]
