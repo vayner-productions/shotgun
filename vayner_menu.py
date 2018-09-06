@@ -30,6 +30,17 @@ checkout_scene_item = pm.menuItem(label="Checkout Scene",
                                   command=checkout_scene,
                                   parent=vayner_menu)
 
+# update timeline - timeline reflects sg_frame_range
+update_timeline = """
+import shotgun.update_timeline as sg
+
+reload(sg)
+sg.update_timeline()
+"""
+update_timeline_item = pm.menuItem(label="Update Timeline",
+                                 command=update_timeline,
+                                 parent=vayner_menu)
+
 # publish scene - increment and save this file and update shotgun fields
 organize_textures = """
 import shotgun.organize_textures as sg
