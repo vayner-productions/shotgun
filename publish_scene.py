@@ -209,7 +209,7 @@ def publish_scene(addressed_tasks=[], comments=None):
     version = sg.create("Version", version_data)
     media_file = set_playblast(image=playblast_image)
     sg.upload("Version", version["id"], media_file, field_name="sg_uploaded_movie")
-    print ">> published all files to shotgun"
+    print ">> published all files to shotgun",
     return
 
 
