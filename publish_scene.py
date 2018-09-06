@@ -69,12 +69,27 @@ def get_alembic_file(file_path):
 
 
 def get_tasks():
+    scene_process = pm.workspace.fileRules["scene"].split("/")[1][3:]
+    step = {
+        "Assets": "Model",
+        "Rigs": "Rig",
+        "Layouts": "Layout",
+        "Dynamics": "Effects",
+        "Lighting": "Lighting",
+        "Animation": "Animation"
+    }
     task_filters = [
         ["project", "is", project],
         ["entity", "is", entity],
         ["sg_status_list", "is_not", "cmp"],
         ["sg_status_list", "is_not", "rev"],
-        ["sg_status_list", "is_not", "omt"]
+        ["sg_status_list", "is_not", "omt"],
+        {
+            "filter_operator": "any",
+            "filters": [
+                ["step", "is", {'type': 'Step', 'id': 7, 'name': step[scene_process]}],
+            ]
+        }
     ]
     task_fields = [
         "content"
