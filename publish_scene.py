@@ -61,9 +61,20 @@ def get_alembic_file(file_path):
     if not os.path.exists(alembic_dir):
         os.makedirs(alembic_dir)
 
+    # nonlinear deformers like squash and stretch are considered meshes, too, and would show up in
+    # pm.ls(type="mesh"), create a set() then list() removes deformers
+    poly = set([])
+    for p in pm.ls(type="mesh"):
+        poly.add("-root {}".format(p.getParent().longName()))
+    poly = " ".join(list(poly))
+
     mel_code = """
-    AbcExport -j "-frameRange {0:.0f} {1:.0f} -dataFormat ogawa -file \\"{2}\\"";
-    """.format(pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1), alembic_file)
+    AbcExport -j "-frameRange {0:.0f} {1:.0f} -dataFormat ogawa {3} -file \\"{2}\\"";
+    """.format(
+        pm.playbackOptions(q=1, ast=1),
+        pm.playbackOptions(q=1, aet=1),
+        alembic_file,
+        poly)
     pm.mel.eval(mel_code)
     return alembic_file
 
@@ -254,8 +265,7 @@ class MyWindow(QtWidgets.QDialog):
     def run(self):
         selection = [sel.text() for sel in self.ui.task_lsw.selectedItems()]
         text = self.ui.description_txt.toPlainText()
-        publish_scene(addressed_tasks=selection,
-                      comments=text)
+        publish_scene(addressed_tasks=selection, comments=text)
         self.ui.close()
         pass
 
