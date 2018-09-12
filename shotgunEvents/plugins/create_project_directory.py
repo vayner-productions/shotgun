@@ -76,7 +76,6 @@ def create_project_directory(sg, logger, event, args):
 
         # create shot paths for cameras, layouts, cache, lighting, animation
         new_shot = event["meta"]["new_value"]
-        source_images_dir = scene_dir.replace("scenes", "sourceimages/Assets/{}".format(new_shot))
         folders = []  # full path to each scene process, including images
         for s in ["Cameras", "Layouts", "Lighting", "Animation"]:
             for fld in os.listdir(scene_dir):
@@ -84,16 +83,16 @@ def create_project_directory(sg, logger, event, args):
                     new_folder = r"{}/{}/{}".format(scene_dir, fld, new_shot)
                     folders += [new_folder]
 
+        source_images_dir = scene_dir.replace("scenes", "sourceimages/Assets/{}".format(new_shot))
+        cache_dir = "{}/06_Cache/08_Animation/{}".format(scene_dir, new_shot)
+
+        folders += [source_images_dir, cache_dir]
         # create folders
         for pth in folders:
             try:
                 os.makedirs(pth)
             except:
                 pass
-        try:
-            os.makedirs(source_images_dir)
-        except:
-            pass
 
         logger.info(">> created shot directory")
     elif "Shotgun_Asset_Change" == event_type:
