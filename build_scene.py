@@ -42,142 +42,457 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
-    def arrow_type(self, toolbox):
+    def get_arrow_type(self, toolbox):
         open = 0
         if toolbox.arrowType() == QtCore.Qt.ArrowType.RightArrow:
-            toolbox.setArrowType(QtCore.Qt.DownArrow)
             open = 1
-        else:
-            toolbox.setArrowType(QtCore.Qt.RightArrow)
         return open
 
-    def layout_row(self, index, name):
-        font = QtGui.QFont("Arial", 14)
-        cbx_size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed,
-                                                QtWidgets.QSizePolicy.Fixed)
-
-        label_name = name.replace("_", " ")
-        label = QtWidgets.QLabel(label_name)
-        label.setFont(font)
-        label_size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
-                                                  QtWidgets.QSizePolicy.Preferred)
-        label.setSizePolicy(label_size_policy)
-
-        publish_checkbox = QtWidgets.QCheckBox("Latest publish")
-        publish_checkbox.setFont(font)
-        publish_checkbox.setSizePolicy(cbx_size_policy)
-
-        latest_checkbox = QtWidgets.QCheckBox("Latest file")
-        latest_checkbox.setFont(font)
-        latest_checkbox.setSizePolicy(cbx_size_policy)
-
-        layout = QtWidgets.QHBoxLayout()
-        layout.setContentsMargins(3, 3, 3, 3)
-        layout_name = "{}_lyt".format(name)
-        layout.setObjectName(layout_name)
-        layout.addWidget(label)
-        layout.addWidget(publish_checkbox)
-        layout.addWidget(latest_checkbox)
-
-        self.ui.verticalLayout_2.insertLayout(index, layout)
+    def set_arrow_type(self, toolbox, open):
+        if open:
+            toolbox.setArrowType(QtCore.Qt.DownArrow)
+        else:
+            toolbox.setArrowType(QtCore.Qt.RightArrow)
         return
 
-    def expand(self, toolbox):
-        is_open = self.arrow_type(toolbox)
-        index = self.ui.verticalLayout_2.indexOf(toolbox)
-
-        if is_open:
-            assets = sg.find("Asset",
-                             [["project", "is", project],
-                              ["sg_asset_type", "is", "CG Model"]],
-                             ["code"])
-
-            for a in assets:
-                name = a["code"][4:]
-                index += 1
-                self.layout_row(index, name)
+    def layout_row(self, index, name, start, items, combo):
+        layout_name = "{}_{}_lyt".format(name, start)
+        hbox = self.ui.scrollAreaLayout.findChild(QtWidgets.QHBoxLayout, layout_name)
+        if hbox:
+            for i in range(3):
+                hbox.itemAt(i).widget().show()
+            hbox.setContentsMargins(3, 3, 3, 3)
         else:
-            # index += 1
-            # widget = self.ui.verticalLayout_2.itemAt(index)
-            # while "_lyt" in widget.objectName():
-            #     widget.deleteLater()
-            #     index += 1
-            #     widget = self.ui.verticalLayout_2.itemAt(index)
-            #     print "> deleted:", widget.objectName()
+            font = QtGui.QFont("Arial", 14)
 
+            label_name = name.replace("_", " ")
+            label = QtWidgets.QLabel(label_name)
+            label.setFont(font)
+            label_size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                                      QtWidgets.QSizePolicy.Preferred)
+            label.setSizePolicy(label_size_policy)
+
+            combox = QtWidgets.QComboBox()
+            combox.addItems(items)
+            combox.setCurrentIndex(combo)
+            combox.setFont(font)
+            combox_size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum,
+                                                       QtWidgets.QSizePolicy.Preferred)
+            combox.setSizePolicy(combox_size_policy)
+            combox.setFixedWidth(80)
+
+            update_btn = QtWidgets.QPushButton("Update Available")
+            update_btn.setFont(font)
+            update_btn.setSizePolicy(combox_size_policy)
+
+            layout = QtWidgets.QHBoxLayout()
+            layout.setContentsMargins(3, 3, 3, 3)
+            # layout_name = "{}_{}_lyt".format(name, start)
+            layout.setObjectName(layout_name)
+            layout.addWidget(label)
+            layout.addWidget(combox)
+            layout.addWidget(update_btn)
+
+            self.ui.scrollAreaLayout.insertLayout(index, layout)
         return
 
     def modeling(self):
-        self.expand(self.ui.modeling_tbx)
-        # publish_file = sg.find_one("Asset",
-        #                            [["project", "is", project]],
-        #                            ["sg_file"])["sg_file"]["local_path"]
-        # dir = pm.workspace.expandName(pm.workspace.fileRules["scene"])
-        # base_name = os.path.basename(dir)[4:] + "_processed."
-        # files = []
-        # for f in os.listdir(dir):
-        #     if base_name in f:
-        #         files += [dir + "/" + f]
-        # latest_file = max(files, key=os.path.getctime)
+        # proccess data from shotgun
+        # get asset name and its file, file directory
+        assets_processed = {}
+
+        assets = sg.find("Asset",
+                         [["project", "is", project],
+                          ["sg_asset_type", "is", "CG Model"]],
+                         ["code", "sg_file"])
+
+        for a in assets:
+            combo, versions = None, []
+
+            combo_current = a["sg_file"]["local_path"]
+            asset_dir = os.path.dirname(combo_current).replace("published", "scenes")
+            for f in os.listdir(asset_dir):
+                if (len(f.split(".")) == 3) and ("{}_processed.".format(a["code"][4:]) in f):
+                    versions += [f.split(".")[1]]
+
+                    combo_key = os.path.basename(combo_current).replace("original", "processed")
+                    if combo_key == f:
+                        combo = os.listdir(asset_dir).index(combo_key)
+
+            assets_processed[a["code"]] = {
+                "combo": combo,
+                "versions": versions
+            }
+
+        # then build out the ui
+        # adding/removing layouts as needed
+        toolbox_index = 1  # refers to commands variable
+        toolbox = self.ui.scrollAreaWidgetContents.children()[toolbox_index]
+        for l in self.ui.scrollAreaWidgetContents.children():
+            if l.objectName() == "modeling_tbx":
+                toolbox_index = self.ui.scrollAreaLayout.indexOf(l)
+                toolbox = l
+        closed = self.get_arrow_type(toolbox)
+        self.set_arrow_type(toolbox, closed)
+
+        if closed:
+            index = self.ui.scrollAreaLayout.indexOf(toolbox)
+            delete_tbx = True
+
+            for a in assets_processed:
+                name = a[4:]
+                start = 1
+                items = assets_processed[a]["versions"]
+                combo = assets_processed[a]["combo"]
+                if items:
+                    index += 1
+                    self.layout_row(index, name, start, items, combo)
+                    delete_tbx = False
+
+            if delete_tbx:
+                layout_name = "modeling_tbx"
+                tbx = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QToolButton,
+                                                                 layout_name)
+                tbx.deleteLater()
+        else:
+            layouts_to_hide = []
+            toolbox_key = "_{}_".format(1)
+
+            for l in self.ui.scrollAreaLayout.children():
+                if toolbox_key in l.objectName():
+                    layouts_to_hide += [l]
+                    for i in range(3):
+                        l.itemAt(i).widget().hide()
+                    l.setContentsMargins(0, 0, 0, 0)
         return
-    
+
     def rigs(self):
-        self.arrow_type(self.ui.rigs_tbx)
+        # proccess data from shotgun
+        # get asset name and its file, file directory
+        assets_processed = {}
+
+        assets = sg.find("Asset",
+                         [["project", "is", project],
+                          ["sg_asset_type", "is", "CG Rig"]],
+                         ["code", "sg_file"])
+
+        for a in assets:
+            combo, versions = None, []
+
+            combo_current = a["sg_file"]["local_path"]
+            asset_dir = os.path.dirname(combo_current).replace("published", "scenes")
+            for f in os.listdir(asset_dir):
+                if (len(f.split(".")) == 3) and ("{}_processed.".format(a["code"][4:]) in f):
+                    versions += [f.split(".")[1]]
+
+                    combo_key = os.path.basename(combo_current).replace("original", "processed")
+                    if combo_key == f:
+                        combo = os.listdir(asset_dir).index(combo_key)
+
+            assets_processed[a["code"]] = {
+                "combo": combo,
+                "versions": versions
+            }
+
+        # then build out the ui
+        # adding/removing layouts as needed
+        toolbox_index = 2  # refers to commands variable
+        toolbox = self.ui.scrollAreaWidgetContents.children()[toolbox_index]
+        for l in self.ui.scrollAreaWidgetContents.children():
+            if l.objectName() == "rigs_tbx":
+                toolbox_index = self.ui.scrollAreaLayout.indexOf(l)
+                toolbox = l
+        closed = self.get_arrow_type(toolbox)
+        self.set_arrow_type(toolbox, closed)
+
+        if closed:
+            index = self.ui.scrollAreaLayout.indexOf(toolbox)
+            delete_tbx = True
+
+            for a in assets_processed:
+                name = a[4:]
+                start = 2
+                items = assets_processed[a]["versions"]
+                combo = assets_processed[a]["combo"]
+                if items:
+                    index += 1  # in case items are empty, avoids appearing in another tab
+                    self.layout_row(index, name, start, items, combo)
+                    delete_tbx = False
+
+            if delete_tbx:
+                layout_name = "rigs_tbx"
+                tbx = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QToolButton,
+                                                                 layout_name)
+                tbx.deleteLater()
+        else:
+            layouts_to_hide = []
+            toolbox_key = "_{}_".format(2)
+
+            for l in self.ui.scrollAreaLayout.children():
+                if toolbox_key in l.objectName():
+                    layouts_to_hide += [l]
+                    for i in range(3):
+                        l.itemAt(i).widget().hide()
+                    l.setContentsMargins(0, 0, 0, 0)
         return
-    
+
     def cameras(self):
-        self.arrow_type(self.ui.cameras_tbx)
+        # proccess data from shotgun
+        # get asset name and its file, file directory
+        assets = sg.find_one("Shot",
+                             [["project", "is", project],
+                              ["code", "is", pm.workspace.fileRules["scene"].split("/")[-1]]],
+                             ["sg_tracked_camera"])
+
+        combo_current = assets["sg_tracked_camera"]["local_path"]
+        asset_dir = os.path.dirname(combo_current).replace("published", "scenes")
+        versions, combo = [], None
+        shot_name = asset_dir.rsplit("\\", 1)[1]
+        file_name = "{}_processed.".format(shot_name)
+        for f in os.listdir(asset_dir):
+            if (len(f.split(".")) == 3) and (file_name in f):
+                versions += [f.split(".")[1]]
+
+                combo_key = os.path.basename(combo_current).replace("original", "processed")
+                if combo_key == f:
+                    combo = os.listdir(asset_dir).index(combo_key)
+
+        # then build out the ui
+        # adding/removing layouts as needed
+        toolbox_index = 3  # refers to commands variable
+        toolbox = self.ui.scrollAreaWidgetContents.children()[toolbox_index]
+        for l in self.ui.scrollAreaWidgetContents.children():
+            if l.objectName() == "cameras_tbx":
+                toolbox_index = self.ui.scrollAreaLayout.indexOf(l)
+                toolbox = l
+        closed = self.get_arrow_type(toolbox)
+        self.set_arrow_type(toolbox, closed)
+
+        if closed:
+            index = self.ui.scrollAreaLayout.indexOf(toolbox)
+            for a in [shot_name]:
+                index += 1
+                name = a
+                start = 3
+                items = versions
+                if items:
+                    self.layout_row(index, name, start, items, combo)
+                else:
+                    layout_name = "cameras_tbx"
+                    tbx = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QToolButton,
+                                                                     layout_name)
+                    tbx.deleteLater()
+        else:
+            layouts_to_hide = []
+            toolbox_key = "_{}_".format(3)
+
+            for l in self.ui.scrollAreaLayout.children():
+                if toolbox_key in l.objectName():
+                    layouts_to_hide += [l]
+                    for i in range(3):
+                        l.itemAt(i).widget().hide()
+                    l.setContentsMargins(0, 0, 0, 0)
         return
 
     def layouts(self):
-        self.arrow_type(self.ui.layouts_tbx)
-        return   
-    
+        scene_dir = pm.workspace.expandName(pm.workspace.fileRules["scene"]).rsplit("/", 2)
+        scene_dir[1] = "04_Layouts"
+        scene_dir = "/".join(scene_dir)
+        versions = []
+        shot_name = scene_dir.rsplit("/", 1)[1]
+        file_name = "{}_processed.".format(shot_name)
+        for f in os.listdir(scene_dir):
+            if (len(f.split(".")) == 3) and (file_name in f):
+                versions += [f.split(".")[1]]
+        versions = sorted(versions)
+
+        # then build out the ui
+        # adding/removing layouts as needed
+        toolbox_index = 4  # refers to commands variable
+        toolbox = self.ui.scrollAreaWidgetContents.children()[toolbox_index]
+        for l in self.ui.scrollAreaWidgetContents.children():
+            if l.objectName() == "layouts_tbx":
+                toolbox_index = self.ui.scrollAreaLayout.indexOf(l)
+                toolbox = l
+        closed = self.get_arrow_type(toolbox)
+        self.set_arrow_type(toolbox, closed)
+
+        if closed:
+            index = self.ui.scrollAreaLayout.indexOf(toolbox)
+            for a in [shot_name]:
+                index += 1
+                name = a
+                start = 4
+                items = versions
+                combo = len(versions) - 1  # not on sg
+                if items:
+                    self.layout_row(index, name, start, items, combo)
+                else:
+                    layout_name = "layouts_tbx"
+                    tbx = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QToolButton,
+                                                                     layout_name)
+                    tbx.deleteLater()
+        else:
+            layouts_to_hide = []
+            toolbox_key = "_{}_".format(4)
+
+            for l in self.ui.scrollAreaLayout.children():
+                if toolbox_key in l.objectName():
+                    layouts_to_hide += [l]
+                    for i in range(3):
+                        l.itemAt(i).widget().hide()
+                    l.setContentsMargins(0, 0, 0, 0)
+        return
+
     def dynamics(self):
-        self.arrow_type(self.ui.dynamics_tbx)
-        return   
-    
+        scene_dir = pm.workspace.expandName(pm.workspace.fileRules["scene"]).rsplit("/", 2)
+        scene_dir[1] = "05_Dynamics"
+        scene_dir = "/".join(scene_dir)
+        versions = []
+        shot_name = scene_dir.rsplit("/", 1)[1]
+        file_name = "{}_processed.".format(shot_name)
+        for f in os.listdir(scene_dir):
+            if (len(f.split(".")) == 3) and (file_name in f):
+                versions += [f.split(".")[1]]
+        versions = sorted(versions)
+
+        # then build out the ui
+        # adding/removing layouts as needed
+        toolbox_index = 5  # refers to commands variable
+        toolbox = self.ui.scrollAreaWidgetContents.children()[toolbox_index]
+        for l in self.ui.scrollAreaWidgetContents.children():
+            if l.objectName() == "dynamics_tbx":
+                toolbox_index = self.ui.scrollAreaLayout.indexOf(l)
+                toolbox = l
+        closed = self.get_arrow_type(toolbox)
+        self.set_arrow_type(toolbox, closed)
+
+        if closed:
+            index = self.ui.scrollAreaLayout.indexOf(toolbox)
+            for a in [shot_name]:
+                index += 1
+                name = a
+                start = 5
+                items = versions
+                combo = len(versions) - 1
+                if items:
+                    self.layout_row(index, name, start, items, combo)
+                else:
+                    layout_name = "dynamics_tbx"
+                    tbx = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QToolButton,
+                                                                     layout_name)
+                    tbx.deleteLater()
+        else:
+            layouts_to_hide = []
+            toolbox_key = "_{}_".format(5)
+
+            for l in self.ui.scrollAreaLayout.children():
+                if toolbox_key in l.objectName():
+                    layouts_to_hide += [l]
+                    for i in range(3):
+                        l.itemAt(i).widget().hide()
+                    l.setContentsMargins(0, 0, 0, 0)
+        return
+
     def animation(self):
-        self.arrow_type(self.ui.animation_tbx)
-        return   
+        # proccess data from shotgun
+        # get asset name and its file, file directory
+        assets = sg.find_one("Shot",
+                             [["project", "is", project],
+                              ["code", "is", pm.workspace.fileRules["scene"].split("/")[-1]]],
+                             ["sg_maya_scene"])
+
+        combo_current = assets["sg_maya_scene"]["local_path"]
+        asset_dir = os.path.dirname(combo_current).replace("published", "scenes")
+        versions, combo = [], None
+        shot_name = asset_dir.rsplit("\\", 1)[1]
+        file_name = "{}_processed.".format(shot_name)
+        for f in os.listdir(asset_dir):
+            if (len(f.split(".")) == 3) and (file_name in f):
+                versions += [f.split(".")[1]]
+
+                combo_key = os.path.basename(combo_current).replace("original", "processed")
+                if combo_key == f:
+                    combo = os.listdir(asset_dir).index(combo_key)
+
+        # then build out the ui
+        # adding/removing layouts as needed
+        toolbox_index = 6  # refers to commands variable
+        toolbox = self.ui.scrollAreaWidgetContents.children()[toolbox_index]
+        for l in self.ui.scrollAreaWidgetContents.children():
+            if l.objectName() == "animation_tbx":
+                toolbox_index = self.ui.scrollAreaLayout.indexOf(l)
+                toolbox = l
+        closed = self.get_arrow_type(toolbox)
+        self.set_arrow_type(toolbox, closed)
+
+        if closed:
+            index = self.ui.scrollAreaLayout.indexOf(toolbox)
+            for a in [shot_name]:
+                index += 1
+                name = a
+                start = 6
+                items = versions
+                if items:
+                    self.layout_row(index, name, start, items, combo)
+                else:
+                    layout_name = "animation_tbx"
+                    tbx = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QToolButton,
+                                                                     layout_name)
+                    tbx.deleteLater()
+        else:
+            layouts_to_hide = []
+            toolbox_key = "_{}_".format(6)
+
+            for l in self.ui.scrollAreaLayout.children():
+                if toolbox_key in l.objectName():
+                    layouts_to_hide += [l]
+                    for i in range(3):
+                        l.itemAt(i).widget().hide()
+                    l.setContentsMargins(0, 0, 0, 0)
+        return
 
     def init_ui(self):
+        #TODO: add radio button to the side to know which are loading
         # make only the toolboxes relevant to the scene process visible
-        asset_processes = ["Assets", "Rigs"]
-        shot_processes = ["Cameras", "Layouts", "Dynamics", "Animation", "Lighting"]
         current_process = pm.workspace.fileRules["scene"].split("/")[1][3:]
+        create_accordian = ["Assets", "Rigs", "Cameras", "Layouts", "Dynamics", "Animation"]
+        commands = [self.modeling, self.rigs, self.cameras, self.layouts, self.dynamics, self.animation]
 
-        # dynamics should appear in animation scene process as animation should in dynamics
-        hide_processes = []
-        if "Shot" in pm.workspace.fileRules["scene"]:
-            for p in shot_processes[::-1]:
-                hide_processes += [p]
-                if current_process == p:
-                    if "Dynamics" == current_process:
-                        hide_processes.remove("Animation")
-                    break
-        else:
-            hide_processes = shot_processes
-            for p in asset_processes[::-1]:
-                hide_processes += [p]
-                if current_process in p:
-                    break
+        for p, c in zip(create_accordian, commands):
+            if current_process == p:
+                break
 
-        # hide widgets that match
-        for i, p in enumerate(hide_processes):
-            hide_processes[i] = "{}_tbx".format(p.lower())
+            # create accordian tabs
+            if "Assets" == p:
+                p = "Modeling"
 
-        for child in self.ui.scrollAreaWidgetContents.children():
-            for p in hide_processes:
-                if p in child.objectName():
-                    child.hide()
+            toolbox = QtWidgets.QToolButton()
+            toolbox.setObjectName("{}_tbx".format(p.lower()))
+            tbx_font = QtGui.QFont("Arial", 16)
+            tbx_size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                                    QtWidgets.QSizePolicy.Fixed)
+            toolbox.setSizePolicy(tbx_size_policy)
+            toolbox.setFont(tbx_font)
+            toolbox.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+            toolbox.setArrowType(QtCore.Qt.RightArrow)
+            toolbox.setStyleSheet("background:rgb(93, 93, 93)")
+            toolbox.setText(p)
+            toolbox.setAutoRaise(1)
 
-        self.ui.modeling_tbx.clicked.connect(self.modeling)
-        self.ui.rigs_tbx.clicked.connect(self.rigs)
-        self.ui.cameras_tbx.clicked.connect(self.cameras)
-        self.ui.layouts_tbx.clicked.connect(self.layouts)
-        self.ui.dynamics_tbx.clicked.connect(self.dynamics)
-        self.ui.animation_tbx.clicked.connect(self.animation)
+            self.ui.scrollAreaLayout.addWidget(toolbox)
+
+            toolbox.clicked.connect(c)
+
+        spacer = QtWidgets.QSpacerItem(20, 2000, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.ui.scrollAreaLayout.addItem(spacer)
+
+        self.modeling()
+        self.rigs()
+        self.cameras()
+        self.layouts()
+        self.dynamics()
+        self.animation()
         return
 
     def setup_ui(self):
