@@ -77,7 +77,7 @@ def create_project_directory(sg, logger, event, args):
         # create shot paths for cameras, layouts, cache, lighting, animation
         new_shot = event["meta"]["new_value"]
         folders = []  # full path to each scene process, including images
-        for s in ["Cameras", "Layouts", "Lighting", "Animation"]:
+        for s in ["Cameras", "Layouts", "Lighting", "Dynamics", "Animation"]:
             for fld in os.listdir(scene_dir):
                 if s in fld:
                     new_folder = r"{}/{}/{}".format(scene_dir, fld, new_shot)
