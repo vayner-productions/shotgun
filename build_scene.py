@@ -232,6 +232,29 @@ class MyWindow(QtWidgets.QDialog):
             num += 1
         return
 
+    def build(self):
+        elements = []
+
+        rx = QtCore.QRegExp("*_wgt")
+        rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
+        for child in self.ui.findChildren(QtWidgets.QLabel, rx):
+            color = child.palette().color(QtGui.QPalette.Background)
+            label = self.ui.findChild(QtWidgets.QLabel, child.objectName().replace("_wgt", "_lbl"))
+
+            if color == QtGui.QColor(0, 0, 255, 255):
+                continue
+            if not label:
+                continue
+            elements += [child.objectName()]
+
+        #TODO: install QtDesigner
+        #TODO: connect pycharm to github
+        #TODO: find the latest from published
+        #TODO: set inactive Shots if Assets
+        #TODO: custom file browser
+        #TODO: option to change name on multi reference
+        return
+
     def init_ui(self):
         self.add_references()
         self.dropdown_menu()
@@ -249,6 +272,8 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.layout_btn.clicked.connect(lambda x="Layout": self.add_shot(x))
         self.ui.dynamics_btn.clicked.connect(lambda x="Dynamics": self.add_shot(x))
         self.ui.animation_btn.clicked.connect(lambda x="Animation": self.add_shot(x))
+
+        self.ui.build_btn.clicked.connect(self.build)
         return
 
     def setup_ui(self):
