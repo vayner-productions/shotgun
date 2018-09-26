@@ -104,7 +104,15 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def add_context_menu(self):
-        # creates right-click "Add" feature
+        # right click for context menu, reveals 'Add' action
+        # adds to Reference element
+
+        # selects item cursor is on, preserves previous selection
+        position = self.ui.assets_lst.mapFromGlobal(QtGui.QCursor.pos())
+        widget = self.ui.assets_lst.itemAt(position)
+        self.ui.assets_lst.setItemSelected(widget, 1)
+
+        # shows context menu
         menu = QtWidgets.QMenu()
         action = QtWidgets.QAction("Add", menu)
         menu.addAction(action)
@@ -167,8 +175,67 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.scrollAreaLayout.insertRow(num, label, field)
         return
 
+    def add_references(self):
+        font = QtGui.QFont("MS Shell Dlg 2")
+        font.setPointSize(12)
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                            QtWidgets.QSizePolicy.Preferred)
+        num = self.ui.scrollAreaLayout.rowCount()
+        # add references
+        for ref in pm.listReferences():
+            item, status = None, "blue"
+
+            # get item using reference node
+            # use name for rigs and assets
+            # use scene process for everything else
+            if ("01_Assets" in ref.path) or ("02_Rigs" in ref.path):
+                item = ref.refNode.rsplit("_", 1)[0]
+                if "original" in item or "processed" in item:
+                    item = item.rsplit("_", 1)[0]
+            else:
+                item = ref.path.dirname().rsplit("/", 2)[1]
+
+            # get status: yellow/update; blue/latest
+            # filters through name.#.ext and name_#.ext
+            latest = None
+            name = current = ref.path.basename().stripext()
+            if len(current.splitall()) == 2 and current.ext[1:].isdigit():
+                # name.####
+                name = current.split(".")[0]
+                current = int(current.ext[1:])
+            elif len(current.rsplit("_", 1)) == 2 and current.rsplit("_", 1)[1].isdigit():
+                # name_####
+                name = current.rsplit("_", 1)[0]
+                current = int(current.rsplit("_", 1)[1])
+
+            pattern = "*{}*{}".format(name, ref.path.ext)
+            files = ref.path.dirname().files(pattern)
+
+            if files:
+                latest = max(files, key=os.path.getctime)
+
+            if current < latest:
+                status = "yellow"
+
+            # create ui
+            label = QtWidgets.QLabel("")
+            label.setMinimumSize(20, 20)
+            label.setStyleSheet("background-color:" + status)
+            label.setObjectName("status_{}_wgt".format(num))
+
+            field = QtWidgets.QLabel(item)
+            field.setFont(font)
+            field.setSizePolicy(size_policy)
+            field.setObjectName("status_{}_lbl".format(num))
+
+            self.ui.scrollAreaLayout.insertRow(num, label, field)
+            num += 1
+        return
+
     def init_ui(self):
+        self.add_references()
         self.dropdown_menu()
+
         self.ui.assets_lne.textChanged.connect(self.dropdown_menu)
         self.ui.assets_cbx.currentIndexChanged.connect(self.dropdown_menu)
 
