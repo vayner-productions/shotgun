@@ -233,8 +233,10 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def build(self):
-        elements = []
+        elements, latest = {}, []
 
+        # find corresponding ui objects _wgt and _lbl
+        # skip those with the latest publish and/or those without a label
         rx = QtCore.QRegExp("*_wgt")
         rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
         for child in self.ui.findChildren(QtWidgets.QLabel, rx):
@@ -245,14 +247,53 @@ class MyWindow(QtWidgets.QDialog):
                 continue
             if not label:
                 continue
-            elements += [child.objectName()]
+            # elements += [child.objectName()]
+            # elements += [label.objectName()]
+            elements[child] = label.text()
 
-        #TODO: install QtDesigner
-        #TODO: connect pycharm to github
-        #TODO: find the latest from published
-        #TODO: set inactive Shots if Assets
-        #TODO: custom file browser
-        #TODO: option to change name on multi reference
+        for e in elements.values():
+            # get scene process
+            scene_process, asset = e, e
+            sg_asset_type = None
+            if len(e.split("_", 1)[0]) == 3:
+                sg_asset_type = sg.find_one("Asset",
+                                            [["project", "is", project],
+                                             ["code", "is", e]],
+                                            ["sg_asset_type"])["sg_asset_type"]
+            elif e.count("_") == 0:
+                # in case element's 3-numbered prefix is removed
+                # ###_name --> name
+                sg_asset_type = sg.find_one("Asset",
+                                            [["project", "is", project],
+                                             ["code", "ends_with", e]],
+                                            ["sg_asset_type"])["sg_asset_type"]
+            if sg_asset_type == "CG Model":
+                scene_process = "01_Assets"
+            elif sg_asset_type == "CG Rig":
+                scene_process = "02_Rigs"
+
+            # create path with exception for animation (referencing from 06_Cache)
+            reference_path = pm.workspace.path
+            shot = pm.workspace.fileRules["scene"].rsplit("/", 1)[1]
+            if (scene_process == "01_Assets") or (scene_process == "02_Rigs"):
+                reference_path += "/published/{}/{}".format(scene_process, asset)
+            elif scene_process == "08_Animation":
+                reference_path += "/scenes/06_Cache/08_Animation/{}".format(shot)
+            else:
+                reference_path += "/published/{}/{}".format(scene_process, shot)
+
+            # find the latest file
+            files = reference_path.files("*.ma")
+            if not files:
+                files = reference_path.files("*.abc")
+            latest += [max(files, key=os.path.getctime)]
+
+        print "Referencing the following:"
+        for f, wgt in zip(latest, elements.keys()):
+            print ">>", f
+            wgt.setStyleSheet("background-color: None")
+        # what about broken links? only with custom
+        # to identify shot or asset, check the length of the first split on "_"
         return
 
     def init_ui(self):
