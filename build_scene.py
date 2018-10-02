@@ -20,7 +20,7 @@ from PySide2 import QtCore, QtWidgets, QtUiTools, QtGui
 import pymel.core as pm
 import sgtk
 import os
-import collections
+import pymel.tools.mel2py as mel2py
 
 eng = sgtk.platform.current_engine()
 sg = eng.shotgun
@@ -183,21 +183,19 @@ class MyWindow(QtWidgets.QDialog):
         num = self.ui.scrollAreaLayout.rowCount()
         # add references
         for ref in pm.listReferences():
-            item, status = None, "blue"
+            item, status = ref.path.dirname().rsplit("/", 2), "blue"
 
             # get item using reference node
             # use name for rigs and assets
             # use scene process for everything else
             if ("01_Assets" in ref.path) or ("02_Rigs" in ref.path):
-                item = ref.refNode.rsplit("_", 1)[0]
-                if "original" in item or "processed" in item:
-                    item = item.rsplit("_", 1)[0]
+                item = item[2]
             else:
-                item = ref.path.dirname().rsplit("/", 2)[1]
+                item = item[1]
 
             # get status: yellow/update; blue/latest
             # filters through name.#.ext and name_#.ext
-            latest = None
+            latest = 0
             name = current = ref.path.basename().stripext()
             if len(current.splitall()) == 2 and current.ext[1:].isdigit():
                 # name.####
@@ -212,7 +210,7 @@ class MyWindow(QtWidgets.QDialog):
             files = ref.path.dirname().files(pattern)
 
             if files:
-                latest = max(files, key=os.path.getctime)
+                latest = int(max(files, key=os.path.getctime).splitext()[0][-4:])
 
             if current < latest:
                 status = "yellow"
@@ -230,6 +228,21 @@ class MyWindow(QtWidgets.QDialog):
 
             self.ui.scrollAreaLayout.insertRow(num, label, field)
             num += 1
+        return
+
+    def custom(self):
+        dialog = QtWidgets.QFileDialog()
+        file_name = dialog.getOpenFileName(
+            parent=self.ui.custom_btn,
+            caption="Custom Reference",
+            dir=pm.workspace.path,
+            filter="Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;Alembic Files (*.abc);; All Files (*.*)",
+            selectedFilter="Maya ASCII (*.ma)",
+            options=QtWidgets.QFileDialog.DontUseNativeDialog
+        )[0]
+        dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
+
+        self.ui.custom_lne.setText(file_name)
         return
 
     def build(self):
@@ -260,17 +273,10 @@ class MyWindow(QtWidgets.QDialog):
                                             [["project", "is", project],
                                              ["code", "is", e]],
                                             ["sg_asset_type"])["sg_asset_type"]
-            elif e.count("_") == 0:
-                # in case element's 3-numbered prefix is removed
-                # ###_name --> name
-                sg_asset_type = sg.find_one("Asset",
-                                            [["project", "is", project],
-                                             ["code", "ends_with", e]],
-                                            ["sg_asset_type"])["sg_asset_type"]
-            if sg_asset_type == "CG Model":
-                scene_process = "01_Assets"
-            elif sg_asset_type == "CG Rig":
-                scene_process = "02_Rigs"
+                if sg_asset_type == "CG Model":
+                    scene_process = "01_Assets"
+                elif sg_asset_type == "CG Rig":
+                    scene_process = "02_Rigs"
 
             # create path with exception for animation (referencing from 06_Cache)
             reference_path = pm.workspace.path
@@ -288,12 +294,17 @@ class MyWindow(QtWidgets.QDialog):
                 files = reference_path.files("*.abc")
             latest += [max(files, key=os.path.getctime)]
 
-        print "Referencing the following:"
+        # update all the files in the scene, create reference to those just added
+        # change status of elements to blue (for latest publish)
         for f, wgt in zip(latest, elements.keys()):
-            print ">>", f
-            wgt.setStyleSheet("background-color: None")
-        # what about broken links? only with custom
-        # to identify shot or asset, check the length of the first split on "_"
+            color = wgt.palette().color(QtGui.QPalette.Background)
+            if color == QtGui.QColor(255, 255, 0, 255):
+                for ref in pm.listReferences():
+                    if not (f.basename() in ref.path) and (f.dirname() in ref.path):
+                        pm.FileReference(refnode=ref.refNode).replaceWith(f)
+            else:
+                pm.createReference(f, namespace=":")
+            wgt.setStyleSheet("background-color: blue")
         return
 
     def init_ui(self):
@@ -309,11 +320,17 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.scrollAreaWidgetContents.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.ui.scrollAreaWidgetContents.customContextMenuRequested.connect(self.remove_context_menu)
 
-        self.ui.camera_btn.clicked.connect(lambda x="Camera": self.add_shot(x))
-        self.ui.layout_btn.clicked.connect(lambda x="Layout": self.add_shot(x))
-        self.ui.dynamics_btn.clicked.connect(lambda x="Dynamics": self.add_shot(x))
-        self.ui.animation_btn.clicked.connect(lambda x="Animation": self.add_shot(x))
+        current_scene_process = pm.workspace.fileRules["scene"].split("/")[1]
+        if (current_scene_process == "01_Assets") or (current_scene_process == "02_Rigs"):
+            self.ui.shots_gbx.setEnabled(0)
+            self.ui.shots_gbx.setVisible(0)
+        else:
+            self.ui.camera_btn.clicked.connect(lambda x="Camera": self.add_shot(x))
+            self.ui.layout_btn.clicked.connect(lambda x="Layout": self.add_shot(x))
+            self.ui.dynamics_btn.clicked.connect(lambda x="Dynamics": self.add_shot(x))
+            self.ui.animation_btn.clicked.connect(lambda x="Animation": self.add_shot(x))
 
+        self.ui.custom_btn.clicked.connect(self.custom)
         self.ui.build_btn.clicked.connect(self.build)
         return
 
