@@ -78,6 +78,20 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.assets_lst.addItems(show)
         return
 
+    def multiple_elements(self, text):
+        """adds an identifier {1} beside the fields in reference elements to indicate multiples"""
+        elements = []
+        rx = QtCore.QRegExp("status_*_lbl")
+        rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
+        for child in self.ui.findChildren(QtWidgets.QLabel, rx):
+            if child.text() in elements:
+                i = 1
+                if text.count("{") != 0:
+                    i = int(text.split("{")[1].split("}")[0]) + 1
+                text = "{} {{{}}}".format(text.split(" ")[0], i)
+            elements += [text]
+        return text
+
     def add_assets(self):
         font = QtGui.QFont("MS Shell Dlg 2")
         font.setPointSize(12)
@@ -94,7 +108,9 @@ class MyWindow(QtWidgets.QDialog):
                 label.setStyleSheet("background-color: None")
                 label.setObjectName("status_{}_wgt".format(num))
 
-                field = QtWidgets.QLabel(sel.text())
+                text = self.multiple_elements(sel.text())
+
+                field = QtWidgets.QLabel(text)
                 field.setFont(font)
                 field.setSizePolicy(size_policy)
                 field.setObjectName("status_{}_lbl".format(num))
@@ -139,12 +155,29 @@ class MyWindow(QtWidgets.QDialog):
             other.deleteLater()
         return
 
-    def remove_context_menu(self):
+    def select_elements(self):
+        f = r"A:/Animation/Projects/Client/VaynerX/Vayner Productions/0002_Test_Project/Project Directory/02_Production/04_Maya/published/03_Cameras/Shot_001/Shot_001_original.0001.ma"
+        ref_node = pm.FileReference(pathOrRefNode=f).refNode
+        assemblies = set([a.__unicode__() for a in pm.ls(assemblies=1)])
+        all_nodes = set(pm.referenceQuery(ref_node, nodes=1))
+        nodes = list(assemblies.intersection(all_nodes))
+        pm.select(nodes)
+        return
+
+    def ref_context_menu(self):
         # creates right-click "Add" feature
         menu = QtWidgets.QMenu()
-        action = QtWidgets.QAction("Remove", menu)
-        menu.addAction(action)
-        action.triggered.connect(self.remove_elements)
+        
+        # select
+        select = QtWidgets.QAction("Select", menu)
+        menu.addAction(select)
+        select.triggered.connect(self.select_elements)
+        
+        # remove
+        remove = QtWidgets.QAction("Remove", menu)
+        menu.addAction(remove)
+        remove.triggered.connect(self.remove_elements)
+        
         menu.exec_(QtGui.QCursor.pos())
         return
 
@@ -167,7 +200,8 @@ class MyWindow(QtWidgets.QDialog):
         label.setStyleSheet("background-color: None")
         label.setObjectName("status_{}_wgt".format(num))
 
-        field = QtWidgets.QLabel(selection[scene_process])
+        text = self.multiple_elements(selection[scene_process])
+        field = QtWidgets.QLabel(text)
         field.setFont(font)
         field.setSizePolicy(size_policy)
         field.setObjectName("status_{}_lbl".format(num))
@@ -318,11 +352,10 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.assets_lst.customContextMenuRequested.connect(self.add_context_menu)
 
         self.ui.scrollAreaWidgetContents.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.ui.scrollAreaWidgetContents.customContextMenuRequested.connect(self.remove_context_menu)
+        self.ui.scrollAreaWidgetContents.customContextMenuRequested.connect(self.ref_context_menu)
 
         current_scene_process = pm.workspace.fileRules["scene"].split("/")[1]
         if (current_scene_process == "01_Assets") or (current_scene_process == "02_Rigs"):
-            self.ui.shots_gbx.setEnabled(0)
             self.ui.shots_gbx.setVisible(0)
         else:
             self.ui.camera_btn.clicked.connect(lambda x="Camera": self.add_shot(x))
