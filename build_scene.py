@@ -36,6 +36,7 @@ def get_window():
 
     mw = MyWindow()
     mw.ui.show()
+    return mw
 
 
 class MyWindow(QtWidgets.QDialog):
@@ -80,7 +81,7 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.assets_lst.addItems(show)
         return
 
-    def multiple_elements(self, text):
+    def indicate_multiples(self, text):
         """adds an identifier {1} beside the fields in reference elements to indicate multiples"""
         elements = []
         rx = QtCore.QRegExp("status_*_lbl")
@@ -93,6 +94,11 @@ class MyWindow(QtWidgets.QDialog):
                 text = "{} {{{}}}".format(text.split(" ")[0], i)
             elements += [text]
         return text
+    
+    def scrolldown(self):
+        value = self.ui.scrollArea.verticalScrollBar().maximum()
+        self.ui.scrollArea.verticalScrollBar().setValue(value)
+        return
 
     def add_assets(self):
         """adds an entity from the assets section to reference elements"""
@@ -111,7 +117,7 @@ class MyWindow(QtWidgets.QDialog):
                 label.setStyleSheet("background-color: None")
                 label.setObjectName("status_{}_wgt".format(num))
 
-                text = self.multiple_elements(sel.text())
+                text = self.indicate_multiples(sel.text())
 
                 field = QtWidgets.QLabel(text)
                 field.setFont(font)
@@ -120,6 +126,8 @@ class MyWindow(QtWidgets.QDialog):
 
                 self.ui.scrollAreaLayout.insertRow(num, label, field)
                 num += 1
+
+            self.ui.scrollArea.verticalScrollBar().rangeChanged.connect(self.scrolldown)
         return
 
     def add_context_menu(self):
@@ -220,13 +228,14 @@ class MyWindow(QtWidgets.QDialog):
         label.setStyleSheet("background-color: None")
         label.setObjectName("status_{}_wgt".format(num))
 
-        text = self.multiple_elements(selection[scene_process])
+        text = self.indicate_multiples(selection[scene_process])
         field = QtWidgets.QLabel(text)
         field.setFont(font)
         field.setSizePolicy(size_policy)
         field.setObjectName("status_{}_lbl".format(num))
 
         self.ui.scrollAreaLayout.insertRow(num, label, field)
+        self.ui.scrollArea.verticalScrollBar().rangeChanged.connect(self.scrolldown)
         return
 
     def add_referenced(self):
