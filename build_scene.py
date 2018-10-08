@@ -54,6 +54,8 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def dropdown_menu(self):
+        """the combo box in the assets section contain options "Rigs" and "Models", these options
+        enable the list view to show folders representing entities on shotgun"""
         dictionary = {
             "Models": "01_Assets",
             "Rigs": "02_Rigs"
@@ -93,6 +95,7 @@ class MyWindow(QtWidgets.QDialog):
         return text
 
     def add_assets(self):
+        """adds an entity from the assets section to reference elements"""
         font = QtGui.QFont("MS Shell Dlg 2")
         font.setPointSize(12)
 
@@ -120,6 +123,7 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def add_context_menu(self):
+        """enable a context menu in the assets section"""
         # right click for context menu, reveals 'Add' action
         # adds to Reference element
 
@@ -137,7 +141,11 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def remove_elements(self):
-        # remove elements from row based on object name correspondence
+        """a context menu in reference elements, removes the row from ui and asset from scene"""
+        # remove asset from scene
+        assets = []
+
+        # remove asset row in ui from cursor selection
         position = QtGui.QCursor.pos()
         widget = QtWidgets.QApplication.widgetAt(position)
         label_field = {
@@ -153,9 +161,18 @@ class MyWindow(QtWidgets.QDialog):
 
             widget.deleteLater()
             other.deleteLater()
+            #TODO: delete entity from ui
+            # assets += []
+
+        # remove asset from scene
+        for asset in assets:
+            break
         return
 
     def select_elements(self):
+        """context menu in reference elements, selects all the nodes from reference based on ui
+        selection"""
+        # TODO: get the reference path of the UI selection
         f = r"A:/Animation/Projects/Client/VaynerX/Vayner Productions/0002_Test_Project/Project Directory/02_Production/04_Maya/published/03_Cameras/Shot_001/Shot_001_original.0001.ma"
         ref_node = pm.FileReference(pathOrRefNode=f).refNode
         assemblies = set([a.__unicode__() for a in pm.ls(assemblies=1)])
@@ -165,7 +182,8 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def ref_context_menu(self):
-        # creates right-click "Add" feature
+        """creates context menu in reference elements"""
+        # creates menu
         menu = QtWidgets.QMenu()
         
         # select
@@ -178,10 +196,12 @@ class MyWindow(QtWidgets.QDialog):
         menu.addAction(remove)
         remove.triggered.connect(self.remove_elements)
         
+        # locates where menu is shown
         menu.exec_(QtGui.QCursor.pos())
         return
 
     def add_shot(self, scene_process):
+        """adds a row from the shots section to reference elements"""
         font = QtGui.QFont("MS Shell Dlg 2")
         font.setPointSize(12)
 
@@ -209,7 +229,10 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.scrollAreaLayout.insertRow(num, label, field)
         return
 
-    def add_references(self):
+    def add_referenced(self):
+        """display all the referenced elements in the scene and their status"""
+        #TODO: elements designated for the scene are listed in sg with checkbox indication
+        #TODO: these designated elements appear at the top of reference elements, always
         font = QtGui.QFont("MS Shell Dlg 2")
         font.setPointSize(12)
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
@@ -265,6 +288,7 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def custom(self):
+        """add custom reference"""
         dialog = QtWidgets.QFileDialog()
         file_name = dialog.getOpenFileName(
             parent=self.ui.custom_btn,
@@ -280,6 +304,7 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def build(self):
+        """updates the entire scene given the list in reference elements"""
         elements, latest = {}, []
 
         # find corresponding ui objects _wgt and _lbl
@@ -294,8 +319,6 @@ class MyWindow(QtWidgets.QDialog):
                 continue
             if not label:
                 continue
-            # elements += [child.objectName()]
-            # elements += [label.objectName()]
             elements[child] = label.text()
 
         for e in elements.values():
@@ -342,7 +365,7 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def init_ui(self):
-        self.add_references()
+        self.add_referenced()
         self.dropdown_menu()
 
         self.ui.assets_lne.textChanged.connect(self.dropdown_menu)
