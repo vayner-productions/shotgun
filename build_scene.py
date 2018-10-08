@@ -20,7 +20,7 @@ from PySide2 import QtCore, QtWidgets, QtUiTools, QtGui
 import pymel.core as pm
 import sgtk
 import os
-import pymel.tools.mel2py as mel2py
+import shutil
 
 eng = sgtk.platform.current_engine()
 sg = eng.shotgun
@@ -296,6 +296,42 @@ class MyWindow(QtWidgets.QDialog):
             num += 1
         return
 
+    def add_custom(self, file_name=None):
+        """add custom element into ui and custom folder, the file is overwritten if it exists"""
+        # /custom
+        if not file_name:
+            file_name = self.ui.custom_lne.text()
+
+        file_name = pm.util.common.path(file_name)
+        if not file_name.isfile():
+            return
+
+        custom = pm.workspace.path + "/custom/" + file_name.basename()
+        pm.util.common.path.copy2(file_name, custom)
+
+        # ui
+        font = QtGui.QFont("MS Shell Dlg 2")
+        font.setPointSize(12)
+
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                            QtWidgets.QSizePolicy.Preferred)
+        num = self.ui.scrollAreaLayout.rowCount()
+
+        label = QtWidgets.QLabel("")
+        label.setMinimumSize(20, 20)
+        label.setStyleSheet("background-color: None")
+        label.setObjectName("status_{}_wgt".format(num))
+
+        text = self.indicate_multiples(custom.basename().stripext())
+        field = QtWidgets.QLabel(text)
+        field.setFont(font)
+        field.setSizePolicy(size_policy)
+        field.setObjectName("status_{}_lbl".format(num))
+
+        self.ui.scrollAreaLayout.insertRow(num, label, field)
+        self.ui.scrollArea.verticalScrollBar().rangeChanged.connect(self.scrolldown)
+        return
+
     def custom(self):
         """add custom reference"""
         dialog = QtWidgets.QFileDialog()
@@ -303,13 +339,17 @@ class MyWindow(QtWidgets.QDialog):
             parent=self.ui.custom_btn,
             caption="Custom Reference",
             dir=pm.workspace.path,
-            filter="Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;Alembic Files (*.abc);; All Files (*.*)",
+            filter="""
+            Maya Files (*.ma *.mb);;
+            Maya ASCII (*.ma);;
+            Maya Binary (*.mb);;
+            Alembic Files (*.abc);;
+            All Files (*.*)""",
             selectedFilter="Maya ASCII (*.ma)",
             options=QtWidgets.QFileDialog.DontUseNativeDialog
         )[0]
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
-
-        self.ui.custom_lne.setText(file_name)
+        self.add_custom(file_name)
         return
 
     def build(self):
@@ -396,6 +436,7 @@ class MyWindow(QtWidgets.QDialog):
             self.ui.animation_btn.clicked.connect(lambda x="Animation": self.add_shot(x))
 
         self.ui.custom_btn.clicked.connect(self.custom)
+        self.ui.custom_lne.returnPressed.connect(self.add_custom)
         self.ui.build_btn.clicked.connect(self.build)
         return
 
