@@ -129,3 +129,5 @@ def create_project_directory(sg, logger, event, args):
             pass
     logger.info(">> created asset directory")
     return
+
+#TODO: ignore space to underscore conversion, ie sg site "006_Gear Large", keep folder the same, without underscore where the space was
