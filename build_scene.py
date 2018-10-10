@@ -39,8 +39,44 @@ def get_window():
     return mw
 
 
+class FileEdit(QtWidgets.QLineEdit):
+    def __init__(self, parent=None):
+        super(FileEdit, self).__init__(parent)
+
+        self.setDragEnabled(True)
+        # font = QtGui.QFont("MS Shell Dlg 2")
+        # font.setPointSize(12)
+        # size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
+        #                                     QtWidgets.QSizePolicy.Expanding)
+        # self.setFont(font)
+        # self.setSizePolicy(size_policy)
+        # print self.size(), parent.size()
+        # self.resize(310, 27)
+
+    def dragEnterEvent(self, event):
+        data = event.mimeData()
+        urls = data.urls()
+        if (urls and urls[0].scheme() == 'file'):
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event):
+        data = event.mimeData()
+        urls = data.urls()
+        if (urls and urls[0].scheme() == 'file'):
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        data = event.mimeData()
+        urls = data.urls()
+        if (urls and urls[0].scheme() == 'file'):
+            # for some reason, this doubles up the intro slash
+            filepath = str(urls[0].path())[1:]
+            self.setText(filepath)
+            
+
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
+        # super(MyWindow, self).__init__()
         self.ui = self.import_ui()
         self.init_ui()
         self.setup_ui()
@@ -54,7 +90,7 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
-    def dropdown_menu(self):
+    def dragdown_menu(self):
         """the combo box in the assets section contain options "Rigs" and "Models", these options
         enable the list view to show folders representing entities on shotgun"""
         dictionary = {
@@ -415,10 +451,10 @@ class MyWindow(QtWidgets.QDialog):
 
     def init_ui(self):
         self.add_referenced()
-        self.dropdown_menu()
+        self.dragdown_menu()
 
-        self.ui.assets_lne.textChanged.connect(self.dropdown_menu)
-        self.ui.assets_cbx.currentIndexChanged.connect(self.dropdown_menu)
+        self.ui.assets_lne.textChanged.connect(self.dragdown_menu)
+        self.ui.assets_cbx.currentIndexChanged.connect(self.dragdown_menu)
 
         self.ui.assets_lst.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.ui.assets_lst.customContextMenuRequested.connect(self.add_context_menu)
@@ -436,13 +472,14 @@ class MyWindow(QtWidgets.QDialog):
             self.ui.animation_btn.clicked.connect(lambda x="Animation": self.add_shot(x))
 
         self.ui.custom_btn.clicked.connect(self.custom)
-        self.ui.custom_lne.returnPressed.connect(self.add_custom)
+        # self.ui.custom_lne.returnPressed.connect(self.add_custom)
         self.ui.build_btn.clicked.connect(self.build)
+
+        file_edit = FileEdit(self.ui.custom_lne)
         return
 
     def setup_ui(self):
         return
 
     def run(self):
-        # self.ui.close()
-        pass
+        return
