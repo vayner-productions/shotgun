@@ -295,13 +295,7 @@ class MyWindow(QtWidgets.QDialog):
     def add_referenced(self):
         """display all the referenced elements in the scene and their status"""
         #TODO: elements designated for the scene are listed in sg with checkbox indication
-        #TODO: these designated elements appear at the top of reference elements, always
-        font = QtGui.QFont("MS Shell Dlg 2")
-        font.setPointSize(12)
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                            QtWidgets.QSizePolicy.Preferred)
-        num = self.ui.scrollAreaLayout.rowCount()
-        # add references
+
         for ref in pm.listReferences():
             item, status = ref.path.dirname().rsplit("/", 2), "blue"
 
