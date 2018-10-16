@@ -20,6 +20,7 @@ from PySide2 import QtCore, QtWidgets, QtUiTools, QtGui
 import pymel.core as pm
 import sgtk
 import os
+from collections import OrderedDict
 
 eng = sgtk.platform.current_engine()
 sg = eng.shotgun
@@ -75,6 +76,8 @@ class FileEdit(QtWidgets.QLineEdit):
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
         self.ui = self.import_ui()
+        #TODO: QUERY DESIGNATED LIST FROM SHOTGUN SITE
+        #TODO: MORPH LIST TO DICT TO EASILY FILTER AGAINST REFERENCED/ADDED ELEMENTS
         self.designated_list = [
             "001_rig_A",
             "002_Model_C",
@@ -82,6 +85,7 @@ class MyWindow(QtWidgets.QDialog):
             "04_Layouts",
             "08_Animation"
             ]
+        self.designated_rows = OrderedDict()
         self.init_ui()
         self.setup_ui()
 
@@ -212,6 +216,8 @@ class MyWindow(QtWidgets.QDialog):
             field.setObjectName(object_name)
 
             label.setStyleSheet("border: 1px solid red")
+
+            self.designated_rows[label] = field
         return
 
     def add_context_menu(self):
@@ -294,8 +300,9 @@ class MyWindow(QtWidgets.QDialog):
 
     def add_referenced(self):
         """display all the referenced elements in the scene and their status"""
-        #TODO: elements designated for the scene are listed in sg with checkbox indication
-
+        designated_list = self.designated_list
+        designated_rows = self.designated_rows
+        print ">> before:\n", designated_list
         for ref in pm.listReferences():
             item, status = ref.path.dirname().rsplit("/", 2), "blue"
 
@@ -330,17 +337,20 @@ class MyWindow(QtWidgets.QDialog):
                 status = "yellow"
 
             # create ui
-            #TODO: USE STATUS AS INDICATOR
-            #TODO: IF NO COLOR, FILL
-            #TODO: IF COLORED, MOVE TO THE NEXT EXISTING ITEM
-            #TODO: ELSE CREATE A NEW ROW
-            """THERE ARE 3 MODEL REFERENCES, TWO DESIGNATED ROWS
-            shot_001 --> new template
-            model_c_4 --> yellow
-            model_c_3 --> yellow
-            model_c_5 --> blue, new template
-            """
-            print ">>", ref.refNode
+            new_row = 1
+            for d, label, field in zip(designated_list, designated_rows.keys(), designated_rows.values()):
+                # print ">>", item, d, field.text()
+                if item in d:
+                    print ">> updating designated list", item, status, field.text()
+                    label.setStyleSheet("background-color:{}; border: 1px solid red".format(status))
+                    designated_list.remove(d)
+                    del designated_rows[label]
+                    new_row = 0
+                    break
+            if new_row:
+                print ">> creating new row", item, status
+                label, field = self.add_template_row(item)
+                label.setStyleSheet("background-color:{}".format(status))
         return
 
     def add_custom(self, file_name=None):
