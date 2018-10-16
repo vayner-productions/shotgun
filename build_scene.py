@@ -20,7 +20,6 @@ from PySide2 import QtCore, QtWidgets, QtUiTools, QtGui
 import pymel.core as pm
 import sgtk
 import os
-import shutil
 
 eng = sgtk.platform.current_engine()
 sg = eng.shotgun
@@ -40,35 +39,34 @@ def get_window():
 
 
 class FileEdit(QtWidgets.QLineEdit):
-    def __init__(self, parent=None):
-        super(FileEdit, self).__init__(parent)
+    def __init__(self):
+        super(FileEdit, self).__init__()
 
         self.setDragEnabled(True)
-        # font = QtGui.QFont("MS Shell Dlg 2")
-        # font.setPointSize(12)
-        # size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-        #                                     QtWidgets.QSizePolicy.Expanding)
-        # self.setFont(font)
-        # self.setSizePolicy(size_policy)
-        # print self.size(), parent.size()
-        # self.resize(310, 27)
+        font = QtGui.QFont("MS Shell Dlg 2")
+        font.setPointSize(12)
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                            QtWidgets.QSizePolicy.Preferred)
+        self.setFont(font)
+        self.setSizePolicy(size_policy)
+        self.setObjectName("custom_lne")
 
     def dragEnterEvent(self, event):
         data = event.mimeData()
         urls = data.urls()
-        if (urls and urls[0].scheme() == 'file'):
+        if urls and urls[0].scheme() == 'file':
             event.acceptProposedAction()
 
     def dragMoveEvent(self, event):
         data = event.mimeData()
         urls = data.urls()
-        if (urls and urls[0].scheme() == 'file'):
+        if urls and urls[0].scheme() == 'file':
             event.acceptProposedAction()
 
     def dropEvent(self, event):
         data = event.mimeData()
         urls = data.urls()
-        if (urls and urls[0].scheme() == 'file'):
+        if urls and urls[0].scheme() == 'file':
             # for some reason, this doubles up the intro slash
             filepath = str(urls[0].path())[1:]
             self.setText(filepath)
@@ -76,8 +74,14 @@ class FileEdit(QtWidgets.QLineEdit):
 
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
-        # super(MyWindow, self).__init__()
         self.ui = self.import_ui()
+        self.designated_list = [
+            "001_rig_A",
+            "002_Model_C",
+            "002_Model_C",
+            "04_Layouts",
+            "08_Animation"
+            ]
         self.init_ui()
         self.setup_ui()
 
@@ -120,7 +124,7 @@ class MyWindow(QtWidgets.QDialog):
     def indicate_multiples(self, text):
         """adds an identifier {1} beside the fields in reference elements to indicate multiples"""
         elements = []
-        rx = QtCore.QRegExp("status_*_lbl")
+        rx = QtCore.QRegExp("status_*lbl")
         rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
         for child in self.ui.findChildren(QtWidgets.QLabel, rx):
             if child.text() in elements:
@@ -130,40 +134,84 @@ class MyWindow(QtWidgets.QDialog):
                 text = "{} {{{}}}".format(text.split(" ")[0], i)
             elements += [text]
         return text
-    
+
     def scrolldown(self):
         value = self.ui.scrollArea.verticalScrollBar().maximum()
         self.ui.scrollArea.verticalScrollBar().setValue(value)
         return
 
-    def add_assets(self):
-        """adds an entity from the assets section to reference elements"""
+    def add_template_row(self, text):
+        """creates a row template for reference elements"""
         font = QtGui.QFont("MS Shell Dlg 2")
         font.setPointSize(12)
 
-        selection = self.ui.assets_lst.selectedItems()
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                             QtWidgets.QSizePolicy.Preferred)
-
         num = self.ui.scrollAreaLayout.rowCount()
+
+        label = QtWidgets.QLabel("")
+        label.setMinimumSize(20, 20)
+        label.setStyleSheet("background-color: None")
+        label.setObjectName("status_{}_wgt".format(num))
+
+        text = self.indicate_multiples(text)
+        field = QtWidgets.QLabel(text)
+        field.setFont(font)
+        field.setSizePolicy(size_policy)
+        field.setObjectName("status_{}_lbl".format(num))
+
+        self.ui.scrollAreaLayout.insertRow(num, label, field)
+        self.ui.scrollArea.verticalScrollBar().rangeChanged.connect(self.scrolldown)
+        return label, field
+
+    def add_shot(self, scene_process):
+        """adds a row from the shots section to reference elements"""
+        selection = {
+            "Camera": "03_Cameras",
+            "Layout": "04_Layouts",
+            "Dynamics": "05_Dynamics",
+            "Animation": "08_Animation"
+        }
+        #TODO: CHECK DESIGNATED LIST BEFORE CREATING A NEW ROW
+        #TODO: PASS THE DESIGNATED LIST AS A GLOBAL VARIABLE SO THIS FUNCTION DOESN'T NEED TO SORT THROUGH DATA EVERYTIME ITS CALLED
+        if selection[scene_process] in self.designated_list:
+            rx = QtCore.QRegExp("status_*_d*")
+            rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
+            designated_widgets = [child for child in self.ui.findChildren(QtWidgets.QLabel, rx)]
+            widgets = designated_widgets[0:][::2]
+            labels = designated_widgets[1:][::2]
+            for w, l in zip(widgets, labels):
+                if not selection[scene_process] in l.text():
+                    continue
+
+                color = w.palette().color(QtGui.QPalette.Background).getRgb()
+                update_element = None
+                if color != QtGui.QColor(0, 0, 255, 255):  # not blue
+                    w.setStyleSheet("background-color: blue")
+                    break
+            return
+        self.add_template_row(selection[scene_process])
+        return
+
+    def add_assets(self, selection=None):
+        """adds an entity from the assets section to reference elements"""
+        if not selection:
+            selection = [sel.text() for sel in self.ui.assets_lst.selectedItems()]
+
         if selection:
             for sel in selection:
-                label = QtWidgets.QLabel("")
-                label.setMinimumSize(20, 20)
-                label.setStyleSheet("background-color: None")
-                label.setObjectName("status_{}_wgt".format(num))
+                self.add_template_row(sel)
+        return
 
-                text = self.indicate_multiples(sel.text())
+    def designated(self):
+        for d in self.designated_list:
+            label, field = self.add_template_row(d)
+            object_name = label.objectName().replace("wgt", "dwgt")
+            label.setObjectName(object_name)
+            object_name = field.objectName().replace("lbl", "dlbl")
+            field.setObjectName(object_name)
 
-                field = QtWidgets.QLabel(text)
-                field.setFont(font)
-                field.setSizePolicy(size_policy)
-                field.setObjectName("status_{}_lbl".format(num))
-
-                self.ui.scrollAreaLayout.insertRow(num, label, field)
-                num += 1
-
-            self.ui.scrollArea.verticalScrollBar().rangeChanged.connect(self.scrolldown)
+            label.setStyleSheet("border: 1px solid red")
         return
 
     def add_context_menu(self):
@@ -229,49 +277,19 @@ class MyWindow(QtWidgets.QDialog):
         """creates context menu in reference elements"""
         # creates menu
         menu = QtWidgets.QMenu()
-        
+
         # select
         select = QtWidgets.QAction("Select", menu)
         menu.addAction(select)
         select.triggered.connect(self.select_elements)
-        
+
         # remove
         remove = QtWidgets.QAction("Remove", menu)
         menu.addAction(remove)
         remove.triggered.connect(self.remove_elements)
-        
+
         # locates where menu is shown
         menu.exec_(QtGui.QCursor.pos())
-        return
-
-    def add_shot(self, scene_process):
-        """adds a row from the shots section to reference elements"""
-        font = QtGui.QFont("MS Shell Dlg 2")
-        font.setPointSize(12)
-
-        selection = {
-            "Camera": "03_Cameras",
-            "Layout": "04_Layouts",
-            "Dynamics": "05_Dynamics",
-            "Animation": "08_Animation"
-        }
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                            QtWidgets.QSizePolicy.Preferred)
-        num = self.ui.scrollAreaLayout.rowCount()
-
-        label = QtWidgets.QLabel("")
-        label.setMinimumSize(20, 20)
-        label.setStyleSheet("background-color: None")
-        label.setObjectName("status_{}_wgt".format(num))
-
-        text = self.indicate_multiples(selection[scene_process])
-        field = QtWidgets.QLabel(text)
-        field.setFont(font)
-        field.setSizePolicy(size_policy)
-        field.setObjectName("status_{}_lbl".format(num))
-
-        self.ui.scrollAreaLayout.insertRow(num, label, field)
-        self.ui.scrollArea.verticalScrollBar().rangeChanged.connect(self.scrolldown)
         return
 
     def add_referenced(self):
@@ -450,6 +468,7 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def init_ui(self):
+        self.designated()
         self.add_referenced()
         self.dragdown_menu()
 
@@ -472,10 +491,10 @@ class MyWindow(QtWidgets.QDialog):
             self.ui.animation_btn.clicked.connect(lambda x="Animation": self.add_shot(x))
 
         self.ui.custom_btn.clicked.connect(self.custom)
-        # self.ui.custom_lne.returnPressed.connect(self.add_custom)
-        self.ui.build_btn.clicked.connect(self.build)
+        file_edit = FileEdit()
+        self.ui.custom_lyt.addWidget(file_edit)
 
-        file_edit = FileEdit(self.ui.custom_lne)
+        self.ui.build_btn.clicked.connect(self.build)
         return
 
     def setup_ui(self):
