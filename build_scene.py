@@ -336,18 +336,23 @@ class MyWindow(QtWidgets.QDialog):
                 status = "yellow"
 
             # create ui
-            label = QtWidgets.QLabel("")
-            label.setMinimumSize(20, 20)
-            label.setStyleSheet("background-color:" + status)
-            label.setObjectName("status_{}_wgt".format(num))
+            if item in self.designated_list:
+                rx = QtCore.QRegExp("status_*_d*")
+                rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
 
-            field = QtWidgets.QLabel(item)
-            field.setFont(font)
-            field.setSizePolicy(size_policy)
-            field.setObjectName("status_{}_lbl".format(num))
+                designated_widgets = [child for child in self.ui.findChildren(QtWidgets.QLabel, rx)]
+                widgets = designated_widgets[0:][::2]
+                labels = designated_widgets[1:][::2]
 
-            self.ui.scrollAreaLayout.insertRow(num, label, field)
-            num += 1
+                for w, l in zip(widgets, labels):
+                    color = w.palette().color(QtGui.QPalette.Background)
+                    if (item in l.text()) and (color == QtGui.QColor(68, 68, 68, 255)):
+                        palette = w.palette()
+                        palette.setColor(QtGui.QPalette.ColorRole.Window, status)
+                        w.setPalette(palette)
+            else:
+                label, field = self.add_template_row(item)
+                label.setStyleSheet("background-color:" + status)
         return
 
     def add_custom(self, file_name=None):
