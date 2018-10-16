@@ -136,6 +136,7 @@ class MyWindow(QtWidgets.QDialog):
         return text
 
     def scrolldown(self):
+        """ensures the items at the bottom are visible at the bottom"""
         value = self.ui.scrollArea.verticalScrollBar().maximum()
         self.ui.scrollArea.verticalScrollBar().setValue(value)
         return
@@ -295,7 +296,6 @@ class MyWindow(QtWidgets.QDialog):
     def add_referenced(self):
         """display all the referenced elements in the scene and their status"""
         #TODO: elements designated for the scene are listed in sg with checkbox indication
-        #TODO: these designated elements appear at the top of reference elements, always
         font = QtGui.QFont("MS Shell Dlg 2")
         font.setPointSize(12)
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
