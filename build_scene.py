@@ -302,7 +302,7 @@ class MyWindow(QtWidgets.QDialog):
         """display all the referenced elements in the scene and their status"""
         designated_list = self.designated_list
         designated_rows = self.designated_rows
-        print ">> before:\n", designated_list
+
         for ref in pm.listReferences():
             item, status = ref.path.dirname().rsplit("/", 2), "blue"
 
@@ -341,14 +341,14 @@ class MyWindow(QtWidgets.QDialog):
             for d, label, field in zip(designated_list, designated_rows.keys(), designated_rows.values()):
                 # print ">>", item, d, field.text()
                 if item in d:
-                    print ">> updating designated list", item, status, field.text()
+                    # print ">> updating designated list", item, status, field.text()
                     label.setStyleSheet("background-color:{}; border: 1px solid red".format(status))
                     designated_list.remove(d)
                     del designated_rows[label]
                     new_row = 0
                     break
             if new_row:
-                print ">> creating new row", item, status
+                # print ">> creating new row", item, status
                 label, field = self.add_template_row(item)
                 label.setStyleSheet("background-color:{}".format(status))
         return
