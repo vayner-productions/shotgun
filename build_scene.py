@@ -330,23 +330,17 @@ class MyWindow(QtWidgets.QDialog):
                 status = "yellow"
 
             # create ui
-            if item in self.designated_list:
-                rx = QtCore.QRegExp("status_*_d*")
-                rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
-
-                designated_widgets = [child for child in self.ui.findChildren(QtWidgets.QLabel, rx)]
-                widgets = designated_widgets[0:][::2]
-                labels = designated_widgets[1:][::2]
-
-                for w, l in zip(widgets, labels):
-                    color = w.palette().color(QtGui.QPalette.Background)
-                    if (item in l.text()) and (color == QtGui.QColor(68, 68, 68, 255)):
-                        palette = w.palette()
-                        palette.setColor(QtGui.QPalette.ColorRole.Window, status)
-                        w.setPalette(palette)
-            else:
-                label, field = self.add_template_row(item)
-                label.setStyleSheet("background-color:" + status)
+            #TODO: USE STATUS AS INDICATOR
+            #TODO: IF NO COLOR, FILL
+            #TODO: IF COLORED, MOVE TO THE NEXT EXISTING ITEM
+            #TODO: ELSE CREATE A NEW ROW
+            """THERE ARE 3 MODEL REFERENCES, TWO DESIGNATED ROWS
+            shot_001 --> new template
+            model_c_4 --> yellow
+            model_c_3 --> yellow
+            model_c_5 --> blue, new template
+            """
+            print ">>", ref.refNode
         return
 
     def add_custom(self, file_name=None):
