@@ -77,7 +77,6 @@ class MyWindow(QtWidgets.QDialog):
     def __init__(self):
         self.ui = self.import_ui()
         #TODO: QUERY DESIGNATED LIST FROM SHOTGUN SITE
-        #TODO: MORPH LIST TO DICT TO EASILY FILTER AGAINST REFERENCED/ADDED ELEMENTS
         self.designated_list = [
             "001_rig_A",
             "002_Model_C",
@@ -259,7 +258,7 @@ class MyWindow(QtWidgets.QDialog):
 
             widget.deleteLater()
             other.deleteLater()
-            #TODO: delete entity from ui
+            #TODO: DELETE ENTITY FROM UI
             # assets += []
 
         # remove asset from scene
@@ -270,7 +269,7 @@ class MyWindow(QtWidgets.QDialog):
     def select_elements(self):
         """context menu in reference elements, selects all the nodes from reference based on ui
         selection"""
-        # TODO: get the reference path of the UI selection
+        # TODO: GET THE REFERENCE PATH OF THE UI SELECTION
         f = r"A:/Animation/Projects/Client/VaynerX/Vayner Productions/0002_Test_Project/Project Directory/02_Production/04_Maya/published/03_Cameras/Shot_001/Shot_001_original.0001.ma"
         ref_node = pm.FileReference(pathOrRefNode=f).refNode
         assemblies = set([a.__unicode__() for a in pm.ls(assemblies=1)])
