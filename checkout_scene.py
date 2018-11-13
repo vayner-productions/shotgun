@@ -47,12 +47,12 @@ def increment_and_save(current_file, entity_type="Asset", publish=0):
     elif not current_file:
         directory = pm.util.common.path(scene_directory)
         files = directory.files(file_name + "_processed.*.ma")
-
         if files:
             latest_processed = max(files, key=get_version)
             old = max(files, key=get_version).split(".")[1]
             new = "{:04d}".format(int(old) + 1)
-            processed_file = latest_processed.replace(old, new)
+            version = ".{}.".format(new)
+            processed_file = version.join(latest_processed.split(".")[::2])
         else:
             processed_file = "{}/{}_processed.0001.ma".format(
                 scene_directory,
