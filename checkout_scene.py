@@ -1,5 +1,7 @@
 import pymel.core as pm
 import sgtk.platform
+import os
+import fnmatch
 
 engine = sgtk.platform.current_engine()
 sg = engine.shotgun
@@ -20,6 +22,11 @@ def get_entity(file_path):
     return entity
 
 
+def get_version(file):
+    version = int(file.split(".")[1])
+    return version
+
+
 def increment_and_save(current_file, entity_type="Asset", publish=0):
     scene_directory = pm.workspace.expandName(pm.workspace.fileRules["scene"])
     file_name = scene_directory.rsplit("/", 1)[1][4:]
@@ -35,17 +42,21 @@ def increment_and_save(current_file, entity_type="Asset", publish=0):
         )
     elif current_file and not publish:
         pm.openFile(current_file, f=1)
-        processed_file = "{}/{}_processed.{}.ma".format(
-            scene_directory,
-            file_name,
-            str(int(current_file.split(".")[1][1:]) + 1).zfill(4)
-        )
+        processed_file = current_file.replace("original", "processed").replace("published", "scenes")
         # print ">> checked out"
-
     elif not current_file:
-        processed_file = "{}/{}_processed.0001.ma".format(
-            scene_directory,
-            file_name)
+        directory = pm.util.common.path(scene_directory)
+        files = directory.files(file_name + "_processed.*.ma")
+
+        if files:
+            latest_processed = max(files, key=get_version)
+            old = max(files, key=get_version).split(".")[1]
+            new = "{:04d}".format(int(old) + 1)
+            processed_file = latest_processed.replace(old, new)
+        else:
+            processed_file = "{}/{}_processed.0001.ma".format(
+                scene_directory,
+                file_name)
         # print ">> new:", processed_file
 
     pm.saveAs(processed_file)
