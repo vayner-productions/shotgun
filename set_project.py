@@ -1,3 +1,4 @@
+#TODO: SCENE PROCESS IS ASSUMED, DOESN'T ALWAYS NEED TO START AT 00_TEST
 import sgtk
 from pymel.core.system import workspace
 import maya.mel as mel
@@ -13,7 +14,7 @@ def get_project_path():
     client_brand, sub_brand = [
         sg.find_one("Project", [["name", "is", project_name]], [i, "name"])[i]["name"] for i in
         ["sg_client", "sg_brand"]]
-    client_brand = client_brand[-8:]
+    client_brand = client_brand
     project_path = r"A:/Animation/Projects/Client/{}/{}/{}/Project Directory/02_Production/04_Maya".format(
         client_brand, sub_brand, project_name)
     return project_path
