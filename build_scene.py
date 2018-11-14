@@ -5,16 +5,6 @@ option to check latest published file on sg and latest file in directory
 from shotgun import build_scene as sg
 reload(sg)
 sg.get_window()
-
-*
-
-how do you handle variations
-is there an instance where model is brought in twice
-what do you want to see --
-what are the attributes it should address --
-- variation
-- rollback
-- status
 """
 from PySide2 import QtCore, QtWidgets, QtUiTools, QtGui
 import pymel.core as pm
@@ -40,6 +30,7 @@ def get_window():
 
 
 class FileEdit(QtWidgets.QLineEdit):
+    """overriding PEP8, camel-case functions are special events functions"""
     def __init__(self):
         super(FileEdit, self).__init__()
 
@@ -126,16 +117,12 @@ class MyWindow(QtWidgets.QDialog):
 
     def indicate_multiples(self, text):
         """adds an identifier {1} beside the fields in reference elements to indicate multiples"""
-        elements = []
         rx = QtCore.QRegExp("status_*lbl")
         rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
-        for child in self.ui.findChildren(QtWidgets.QLabel, rx):
-            if child.text() in elements:
-                i = 1
-                if text.count("{") != 0:
-                    i = int(text.split("{")[1].split("}")[0]) + 1
-                text = "{} {{{}}}".format(text.split(" ")[0], i)
-            elements += [text]
+        elements = [child.text().split(" {", 1)[0]  # get the asset name without indications
+                    for child in self.ui.findChildren(QtWidgets.QLabel, rx)]
+        if elements.count(text) != 0:
+            text = "{} {{{}}}".format(text, elements.count(text) + 1)
         return text
 
     def scrolldown(self):
@@ -175,8 +162,6 @@ class MyWindow(QtWidgets.QDialog):
             "Dynamics": "05_Dynamics",
             "Animation": "08_Animation"
         }
-        #TODO: CHECK DESIGNATED LIST BEFORE CREATING A NEW ROW
-        #TODO: PASS THE DESIGNATED LIST AS A GLOBAL VARIABLE SO THIS FUNCTION DOESN'T NEED TO SORT THROUGH DATA EVERYTIME ITS CALLED
         if selection[scene_process] in self.designated_list:
             rx = QtCore.QRegExp("status_*_d*")
             rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
