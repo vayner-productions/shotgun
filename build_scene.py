@@ -1,6 +1,5 @@
 """
-checks the latest file in a scene process
-option to check latest published file on sg and latest file in directory
+checks for latest published version
 
 from shotgun import build_scene as sg
 reload(sg)
@@ -228,8 +227,10 @@ class MyWindow(QtWidgets.QDialog):
         assets = []
 
         # remove asset row in ui from cursor selection
+        #TODO: POSITION NOT CAPTURED CORRECTLY, DOESN'T SELECT THE RIGHT WIDGET
         position = QtGui.QCursor.pos()
         widget = QtWidgets.QApplication.widgetAt(position)
+        print ">> remove:", widget.objectName(), widget.text()
         label_field = {
             "_lbl": "_wgt",
             "_wgt": "_lbl"
@@ -244,6 +245,7 @@ class MyWindow(QtWidgets.QDialog):
             widget.deleteLater()
             other.deleteLater()
             #TODO: DELETE ENTITY FROM UI
+            #TODO: DELETE CUSTOM FROM UI
             # assets += []
 
         # remove asset from scene
@@ -283,7 +285,11 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def add_referenced(self):
-        """display all the referenced elements in the scene and their status"""
+        """display all the referenced elements in the scene and their status
+        the status refers to the file's directory name, which could be outside /published
+        for example, status looks at /scenes/06_Cache when referencing alembics
+        another example, status looks at /published/rigs when referencing rigs
+        another example, status looks at /custom when files referenced through custom button"""
         designated_list = self.designated_list
         designated_rows = self.designated_rows
 
