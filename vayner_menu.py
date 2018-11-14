@@ -30,6 +30,19 @@ checkout_scene_item = pm.menuItem(label="Checkout Scene",
                                   command=checkout_scene,
                                   parent=vayner_menu)
 
+
+# check out scene - open the latest published scene
+increment_and_save = """
+from shotgun import checkout_scene as sg
+
+reload(sg)
+sg.increment_and_save(None)
+"""
+checkout_scene_item = pm.menuItem(label="Increment and Save",
+                                  command=increment_and_save,
+                                  parent=vayner_menu)
+
+
 # update timeline - timeline reflects sg_frame_range
 update_timeline = """
 import shotgun.update_timeline as sg
