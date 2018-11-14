@@ -1,4 +1,3 @@
-#TODO: SCENE PROCESS IS ASSUMED, DOESN'T ALWAYS NEED TO START AT 00_TEST
 import sgtk
 from pymel.core.system import workspace
 import maya.mel as mel
