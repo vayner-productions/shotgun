@@ -95,9 +95,7 @@ import pymel.core as pm
 main_maya_window = pm.language.melGlobals['gMainWindow']
 if pm.menu('Vayner', q=1, exists=1):
     pm.deleteUI('Vayner')
-"""
 
-"""
 # load menu from script editor
 import pymel.core as pm
 from shotgun import vayner_menu as sg
