@@ -89,16 +89,6 @@ render_setup_item = pm.menuItem(label="Render Setup",
                                 command=render_setup,
                                 parent=vayner_menu)
 
-# render setup - for lighters to prep there render globals
-render_setup = """
-from shotgun import render_setup as sg
-reload(sg)
-sg.get_window()
-"""
-render_setup_item = pm.menuItem(label="Test",
-                                command=render_setup,
-                                parent=vayner_menu)
-
 """
 # delete Vayner menu
 import pymel.core as pm
