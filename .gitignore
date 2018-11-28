@@ -4,3 +4,4 @@ shotgunEventDaemon/
 notes/
 __init__.py
 *.txt
+*.idea
