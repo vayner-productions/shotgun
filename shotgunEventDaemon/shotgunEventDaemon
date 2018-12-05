@@ -1,59 +1,103 @@
-2018-12-04 09:17:27,332 - engine - DEBUG - Got 1 events: 763613 to 763613.
-2018-12-04 09:26:25,049 - engine - DEBUG - Got 1 events: 763615 to 763615.
-2018-12-04 09:33:35,061 - engine - DEBUG - Got 1 events: 763616 to 763616.
-2018-12-04 09:59:14,736 - engine - DEBUG - Got 1 events: 763619 to 763619.
-2018-12-04 09:59:25,013 - engine - DEBUG - Got 2 events: 763620 to 763621.
-2018-12-04 10:12:13,404 - engine - DEBUG - Got 1 events: 763622 to 763622.
-2018-12-04 10:12:19,079 - engine - DEBUG - Got 3 events: 763623 to 763625.
-2018-12-04 10:12:35,661 - engine - DEBUG - Got 2 events: 763626 to 763627.
-2018-12-04 10:12:40,845 - engine - DEBUG - Got 4 events: 763628 to 763631.
-2018-12-04 10:12:46,009 - engine - DEBUG - Got 1 events: 763632 to 763632.
-2018-12-04 10:13:26,931 - engine - DEBUG - Got 6 events: 763640 to 763645.
-2018-12-04 10:16:41,319 - engine - DEBUG - Got 13 events: 763667 to 763679.
-2018-12-04 10:16:46,503 - engine - DEBUG - Got 3 events: 763680 to 763682.
-2018-12-04 10:16:51,640 - engine - DEBUG - Got 15 events: 763687 to 763701.
-2018-12-04 10:17:22,526 - engine - DEBUG - Got 1 events: 763702 to 763702.
-2018-12-04 10:17:32,809 - engine - DEBUG - Got 1 events: 763703 to 763703.
-2018-12-04 10:18:03,528 - engine - DEBUG - Got 2 events: 763713 to 763714.
-2018-12-04 10:21:28,414 - engine - DEBUG - Got 1 events: 763716 to 763716.
-2018-12-04 10:21:59,168 - engine - DEBUG - Got 1 events: 763717 to 763717.
-2018-12-04 10:25:29,877 - engine - DEBUG - Got 8 events: 763718 to 763725.
-2018-12-04 10:27:17,775 - engine - DEBUG - Got 1 events: 763726 to 763726.
-2018-12-04 10:27:38,492 - engine - DEBUG - Got 1 events: 763727 to 763727.
-2018-12-04 10:27:43,638 - engine - DEBUG - Got 4 events: 763728 to 763731.
-2018-12-04 10:28:14,382 - engine - DEBUG - Got 1 events: 763732 to 763732.
-2018-12-04 10:33:57,319 - engine - DEBUG - Got 15 events: 763737 to 763751.
-2018-12-04 10:34:02,578 - engine - DEBUG - Got 6 events: 763751 to 763756.
-2018-12-04 10:34:07,730 - engine - DEBUG - Got 1 events: 763757 to 763757.
-2018-12-04 10:34:28,190 - engine - DEBUG - Got 3 events: 763760 to 763762.
-2018-12-04 10:34:33,342 - engine - DEBUG - Got 4 events: 763763 to 763766.
-2018-12-04 10:35:09,586 - engine - DEBUG - Got 1 events: 763767 to 763767.
-2018-12-04 10:35:35,382 - engine - DEBUG - Got 7 events: 763768 to 763774.
-2018-12-04 10:37:58,749 - engine - DEBUG - Got 1 events: 763776 to 763776.
-2018-12-04 10:56:35,239 - engine - DEBUG - Got 13 events: 763782 to 763794.
-2018-12-04 10:56:40,423 - engine - DEBUG - Got 2 events: 763795 to 763796.
-2018-12-04 10:56:45,563 - engine - DEBUG - Got 19 events: 763797 to 763815.
-2018-12-04 11:02:44,877 - engine - DEBUG - Got 2 events: 763816 to 763817.
-2018-12-04 11:08:17,846 - engine - DEBUG - Got 1 events: 763818 to 763818.
-2018-12-04 11:08:28,177 - engine - DEBUG - Got 13 events: 763819 to 763831.
-2018-12-04 11:08:33,342 - engine - DEBUG - Got 2 events: 763832 to 763833.
-2018-12-04 11:08:38,476 - engine - DEBUG - Got 4 events: 763853 to 763856.
-2018-12-04 11:13:50,861 - engine - DEBUG - Got 1 events: 763862 to 763862.
-2018-12-04 11:14:01,154 - engine - DEBUG - Got 14 events: 763864 to 763877.
-2018-12-04 11:14:47,394 - engine - DEBUG - Got 1 events: 763878 to 763878.
-2018-12-04 11:15:54,078 - engine - DEBUG - Got 3 events: 763901 to 763903.
-2018-12-04 11:16:30,013 - engine - DEBUG - Got 1 events: 763904 to 763904.
-2018-12-04 11:16:40,250 - engine - DEBUG - Got 8 events: 763905 to 763912.
-2018-12-04 11:17:56,996 - engine - DEBUG - Got 7 events: 763913 to 763919.
-2018-12-04 11:18:02,211 - engine - DEBUG - Got 6 events: 763920 to 763925.
-2018-12-04 11:18:12,464 - engine - DEBUG - Got 1 events: 763926 to 763926.
-2018-12-04 11:19:08,755 - engine - DEBUG - Got 2 events: 763927 to 763928.
-2018-12-04 11:19:13,895 - engine - DEBUG - Got 19 events: 763929 to 763947.
-2018-12-04 11:20:00,164 - engine - DEBUG - Got 16 events: 763948 to 763963.
-2018-12-04 11:20:05,367 - engine - DEBUG - Got 2 events: 763964 to 763965.
-2018-12-04 11:20:31,072 - engine - DEBUG - Got 13 events: 763966 to 763978.
-2018-12-04 11:20:36,276 - engine - DEBUG - Got 8 events: 763979 to 763986.
-2018-12-04 11:21:22,516 - engine - DEBUG - Got 13 events: 763987 to 763999.
-2018-12-04 11:21:37,920 - engine - DEBUG - Got 2 events: 764000 to 764001.
-2018-12-04 11:21:43,082 - engine - DEBUG - Got 4 events: 764002 to 764005.
-2018-12-04 11:22:49,891 - engine - DEBUG - Got 1 events: 764007 to 764007.
+2018-12-05 15:10:11,016 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:10:12,137 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:10:39,000 - engine - INFO - Using Shotgun version 3.0.36
+2018-12-05 15:10:39,012 - engine - INFO - Loading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:10:39,441 - engine - DEBUG - Starting the event processing loop.
+2018-12-05 15:10:39,740 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:10:47,719 - engine - INFO - Using Shotgun version 3.0.36
+2018-12-05 15:10:47,736 - engine - INFO - Loading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:10:47,816 - engine - CRITICAL - Crash!!!!! Unexpected error (<type 'exceptions.EOFError'>) in main loop.
+
+Traceback (most recent call last):
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 327, in start
+    self._mainLoop()
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 475, in _mainLoop
+    self._loadEventIdData()
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 349, in _loadEventIdData
+    self._eventIdData = pickle.load(fh)
+EOFError
+
+2018-12-05 15:10:48,178 - engine - DEBUG - Starting the event processing loop.
+2018-12-05 15:10:48,503 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:10:56,673 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:10:57,586 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:11:40,762 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:11:41,562 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:12:16,311 - engine - INFO - Using Shotgun version 3.0.36
+2018-12-05 15:12:16,332 - engine - INFO - Loading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:12:16,842 - engine - DEBUG - Starting the event processing loop.
+2018-12-05 15:12:17,260 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:13:09,411 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:13:10,408 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:13:34,499 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:13:35,417 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:13:35,489 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:13:36,220 - engine - CRITICAL - Crash!!!!! Unexpected error (<type 'exceptions.EOFError'>) in main loop.
+
+Traceback (most recent call last):
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 327, in start
+    self._mainLoop()
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 475, in _mainLoop
+    self._loadEventIdData()
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 349, in _loadEventIdData
+    self._eventIdData = pickle.load(fh)
+EOFError
+
+2018-12-05 15:13:39,058 - engine - DEBUG - Got 500 events: 765074 to 765573.
+2018-12-05 15:13:41,647 - engine - DEBUG - Got 500 events: 765574 to 766088.
+2018-12-05 15:13:44,180 - engine - DEBUG - Got 500 events: 766089 to 766589.
+2018-12-05 15:13:46,463 - engine - INFO - Using Shotgun version 3.0.36
+2018-12-05 15:13:46,476 - engine - INFO - Loading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:13:46,907 - engine - DEBUG - Starting the event processing loop.
+2018-12-05 15:13:47,221 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:13:50,855 - engine - DEBUG - Got 500 events: 765074 to 765573.
+2018-12-05 15:13:53,601 - engine - DEBUG - Got 500 events: 765574 to 766088.
+2018-12-05 15:13:55,835 - engine - DEBUG - Got 500 events: 766089 to 766589.
+2018-12-05 15:14:23,697 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:14:24,453 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:14:26,650 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:14:27,473 - engine - DEBUG - Got 500 events: 764997 to 765497.
+2018-12-05 15:14:28,040 - engine - DEBUG - Got 500 events: 765019 to 765519.
+2018-12-05 15:14:30,434 - engine - DEBUG - Got 500 events: 765386 to 765897.
+2018-12-05 15:14:31,306 - engine - DEBUG - Got 500 events: 765463 to 765975.
+2018-12-05 15:14:33,591 - engine - DEBUG - Got 500 events: 765823 to 766331.
+2018-12-05 15:14:34,262 - engine - DEBUG - Got 500 events: 765890 to 766394.
+2018-12-05 15:14:36,513 - engine - DEBUG - Got 500 events: 766395 to 766894.
+2018-12-05 15:15:09,358 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:15:10,151 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:15:17,809 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:15:18,638 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:18:16,786 - engine - DEBUG - Shuting down event processing loop.
+2018-12-05 15:18:16,032 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:18:17,029 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:18:43,141 - engine - INFO - Using Shotgun version 3.0.36
+2018-12-05 15:18:43,203 - engine - INFO - Loading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:18:43,661 - engine - DEBUG - Starting the event processing loop.
+2018-12-05 15:18:43,961 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:18:45,266 - engine - CRITICAL - Crash!!!!! Unexpected error (<type 'exceptions.EOFError'>) in main loop.
+
+Traceback (most recent call last):
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 327, in start
+    self._mainLoop()
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 475, in _mainLoop
+    self._loadEventIdData()
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 349, in _loadEventIdData
+    self._eventIdData = pickle.load(fh)
+EOFError
+
+2018-12-05 15:19:42,223 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:19:42,997 - engine - DEBUG - Got 500 events: 764572 to 765073.
+2018-12-05 15:19:46,634 - engine - DEBUG - Got 500 events: 765074 to 765573.
+2018-12-05 15:19:49,322 - engine - DEBUG - Got 500 events: 765574 to 766088.
+2018-12-05 15:19:51,855 - engine - DEBUG - Got 500 events: 766089 to 766589.
+2018-12-05 15:21:44,565 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:21:45,539 - engine - DEBUG - Got 500 events: 766457 to 766956.
+2018-12-05 15:21:58,477 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:21:59,332 - engine - DEBUG - Got 500 events: 766457 to 766956.
+2018-12-05 15:22:37,150 - engine - DEBUG - Shuting down event processing loop.
+2018-12-05 15:23:59,290 - engine - INFO - Using Shotgun version 3.0.36
+2018-12-05 15:23:59,301 - engine - INFO - Loading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:23:59,736 - engine - DEBUG - Starting the event processing loop.
+2018-12-05 15:24:00,078 - engine - DEBUG - Got 500 events: 766457 to 766956.
+2018-12-05 15:31:28,125 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:31:29,040 - engine - DEBUG - Got 500 events: 766457 to 766956.
