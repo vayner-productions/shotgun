@@ -2,6 +2,5 @@
 shotgunEvents/src/examplePlugins/
 shotgunEventDaemon/
 notes/
-__init__.py
 *.txt
 *.idea/
