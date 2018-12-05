@@ -101,3 +101,13 @@ EOFError
 2018-12-05 15:24:00,078 - engine - DEBUG - Got 500 events: 766457 to 766956.
 2018-12-05 15:31:28,125 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
 2018-12-05 15:31:29,040 - engine - DEBUG - Got 500 events: 766457 to 766956.
+2018-12-05 15:33:31,986 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:33:33,065 - engine - DEBUG - Got 500 events: 764007 to 764507.
+2018-12-05 15:33:36,535 - engine - DEBUG - Got 500 events: 764508 to 765008.
+2018-12-05 15:33:40,164 - engine - DEBUG - Got 500 events: 765009 to 765509.
+2018-12-05 15:33:42,661 - engine - DEBUG - Got 500 events: 765510 to 766022.
+2018-12-05 15:33:44,983 - engine - DEBUG - Got 500 events: 766023 to 766525.
+2018-12-05 15:35:32,836 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:35:33,855 - engine - DEBUG - Got 500 events: 766457 to 766956.
+2018-12-05 15:38:56,865 - engine - INFO - Reloading plugin at \\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py
+2018-12-05 15:38:57,776 - engine - DEBUG - Got 500 events: 766457 to 766956.

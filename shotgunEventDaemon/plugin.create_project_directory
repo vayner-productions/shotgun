@@ -3457,3 +3457,1227 @@ Local variables at outer most frame in plugin:
 2018-12-05 15:31:31,503 - plugin.create_project_directory - DEBUG - Skipping: inactive.
 2018-12-05 15:31:31,506 - plugin.create_project_directory - DEBUG - Skipping: inactive.
 2018-12-05 15:31:31,512 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:32,569 - plugin.create_project_directory - DEBUG - Registered callback.
+2018-12-05 15:33:33,065 - plugin.create_project_directory - DEBUG - Dispatching event 764007 to callback create_project_directory.
+2018-12-05 15:33:33,387 - plugin.create_project_directory.create_project_directory - INFO - >> created asset directory
+2018-12-05 15:33:33,447 - plugin.create_project_directory - DEBUG - Dispatching event 764009 to callback create_project_directory.
+2018-12-05 15:33:33,746 - plugin.create_project_directory.create_project_directory - INFO - >> created asset directory
+2018-12-05 15:33:33,776 - plugin.create_project_directory - DEBUG - Dispatching event 764017 to callback create_project_directory.
+2018-12-05 15:33:34,121 - plugin.create_project_directory.create_project_directory - INFO - >> created asset directory
+2018-12-05 15:33:34,328 - plugin.create_project_directory - INFO - Event 764056 never happened - ignoring.
+2018-12-05 15:33:34,489 - plugin.create_project_directory - DEBUG - Dispatching event 764109 to callback create_project_directory.
+2018-12-05 15:33:34,808 - plugin.create_project_directory.create_project_directory - INFO - >> created asset directory
+2018-12-05 15:33:36,898 - plugin.create_project_directory - DEBUG - Dispatching event 764572 to callback create_project_directory.
+2018-12-05 15:33:37,101 - plugin.create_project_directory.create_project_directory - INFO - >> created project directory
+2018-12-05 15:33:37,102 - plugin.create_project_directory.create_project_directory - INFO - >> created asset directory
+2018-12-05 15:33:38,040 - plugin.create_project_directory - DEBUG - Dispatching event 764776 to callback create_project_directory.
+2018-12-05 15:33:38,260 - plugin.create_project_directory.create_project_directory - INFO - >> created project directory
+2018-12-05 15:33:38,262 - plugin.create_project_directory.create_project_directory - INFO - >> created asset directory
+2018-12-05 15:33:38,266 - plugin.create_project_directory - DEBUG - Dispatching event 764777 to callback create_project_directory.
+2018-12-05 15:33:38,484 - plugin.create_project_directory.create_project_directory - INFO - >> created project directory
+2018-12-05 15:33:38,486 - plugin.create_project_directory.create_project_directory - INFO - >> created asset directory
+2018-12-05 15:33:38,822 - plugin.create_project_directory - DEBUG - Dispatching event 764809 to callback create_project_directory.
+2018-12-05 15:33:39,048 - plugin.create_project_directory.create_project_directory - INFO - >> created shot directory
+2018-12-05 15:33:39,049 - plugin.create_project_directory.create_project_directory - INFO - >> created asset directory
+2018-12-05 15:33:39,578 - plugin.create_project_directory - INFO - Event 764948 never happened - ignoring.
+2018-12-05 15:33:40,483 - plugin.create_project_directory - INFO - Event 765060 never happened - ignoring.
+2018-12-05 15:33:43,240 - plugin.create_project_directory - INFO - Event 765659 never happened - ignoring.
+2018-12-05 15:33:43,546 - plugin.create_project_directory - INFO - Event 765742 never happened - ignoring.
+2018-12-05 15:33:43,670 - plugin.create_project_directory - INFO - Event 765780 never happened - ignoring.
+2018-12-05 15:33:43,674 - plugin.create_project_directory - INFO - Event 765782 never happened - ignoring.
+2018-12-05 15:33:43,681 - plugin.create_project_directory - INFO - Event 765785 never happened - ignoring.
+2018-12-05 15:33:43,686 - plugin.create_project_directory - INFO - Event 765787 never happened - ignoring.
+2018-12-05 15:33:43,690 - plugin.create_project_directory - INFO - Event 765789 never happened - ignoring.
+2018-12-05 15:33:44,095 - plugin.create_project_directory - INFO - Event 765862 never happened - ignoring.
+2018-12-05 15:33:44,148 - plugin.create_project_directory - INFO - Event 765868 never happened - ignoring.
+2018-12-05 15:33:44,177 - plugin.create_project_directory - INFO - Event 765877 never happened - ignoring.
+2018-12-05 15:33:44,203 - plugin.create_project_directory - INFO - Event 765886 never happened - ignoring.
+2018-12-05 15:33:44,232 - plugin.create_project_directory - INFO - Event 765895 never happened - ignoring.
+2018-12-05 15:33:44,252 - plugin.create_project_directory - INFO - Event 765902 never happened - ignoring.
+2018-12-05 15:33:45,236 - plugin.create_project_directory - INFO - Events 766058-766059 never happened - ignoring.
+2018-12-05 15:33:45,650 - plugin.create_project_directory - INFO - Event 766152 never happened - ignoring.
+2018-12-05 15:33:46,920 - plugin.create_project_directory - DEBUG - Dispatching event 766457 to callback create_project_directory.
+2018-12-05 15:33:47,016 - plugin.create_project_directory.create_project_directory - CRITICAL - An error occured processing an event.
+
+Traceback (most recent call last):
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 950, in process
+    self._callback(self._shotgun, self._logger, event, self._args)
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py", line 55, in create_project_directory
+    name[key] = data[f]["name"]
+TypeError: 'NoneType' object has no attribute '__getitem__'
+
+
+Local variables at outer most frame in plugin:
+
+{'args': None,
+ 'data': {'id': 230, 'sg_client': None, 'type': 'Project'},
+ 'event': {'attribute_name': 'name',
+           'created_at': datetime.datetime(2018, 12, 4, 22, 54, 12, tzinfo=<shotgun_api3.lib.sgtimezone.LocalTimezone object at 0x01878510>),
+           'entity': {'id': 230, 'name': 'VFX Project 07', 'type': 'Project'},
+           'event_type': 'Shotgun_Project_Change',
+           'id': 766457,
+           'meta': {'attribute_name': 'name',
+                    'entity_id': 230,
+                    'entity_type': 'Project',
+                    'field_data_type': 'text',
+                    'in_create': True,
+                    'new_value': 'VFX Project 07',
+                    'old_value': None,
+                    'type': 'attribute_change'},
+           'project': None,
+           'session_uuid': '619fff12-f841-11e8-813d-0242ac110004',
+           'type': 'EventLogEntry',
+           'user': {'id': 87, 'name': 'Alexander Smith', 'type': 'HumanUser'}},
+ 'event_id': 766457,
+ 'f': 'sg_client',
+ 'key': 'client',
+ 'logger': <logging.Logger object at 0x018E6A50>,
+ 'name': {'project': 'VFX Project 07'},
+ 'project': {'id': 230, 'name': 'VFX Project 07', 'type': 'Project'},
+ 'sg': <shotgun_api3.shotgun.Shotgun object at 0x018E65B0>}
+2018-12-05 15:33:47,022 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,026 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,030 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,035 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,039 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,042 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,084 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,088 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,092 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,096 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,101 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,105 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,108 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,114 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,118 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,122 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,128 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,131 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,135 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,141 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,144 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,150 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,154 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,194 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,197 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,203 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,207 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,244 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,249 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,253 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,259 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,263 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,266 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,270 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,275 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,279 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,283 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,288 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,292 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,296 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,301 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,305 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,309 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,312 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,318 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,322 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,325 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,329 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,334 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,338 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,342 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,346 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,351 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,355 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,361 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,365 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,368 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,374 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,378 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,381 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,387 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,391 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,394 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,398 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,403 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,407 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,411 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:33:47,415 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:33,359 - plugin.create_project_directory - DEBUG - Registered callback.
+2018-12-05 15:35:33,887 - plugin.create_project_directory - DEBUG - Dispatching event 766457 to callback create_project_directory.
+2018-12-05 15:35:34,141 - plugin.create_project_directory.create_project_directory - CRITICAL - An error occured processing an event.
+
+Traceback (most recent call last):
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 950, in process
+    self._callback(self._shotgun, self._logger, event, self._args)
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py", line 55, in create_project_directory
+    name[key] = data[f]["name"]
+TypeError: 'NoneType' object has no attribute '__getitem__'
+
+
+Local variables at outer most frame in plugin:
+
+{'args': None,
+ 'data': {'id': 230, 'sg_client': None, 'type': 'Project'},
+ 'event': {'attribute_name': 'name',
+           'created_at': datetime.datetime(2018, 12, 4, 22, 54, 12, tzinfo=<shotgun_api3.lib.sgtimezone.LocalTimezone object at 0x01878510>),
+           'entity': {'id': 230, 'name': 'VFX Project 07', 'type': 'Project'},
+           'event_type': 'Shotgun_Project_Change',
+           'id': 766457,
+           'meta': {'attribute_name': 'name',
+                    'entity_id': 230,
+                    'entity_type': 'Project',
+                    'field_data_type': 'text',
+                    'in_create': True,
+                    'new_value': 'VFX Project 07',
+                    'old_value': None,
+                    'type': 'attribute_change'},
+           'project': None,
+           'session_uuid': '619fff12-f841-11e8-813d-0242ac110004',
+           'type': 'EventLogEntry',
+           'user': {'id': 87, 'name': 'Alexander Smith', 'type': 'HumanUser'}},
+ 'event_id': 766457,
+ 'f': 'sg_client',
+ 'key': 'client',
+ 'logger': <logging.Logger object at 0x018E6A50>,
+ 'name': {'project': 'VFX Project 07'},
+ 'project': {'id': 230, 'name': 'VFX Project 07', 'type': 'Project'},
+ 'sg': <shotgun_api3.shotgun.Shotgun object at 0x02331170>}
+2018-12-05 15:35:34,148 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,154 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,157 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,161 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,165 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,171 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,174 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,177 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,181 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,186 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,190 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,193 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,197 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,200 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,204 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,209 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,224 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,257 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,260 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,265 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,269 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,273 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,276 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,280 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,286 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,325 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,329 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,335 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,338 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,342 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,345 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,349 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,352 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,357 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,359 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,364 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,367 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,371 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,375 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,378 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,381 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,387 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,390 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,394 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,398 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,401 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,407 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,411 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,414 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,418 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,423 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,426 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,430 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,434 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,437 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,443 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,447 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,450 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,454 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,457 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,461 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,466 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,469 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,473 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,476 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,480 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,483 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,487 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,492 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,496 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,500 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,503 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,507 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,512 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,516 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,519 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,523 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,528 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,530 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,535 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,538 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,542 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,546 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,549 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,553 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,558 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,562 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,565 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,569 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,573 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,578 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,582 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,585 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,588 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,592 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,596 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,599 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,604 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,607 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,611 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,614 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,618 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,622 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,627 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,631 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,634 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,638 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,642 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,678 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,683 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,686 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,690 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,694 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,697 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,701 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,704 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,709 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,713 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,717 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,720 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,723 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,727 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,733 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,737 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,742 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,744 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,749 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,753 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,756 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,759 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,763 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,767 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,772 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,775 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,779 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,782 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,786 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,790 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,795 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,799 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,802 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,808 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,812 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,815 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,819 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,823 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,826 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,831 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,835 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,838 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,842 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,846 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,849 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,855 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,858 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,861 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,867 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,869 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,875 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,878 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,881 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,885 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,888 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,892 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,897 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,901 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,904 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,910 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,914 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,917 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,921 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,926 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,928 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,933 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,937 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,940 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,944 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,948 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,951 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,956 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,959 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,963 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,967 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,970 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,973 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,979 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,983 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,986 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,990 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,994 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:34,997 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,002 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,006 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,009 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,013 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,017 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,020 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,025 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,029 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,032 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,036 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,039 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,043 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,048 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,052 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,056 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,061 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,063 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,068 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,072 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,075 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,078 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,082 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,086 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,091 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,095 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,098 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,102 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,108 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,111 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,115 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,118 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,122 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,125 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,130 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,134 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,138 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,141 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,144 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,148 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,153 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,157 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,161 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,164 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,168 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,173 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,177 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,180 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,184 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,187 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,190 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,194 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,197 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,203 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,207 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,210 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,213 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,217 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,223 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,226 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,230 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,233 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,275 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,279 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,282 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,286 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,290 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,295 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,299 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,302 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,306 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,311 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,315 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,318 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,322 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,326 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,331 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,334 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,338 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,341 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,345 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,348 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,352 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,394 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,398 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,403 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,407 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,411 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,414 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,420 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,423 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,427 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,430 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,434 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,438 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,444 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,447 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,450 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,454 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,459 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,463 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,467 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,470 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,473 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,509 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,513 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,516 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,520 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,525 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,529 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,532 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,536 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,540 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,545 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,549 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,555 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,559 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,562 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,565 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,569 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,573 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,576 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,617 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,621 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,625 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,628 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,632 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,637 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,641 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,644 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,648 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,653 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,657 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,661 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,664 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,668 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,673 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,677 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,680 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,684 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,688 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,693 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,696 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,700 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,703 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,707 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,711 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,717 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,720 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,724 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,727 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,732 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,736 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,740 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,744 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,747 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,753 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,756 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,760 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,765 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,769 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,773 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,779 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,782 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,786 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,789 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,793 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,798 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,802 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,805 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,809 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,812 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,816 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,821 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,825 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,828 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,832 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,836 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,841 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,845 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,848 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,851 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,857 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,861 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,865 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,868 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,871 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,875 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,880 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,884 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,888 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,891 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,894 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,898 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,903 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,905 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,910 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,914 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,917 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,921 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,927 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,930 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,934 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,938 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,943 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,947 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,950 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,953 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,957 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,961 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,966 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,970 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,973 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,977 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,982 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,984 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,990 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,993 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:35,996 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,000 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,005 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,009 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,013 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,016 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,020 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,025 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,029 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,032 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,036 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,039 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,043 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,048 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,052 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,055 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,059 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,063 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,068 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,072 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,075 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,079 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,084 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,088 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,091 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,095 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,098 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,104 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,108 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,111 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,115 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,118 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,122 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,127 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,130 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,134 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,138 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,141 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,144 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,148 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,153 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,157 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,161 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,165 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,170 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,174 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,177 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,181 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,184 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,188 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,193 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,197 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,200 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,203 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,207 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,210 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,214 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,250 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,255 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,257 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,262 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,266 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,270 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,275 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,278 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,282 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,286 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,289 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,292 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,296 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,301 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,303 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,308 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,312 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,315 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,319 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,323 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,328 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,332 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,335 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,339 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,344 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,346 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,351 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,355 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,358 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,362 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,367 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,371 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,375 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:35:36,378 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,306 - plugin.create_project_directory - DEBUG - Registered callback.
+2018-12-05 15:38:57,776 - plugin.create_project_directory - DEBUG - Dispatching event 766457 to callback create_project_directory.
+2018-12-05 15:38:57,884 - plugin.create_project_directory.create_project_directory - CRITICAL - An error occured processing an event.
+
+Traceback (most recent call last):
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 950, in process
+    self._callback(self._shotgun, self._logger, event, self._args)
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py", line 55, in create_project_directory
+    name[key] = data[f]["name"]
+TypeError: 'NoneType' object has no attribute '__getitem__'
+
+
+Local variables at outer most frame in plugin:
+
+{'args': None,
+ 'data': {'id': 230, 'sg_client': None, 'type': 'Project'},
+ 'event': {'attribute_name': 'name',
+           'created_at': datetime.datetime(2018, 12, 4, 22, 54, 12, tzinfo=<shotgun_api3.lib.sgtimezone.LocalTimezone object at 0x01878510>),
+           'entity': {'id': 230, 'name': 'VFX Project 07', 'type': 'Project'},
+           'event_type': 'Shotgun_Project_Change',
+           'id': 766457,
+           'meta': {'attribute_name': 'name',
+                    'entity_id': 230,
+                    'entity_type': 'Project',
+                    'field_data_type': 'text',
+                    'in_create': True,
+                    'new_value': 'VFX Project 07',
+                    'old_value': None,
+                    'type': 'attribute_change'},
+           'project': None,
+           'session_uuid': '619fff12-f841-11e8-813d-0242ac110004',
+           'type': 'EventLogEntry',
+           'user': {'id': 87, 'name': 'Alexander Smith', 'type': 'HumanUser'}},
+ 'event_id': 766457,
+ 'f': 'sg_client',
+ 'key': 'client',
+ 'logger': <logging.Logger object at 0x018E6A50>,
+ 'name': {'project': 'VFX Project 07'},
+ 'project': {'id': 230, 'name': 'VFX Project 07', 'type': 'Project'},
+ 'sg': <shotgun_api3.shotgun.Shotgun object at 0x0233A530>}
+2018-12-05 15:38:57,888 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,892 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,898 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,901 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,905 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,910 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,914 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,917 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,921 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,924 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,928 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,933 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,937 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,940 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,944 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,980 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,984 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,989 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,993 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:57,996 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,026 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,032 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,036 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,040 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,045 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,048 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,052 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,055 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,059 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,062 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,066 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,071 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,075 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,078 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,082 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,086 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,091 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,095 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,098 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,101 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,105 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,109 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,114 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,117 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,121 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,125 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,128 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,132 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,135 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,141 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,145 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,150 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,154 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,157 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,161 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,164 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,167 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,171 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,176 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,178 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,183 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,187 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,190 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,194 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,197 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,201 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,204 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,209 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,213 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,216 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,220 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,223 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,227 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,232 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,236 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,239 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,243 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,246 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,250 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,253 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,257 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,260 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,265 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,267 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,272 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,275 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,279 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,282 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,286 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,289 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,292 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,296 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,301 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,305 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,308 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,312 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,315 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,319 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,322 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,326 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,331 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,371 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,375 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,378 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,384 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,388 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,391 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,394 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,400 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,404 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,407 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,411 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,415 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,418 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,460 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,463 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,467 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,471 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,476 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,480 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,483 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,486 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,490 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,494 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,535 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,572 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,575 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,579 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,584 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,586 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,591 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,595 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,599 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,604 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,608 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,611 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,615 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,619 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,624 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,628 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,631 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,655 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,660 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,664 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,667 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,671 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,674 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,678 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,683 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,686 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,690 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,730 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,736 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,776 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,779 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,782 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,786 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,790 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,795 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,799 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,803 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,808 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,845 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,848 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,852 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,857 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,861 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,865 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,868 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,872 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,875 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,880 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,921 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,924 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,963 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,967 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,970 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,974 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,979 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,983 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,986 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,990 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,994 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:58,999 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,003 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,007 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,012 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,082 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,085 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,091 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,095 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,098 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,102 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,107 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,141 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,145 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,150 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,154 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,157 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,161 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,164 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,168 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,171 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,176 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,211 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,250 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,253 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,257 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,263 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,266 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,269 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,273 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,278 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,282 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,285 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,289 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,293 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,298 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,302 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,305 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,309 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,381 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,387 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,391 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,394 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,398 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,403 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,407 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,411 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,414 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,420 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,424 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,427 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,431 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,436 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,440 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,444 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,447 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,489 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,492 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,496 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,500 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,503 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,506 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,510 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,515 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,517 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,522 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,568 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,572 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,575 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,579 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,582 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,586 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,591 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,594 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,598 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,601 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,607 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,611 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,615 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,619 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,624 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,628 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,631 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,635 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,640 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,644 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,648 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,651 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,655 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,660 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,664 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,668 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,673 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,677 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,680 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,684 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,690 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,694 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,697 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,700 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,704 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,709 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,713 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,717 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,720 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,724 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,729 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,736 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,739 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,743 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,746 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,750 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,756 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,760 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,765 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,769 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,773 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,776 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,780 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,785 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,789 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,792 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,796 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,799 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,803 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,809 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,813 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,816 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,821 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,825 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,828 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,832 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,838 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,841 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,845 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,848 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,852 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,857 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,861 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,865 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,869 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,874 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,878 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,881 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,887 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,891 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,894 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,898 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,903 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,907 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,910 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,914 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,917 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,923 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,927 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,931 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,936 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,940 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,943 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,947 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,950 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,954 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,959 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,961 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,966 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,970 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,973 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,977 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,982 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,986 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,990 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,993 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:38:59,996 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,000 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,038 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,042 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,046 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,049 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,053 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,056 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,062 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,065 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,069 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,075 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,078 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,082 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,085 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,091 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,095 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,098 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,102 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,107 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,111 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,115 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,118 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,122 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,125 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,130 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,134 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,174 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,178 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,184 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,187 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,191 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,196 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,200 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,203 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,209 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,213 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,217 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,220 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,226 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,230 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,233 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,236 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,240 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,244 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,247 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,252 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,256 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,259 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,263 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,266 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,270 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,273 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,279 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,282 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,286 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,292 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,296 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,299 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,303 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,308 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,312 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,315 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,319 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,323 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,328 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,331 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,335 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,338 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,342 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,346 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,351 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,355 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,358 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,362 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,367 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,372 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,377 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,381 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,384 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,388 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,394 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,398 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,401 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,405 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,411 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,414 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,417 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,421 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,424 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,428 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,433 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,437 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,440 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,444 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,448 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,453 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,456 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,460 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,464 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,469 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,473 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,476 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,480 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,483 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,486 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,490 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,494 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,499 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,503 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,506 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,510 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,515 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,519 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,523 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,526 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,530 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,536 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,539 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,543 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,548 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,552 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,555 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,559 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,563 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,568 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,572 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,576 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,581 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,585 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,588 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,594 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,598 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,601 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,605 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,609 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,614 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,618 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,621 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,625 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,628 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,632 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,638 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,641 - plugin.create_project_directory - DEBUG - Skipping: inactive.
+2018-12-05 15:39:00,645 - plugin.create_project_directory - DEBUG - Skipping: inactive.
