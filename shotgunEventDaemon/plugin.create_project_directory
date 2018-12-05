@@ -1,0 +1,56 @@
+2018-12-04 11:22:49,891 - plugin.create_project_directory - DEBUG - Dispatching event 764007 to callback create_project_directory.
+2018-12-04 11:22:50,453 - plugin.create_project_directory.create_project_directory - CRITICAL - An error occured processing an event.
+
+Traceback (most recent call last):
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\src\shotgunEventDaemon.py", line 950, in process
+    self._callback(self._shotgun, self._logger, event, self._args)
+  File "\\genesisnx\genesisnx\Animation\Shotgun\System\Tools\shotgun\shotgunEvents\plugins\create_project_directory.py", line 110, in create_project_directory
+    if "Rig" in sg_asset_type:
+TypeError: argument of type 'NoneType' is not iterable
+
+
+Local variables at outer most frame in plugin:
+
+{'args': None,
+ 'data': {'id': 221,
+          'sg_brand': {'id': 75,
+                       'name': 'Stella Global',
+                       'type': 'CustomNonProjectEntity29'},
+          'type': 'Project'},
+ 'event': {'attribute_name': 'code',
+           'created_at': datetime.datetime(2018, 12, 4, 11, 22, 46, tzinfo=<shotgun_api3.lib.sgtimezone.LocalTimezone object at 0x019967F0>),
+           'entity': {'id': 1849,
+                      'name': '001_Peru_Artwork',
+                      'type': 'Asset'},
+           'event_type': 'Shotgun_Asset_Change',
+           'id': 764007,
+           'meta': {'attribute_name': 'code',
+                    'entity_id': 1849,
+                    'entity_type': 'Asset',
+                    'field_data_type': 'text',
+                    'in_create': True,
+                    'new_value': '001_Peru_Artwork',
+                    'old_value': None,
+                    'type': 'attribute_change'},
+           'project': {'id': 221,
+                       'name': '0011_Stella Global Proximity Hand Painted',
+                       'type': 'Project'},
+           'session_uuid': 'bba3363e-f7e0-11e8-b0f2-0242ac110004',
+           'type': 'EventLogEntry',
+           'user': {'id': 88, 'name': 'Dan Veet', 'type': 'HumanUser'}},
+ 'event_id': 764007,
+ 'event_type': 'Shotgun_Asset_Change',
+ 'f': 'sg_brand',
+ 'key': 'brand',
+ 'logger': <logging.Logger object at 0x02158070>,
+ 'name': {'brand': 'Stella Global',
+          'client': 'ABINBEV',
+          'project': '0011_Stella Global Proximity Hand Painted'},
+ 'project': {'id': 221,
+             'name': '0011_Stella Global Proximity Hand Painted',
+             'type': 'Project'},
+ 'scene_dir': '//genesisnx/genesisnx/Animation/Projects/Client/ABINBEV/Stella Global/0011_Stella Global Proximity Hand Painted/Project Directory/02_Production/04_Maya/scenes',
+ 'scene_folder': None,
+ 'sg': <shotgun_api3.shotgun.Shotgun object at 0x019E1C10>,
+ 'sg_asset_type': None,
+ 'start': '//genesisnx/genesisnx/Animation/Projects/Client/ABINBEV/Stella Global/0011_Stella Global Proximity Hand Painted'}
