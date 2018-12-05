@@ -1,6 +1,6 @@
 *.ui
 shotgunEvents/src/examplePlugins/
-shotgunEventDaemon/plugin.create_project_directory.*
+shotgunEventDaemon/
 notes/
 __init__.py
 *.txt
