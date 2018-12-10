@@ -41,6 +41,14 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
+    def create_row(self):
+        # widget - horizontal layout, (0,3,6,3), 3 spacing
+        # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
+        # label name - horizontal expanding, arial 14
+        # frame - horizontal fixed, style color blue, box plain 3, vertical layout
+        # combobox - horizontal expanding, arial 14, style color none,
+        return
+
     def init_ui(self):
         return
 
