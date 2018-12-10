@@ -42,14 +42,36 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def create_row(self):
+        layout = QtWidgets.QHBoxLayout()
+        layout.setSpacing(3)
+
+        font = QtGui.QFont("Arial", 14)
+
         # widget - horizontal layout, (0,3,6,3), 3 spacing
+        row = QtWidgets.QWidget()
+        row.setObjectName("ROW1")
+        row.setLayout(layout)
+        row.setContentsMargins(0, 3, 6, 3)
+
         # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
+        num = QtWidgets.QLabel("HHHH")
+        num.setObjectName("num")
+        # num.setFont(font)
+        num.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        num.setMaximumWidth(25)
+        num.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        num.setParent(row)
+        # row.addWidget(num)
+
         # label name - horizontal expanding, arial 14
         # frame - horizontal fixed, style color blue, box plain 3, vertical layout
         # combobox - horizontal expanding, arial 14, style color none,
-        return
+        return row
 
     def init_ui(self):
+        self.ui.verticalLayout.
+        # row = self.create_row()
+        # self.ui.verticalLayout.insertWidget(row)
         return
 
     def setup_ui(self):
