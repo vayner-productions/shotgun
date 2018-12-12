@@ -5,7 +5,7 @@ from shotgun import build_scene as sg
 reload(sg)
 sg.get_window()
 """
-from PySide2 import QtCore, QtWidgets, QtUiTools, QtGui
+from PySide2 import QtCore, QtWidgets, QtUiTools, QtWidgets
 import pymel.core as pm
 import sgtk
 
@@ -41,18 +41,19 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
-    def create_row(self, row_object, number, asset_name):
-        vlayout = QtWidgets.QVBoxLayout()
+    def create_row(self, number, asset_name, update):
+        rx = QtCore.QRegExp("row_*")
+        rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
+        index = len(self.ui.findChildren(QtWidgets.QWidget, rx)) + 1
 
         font = QtGui.QFont("Arial", 14)
 
         # widget - horizontal hlayout, (0,3,6,3), 3 spacing
         row = QtWidgets.QWidget()
-        row.setObjectName(row_object)
-        row.setContentsMargins(0, 3, 6, 3)
+        row.setObjectName("Row_{:02}".format(index))
 
         # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
-        num = QtWidgets.QLabel(number)
+        num = QtWidgets.QLabel("{}".format(number))
         num.setFont(font)
         num.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         num.setMaximumWidth(25)
@@ -65,38 +66,51 @@ class MyWindow(QtWidgets.QDialog):
 
         # frame - horizontal fixed, style color blue, box plain 3, vertical hlayout
         frame = QtWidgets.QFrame()
-        frame.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        frame.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
         frame.setFrameShape(QtWidgets.QFrame.Box)
         frame.setFrameShadow(QtWidgets.QFrame.Plain)
         frame.setLineWidth(3)
-        frame.setLayout(vlayout)
-        frame.setStyleSheet("color:blue")
+        if update:
+            frame.setStyleSheet("color:orange")
 
         # combobox - horizontal expanding, arial 14, style color none,
         combo = QtWidgets.QComboBox()
         combo.setFont(font)
         combo.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         combo.setStyleSheet("color:none")
+        combo.setFrame(0)
+
+        vlayout = QtWidgets.QVBoxLayout()
+        vlayout.setSpacing(0)
+        vlayout.setContentsMargins(0, 0, 0, 0)
+
+        vlayout.addWidget(combo)
+        frame.setLayout(vlayout)
 
         hlayout = QtWidgets.QHBoxLayout()
         hlayout.setSpacing(3)
+        hlayout.setContentsMargins(0, 3, 6, 3)
+
         hlayout.addWidget(num)
         hlayout.addWidget(name)
         hlayout.addWidget(frame)
-        hlayout.addWidget(combo)
+
         row.setLayout(hlayout)
+        row.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+
+        if index % 2 == 0:
+            row.setStyleSheet("background-color: rgb(128, 128, 128)")  # light grey
+        else:
+            row.setStyleSheet("background-color: rgb(68, 68, 68)")  # maya grey
         return row
 
     def init_ui(self):
-        rx = QtCore.QRegExp("row_*")
-        rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
-        index = len(self.ui.findChildren(QtWidgets.QWidget, rx)) + 1
-
-        row = self.create_row()
-        row.setObjectName("Row_01")
+        number = 1
+        asset_name = "001_model_a"
+        update = True
+        index = 1
+        row = self.create_row(number, asset_name, update)
         self.ui.verticalLayout.insertWidget(index, row)
-        # row = self.create_row()
-        # self.ui.verticalLayout.insertWidget(row)
         return
 
     def setup_ui(self):
