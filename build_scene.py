@@ -5,7 +5,7 @@ from shotgun import build_scene as sg
 reload(sg)
 sg.get_window()
 """
-from PySide2 import QtCore, QtWidgets, QtUiTools, QtWidgets
+from PySide2 import QtCore, QtGui, QtWidgets, QtUiTools
 import pymel.core as pm
 import sgtk
 
@@ -41,11 +41,7 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
-    def create_row(self, number, asset_name, update):
-        rx = QtCore.QRegExp("row_*")
-        rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
-        index = len(self.ui.findChildren(QtWidgets.QWidget, rx)) + 1
-
+    def create_row(self, number, asset_name, update, index):
         font = QtGui.QFont("Arial", 14)
 
         # widget - horizontal hlayout, (0,3,6,3), 3 spacing
@@ -97,20 +93,31 @@ class MyWindow(QtWidgets.QDialog):
 
         row.setLayout(hlayout)
         row.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-
         if index % 2 == 0:
-            row.setStyleSheet("background-color: rgb(128, 128, 128)")  # light grey
+            row.setStyleSheet("background-color: rgb(128, 128, 128)")  # light
         else:
-            row.setStyleSheet("background-color: rgb(68, 68, 68)")  # maya grey
+            row.setStyleSheet("background-color: rgb(115, 115, 115)")  # dark
         return row
 
     def init_ui(self):
-        number = 1
-        asset_name = "001_model_a"
-        update = True
-        index = 1
-        row = self.create_row(number, asset_name, update)
-        self.ui.verticalLayout.insertWidget(index, row)
+        a_s = "Asset"
+        entity = pm.workspace.fileRules["scene"].split("/")[1]
+        sg.find(a_s,
+                [["project", "is", project],
+                 ["code", "is", entity]],
+                ["asset"])
+
+        asset = [1, "001_model_a", False]
+        asset2 = [1, "001_model_b", True]
+        asset3 = [1, "001_model_c", False]
+
+        references = [asset, asset2, asset3]
+        index = 0  # first row is the header
+        for ast in references:
+            index += 1  # which row
+            ast.append(index)
+            row = self.create_row(*ast)
+            self.ui.verticalLayout.insertWidget(index, row)
         return
 
     def setup_ui(self):
