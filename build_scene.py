@@ -105,10 +105,10 @@ class MyWindow(QtWidgets.QDialog):
         if "01" in scene_process or "02" in scene_process:
             type = "Asset"
 
-        assets = sg.find(type,
-                         [["project", "is", project],
-                          ["code", "is", entity]],
-                         ["assets"])
+        assets = sg.find_one(type,
+                             [["project", "is", project],
+                              ["code", "is", entity]],
+                             ["assets"])["assets"]
 
         references = []
         for asset in assets:
