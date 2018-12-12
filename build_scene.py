@@ -100,18 +100,23 @@ class MyWindow(QtWidgets.QDialog):
         return row
 
     def init_ui(self):
-        a_s = "Asset"
-        entity = pm.workspace.fileRules["scene"].split("/")[1]
-        sg.find(a_s,
-                [["project", "is", project],
-                 ["code", "is", entity]],
-                ["asset"])
+        type = "Shot"
+        scene_process, entity = pm.workspace.fileRules["scene"].split("/")[1:]
+        if "01" in scene_process or "02" in scene_process:
+            type = "Asset"
 
-        asset = [1, "001_model_a", False]
-        asset2 = [1, "001_model_b", True]
-        asset3 = [1, "001_model_c", False]
+        assets = sg.find(type,
+                         [["project", "is", project],
+                          ["code", "is", entity]],
+                         ["assets"])
 
-        references = [asset, asset2, asset3]
+        references = []
+        for asset in assets:
+            print ">>", sg.find(type, [["id", "is", asset["id"]]], ["sg_file"])
+            number = None  # times same asset is used
+            asset_name = None
+            update = None  # is the reference the latest publish
+
         index = 0  # first row is the header
         for ast in references:
             index += 1  # which row
