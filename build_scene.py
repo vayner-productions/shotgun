@@ -117,17 +117,18 @@ class MyWindow(QtWidgets.QDialog):
         references = []
         for asset in assets:
             # create row only if published file exists
-            publish = sg.find_one(type,
-                                  [["id", "is", asset["id"]]],
-                                  ["sg_file"])["sg_file"]["local_path_windows"]
+            publish = None
+            try:
+                publish = sg.find_one("Asset",  # every scene process references assets
+                                      [["id", "is", asset["id"]]],
+                                      ["sg_file"])["sg_file"]["local_path_windows"]
+            except:
+                continue
 
             # root switching
             root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
             publish = publish.replace("\\", "/").split("04_Maya")
             publish = "".join([root, publish[1]])
-
-            if publish is None:
-                break
 
             # QUERY DATA FOR ROWS
             number = len([ref[1] for ref in references]) + 1  # times same asset is used
@@ -151,7 +152,15 @@ class MyWindow(QtWidgets.QDialog):
                     break
             references += [[number, asset_name, current, items]]
 
-            # print ">> current/items", current, items; return
+        if type == "Shot":
+            number = 1
+            asset_name = None
+            current = sg.find_one(type, [["project", "is", project]], ["sg_tracked_camera"])[
+                "sg_tracked_camera"]["local_path_windows"].split(".")[1]
+            print ">> current", current
+            # items = []
+            # references += [[number, asset_name, current, items]]
+
         # CREATE ROWS WITH QUERIED DATA
         index = 0  # first row is the header
         for ast in references:
