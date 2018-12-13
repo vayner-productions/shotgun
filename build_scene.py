@@ -41,7 +41,7 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
-    def create_row(self, number, asset_name, update, index):
+    def create_row(self, number, asset_name, current, items, index):
         font = QtGui.QFont("Arial", 14)
 
         # widget - horizontal hlayout, (0,3,6,3), 3 spacing
@@ -66,7 +66,7 @@ class MyWindow(QtWidgets.QDialog):
         frame.setFrameShape(QtWidgets.QFrame.Box)
         frame.setFrameShadow(QtWidgets.QFrame.Plain)
         frame.setLineWidth(3)
-        if update:
+        if items.index(current) != 0:
             frame.setStyleSheet("color:orange")
 
         # combobox - horizontal expanding, arial 14, style color none,
@@ -75,6 +75,8 @@ class MyWindow(QtWidgets.QDialog):
         combo.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         combo.setStyleSheet("color:none")
         combo.setFrame(0)
+        combo.addItems(items)
+        combo.setCurrentText(current)
 
         vlayout = QtWidgets.QVBoxLayout()
         vlayout.setSpacing(0)
@@ -110,28 +112,54 @@ class MyWindow(QtWidgets.QDialog):
                               ["code", "is", entity]],
                              ["assets"])["assets"]
 
-        references = [[1, "001_model_a", None]]
+        references = []
         for asset in assets:
-            print asset
-            publish = "/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya/published/01_Assets/001_model_a/model_a_original.0001.ma"
-            # publish = sg.find_one(type,
-            #                       [["id", "is", asset["id"]]],
-            #                       ["sg_file"])["sg_file"]["local_path_windows"]
+            # create row only if published file exists
+            publish = sg.find_one(type,
+                                  [["id", "is", asset["id"]]],
+                                  ["sg_file"])["sg_file"]["local_path_windows"]
             if publish is None:
                 break
 
+            # QUERY DATA FOR ROWS
             number = len([ref[1] for ref in references]) + 1  # times same asset is used
             asset_name = asset["name"]
-            update = None  # is the reference the latest publish
 
-            references += [[number, asset_name, update]]
+            # combo items
+            files = []
+            for ref in pm.listReferences():
+                if asset_name == ref.path.dirname().basename():
+                    files = ref.path.dirname().files("*.ma")
+                    break
 
+            items = []
+            for f in files:
+                items += [f.basename().split(".")[1]]
+            items = sorted(items)[::-1]
+
+            # combo current text
+            match = 0
+            current = None
+            for ref in pm.listReferences():
+                if asset_name == ref.path.dirname().basename():
+                    match += 1
+                    print match
+                else:
+                    continue
+
+                if match == number:
+                    current = ref.path.split(".")[1]
+                    break
+            references += [[number, asset_name, current, items]]
+
+        # CREATE ROWS WITH QUERIED DATA
         index = 0  # first row is the header
         for ast in references:
             index += 1  # which row
             ast.append(index)
             row = self.create_row(*ast)
             self.ui.verticalLayout.insertWidget(index, row)
+        #TODO: CHECK UI APPEARS CORRECT FOR ALL SCENE PROCESSES
         return
 
     def setup_ui(self):
