@@ -83,6 +83,7 @@ def get_tasks():
     scene_process = pm.workspace.fileRules["scene"].split("/")[1][3:]
     step = {
         "Assets": "Model",
+        "Cameras": "Cameras",
         "Rigs": "Rig",
         "Layouts": "Layout",
         "Dynamics": "Effects",
