@@ -66,8 +66,10 @@ class MyWindow(QtWidgets.QDialog):
         frame.setFrameShape(QtWidgets.QFrame.Box)
         frame.setFrameShadow(QtWidgets.QFrame.Plain)
         frame.setLineWidth(3)
-        if items.index(current) != 0:
-            frame.setStyleSheet("color:orange")
+        if current is None:
+            frame.setStyleSheet("color:rgb(255,255,102)")  # first publish available, add to scene
+        elif items.index(current) != 0:
+            frame.setStyleSheet("color:rgb(255,165,0)")  # new publish available
 
         # combobox - horizontal expanding, arial 14, style color none,
         combo = QtWidgets.QComboBox()
@@ -118,6 +120,12 @@ class MyWindow(QtWidgets.QDialog):
             publish = sg.find_one(type,
                                   [["id", "is", asset["id"]]],
                                   ["sg_file"])["sg_file"]["local_path_windows"]
+
+            # root switching
+            root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
+            publish = publish.replace("\\", "/").split("04_Maya")
+            publish = "".join([root, publish[1]])
+
             if publish is None:
                 break
 
@@ -126,16 +134,8 @@ class MyWindow(QtWidgets.QDialog):
             asset_name = asset["name"]
 
             # combo items
-            files = []
-            for ref in pm.listReferences():
-                if asset_name == ref.path.dirname().basename():
-                    files = ref.path.dirname().files("*.ma")
-                    break
-
-            items = []
-            for f in files:
-                items += [f.basename().split(".")[1]]
-            items = sorted(items)[::-1]
+            files = pm.util.common.path(publish).dirname().files("*.ma")
+            items = sorted([f.split(".")[1] for f in files])[::-1]
 
             # combo current text
             match = 0
@@ -143,7 +143,6 @@ class MyWindow(QtWidgets.QDialog):
             for ref in pm.listReferences():
                 if asset_name == ref.path.dirname().basename():
                     match += 1
-                    print match
                 else:
                     continue
 
@@ -152,13 +151,14 @@ class MyWindow(QtWidgets.QDialog):
                     break
             references += [[number, asset_name, current, items]]
 
+            # print ">> current/items", current, items; return
         # CREATE ROWS WITH QUERIED DATA
         index = 0  # first row is the header
         for ast in references:
             index += 1  # which row
             ast.append(index)
             row = self.create_row(*ast)
-            self.ui.verticalLayout.insertWidget(index, row)
+            self.ui.central_vlayout.insertWidget(index, row)
         #TODO: CHECK UI APPEARS CORRECT FOR ALL SCENE PROCESSES
         return
 
