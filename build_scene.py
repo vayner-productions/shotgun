@@ -110,12 +110,21 @@ class MyWindow(QtWidgets.QDialog):
                               ["code", "is", entity]],
                              ["assets"])["assets"]
 
-        references = []
+        references = [[1, "001_model_a", None]]
         for asset in assets:
-            print ">>", sg.find(type, [["id", "is", asset["id"]]], ["sg_file"])
-            number = None  # times same asset is used
-            asset_name = None
+            print asset
+            publish = "/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya/published/01_Assets/001_model_a/model_a_original.0001.ma"
+            # publish = sg.find_one(type,
+            #                       [["id", "is", asset["id"]]],
+            #                       ["sg_file"])["sg_file"]["local_path_windows"]
+            if publish is None:
+                break
+
+            number = len([ref[1] for ref in references]) + 1  # times same asset is used
+            asset_name = asset["name"]
             update = None  # is the reference the latest publish
+
+            references += [[number, asset_name, update]]
 
         index = 0  # first row is the header
         for ast in references:
