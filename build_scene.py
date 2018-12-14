@@ -31,7 +31,6 @@ class MyWindow(QtWidgets.QDialog):
     def __init__(self):
         self.ui = self.import_ui()
         self.init_ui()
-        self.setup_ui()
 
     def import_ui(self):
         ui_path = __file__.split(".")[0] + ".ui"
@@ -107,10 +106,6 @@ class MyWindow(QtWidgets.QDialog):
             row.setStyleSheet("background-color: rgb(115, 115, 115)")  # dark
         return row
 
-#TODO: LOAD TO EMPTY SCENE
-#TODO: LOAD TO HALF FILLED SCENE
-#TODO: LOAD TO FILLED HALF UPDATED SCENE
-#TODO: ROLLBACK
     def init_rows(self):
         references = []
         type = "Shot"
@@ -260,13 +255,11 @@ class MyWindow(QtWidgets.QDialog):
                 pm.FileReference(refnode=reference_node).replaceWith(reference_file)
             else:
                 pm.createReference(reference_file, namespace=":")
+        self.ui.close()
         return
 
     def init_ui(self):
         self.init_rows()
         self.ui.latest_btn.clicked.connect(self.set_latest)
         self.ui.update_btn.clicked.connect(self.update_scene)
-        return
-
-    def setup_ui(self):
         return
