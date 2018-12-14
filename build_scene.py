@@ -154,12 +154,19 @@ class MyWindow(QtWidgets.QDialog):
 
         if type == "Shot":
             number = 1
-            asset_name = None
-            current = sg.find_one(type, [["project", "is", project]], ["sg_tracked_camera"])[
-                "sg_tracked_camera"]["local_path_windows"].split(".")[1]
-            print ">> current", current
-            # items = []
-            # references += [[number, asset_name, current, items]]
+            asset_name = "Render Camera"
+            publish = sg.find_one(type, [["project", "is", project]], ["sg_tracked_camera"])[
+                "sg_tracked_camera"]["local_path_windows"]
+            current = publish.split(".")[1]
+
+            # root switching
+            root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
+            publish = publish.replace("\\", "/").split("04_Maya")
+            publish = "".join([root, publish[1]])
+
+            files = pm.util.common.path(publish).dirname().files("*.ma")
+            items = sorted([f.split(".")[1] for f in files])[::-1]
+            references += [[number, asset_name, current, items]]
 
         # CREATE ROWS WITH QUERIED DATA
         index = 0  # first row is the header
