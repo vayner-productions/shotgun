@@ -75,13 +75,14 @@ class MyWindow(QtWidgets.QDialog):
             frame.setStyleSheet("color:rgb(255,165,0)")  # new publish available
 
         # combobox - horizontal expanding, arial 14, style color none,
-        combo = QtWidgets.QComboBox().setFocusPolicy(QtCore.Qt.NoFocus)
+        combo = QtWidgets.QComboBox()
         combo.setFont(font)
         combo.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         combo.setStyleSheet("color:none")
         combo.setFrame(0)
         combo.addItems(items)
         combo.setCurrentText(current)
+        combo.setFocusPolicy(QtCore.Qt.NoFocus)
 
         vlayout = QtWidgets.QVBoxLayout()
         vlayout.setSpacing(0)
