@@ -15,7 +15,6 @@ project = sg.find_one("Project", [["name", "is", eng.context.project["name"]]])
 root = None
 
 
-
 def get_window():
     global mw
     try:
