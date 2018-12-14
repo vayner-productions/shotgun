@@ -104,6 +104,11 @@ class MyWindow(QtWidgets.QDialog):
             row.setStyleSheet("background-color: rgb(115, 115, 115)")  # dark
         return row
 
+#TODO: SET LATEST
+#TODO: LOAD TO EMPTY SCENE
+#TODO: LOAD TO HALF FILLED SCENE
+#TODO: LOAD TO FILLED HALF UPDATED SCENE
+#TODO: ROLLBACK
     def init_ui(self):
         references = []
         type = "Shot"
