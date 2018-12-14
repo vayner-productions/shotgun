@@ -12,7 +12,7 @@ import sgtk
 eng = sgtk.platform.current_engine()
 sg = eng.shotgun
 project = sg.find_one("Project", [["name", "is", eng.context.project["name"]]])
-root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
+root = None
 
 
 
