@@ -62,7 +62,8 @@ class MyWindow(QtWidgets.QDialog):
 
         # frame - horizontal fixed, style color blue, box plain 3, vertical hlayout
         frame = QtWidgets.QFrame()
-        frame.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
+        frame.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        frame.setMaximumWidth(90)
         frame.setFrameShape(QtWidgets.QFrame.Box)
         frame.setFrameShadow(QtWidgets.QFrame.Plain)
         frame.setLineWidth(3)
