@@ -105,17 +105,53 @@ class MyWindow(QtWidgets.QDialog):
         return row
 
     def init_ui(self):
+        references = []
         type = "Shot"
         scene_process, entity = pm.workspace.fileRules["scene"].split("/")[1:]
         if "01" in scene_process or "02" in scene_process:
             type = "Asset"
 
+        # add render camera for any shot scene process
+        if type == "Shot":
+            number = 1
+            asset_name = "Render Camera"
+            publish = sg.find_one(type, [["project", "is", project]], ["sg_tracked_camera"])[
+                "sg_tracked_camera"]["local_path_windows"]
+            current = publish.split(".")[1]
+
+            # root switching
+            if root:
+                publish = publish.replace("\\", "/").split("04_Maya")
+                publish = "".join([root, publish[1]])
+
+            files = pm.util.common.path(publish).dirname().files("*.ma")
+            items = sorted([f.split(".")[1] for f in files])[::-1]
+            references += [[number, asset_name, current, items]]
+
+        # add cache to lighting scene process
+        if "Lighting" in scene_process:
+            number = 1
+            asset_name = "Alembic Cache"
+            publish = sg.find_one(type, [["project", "is", project]], ["sg_alembic_cache"])[
+                "sg_alembic_cache"]["local_path_windows"]
+            current = publish.split(".")[1]
+
+            # root switching
+            if root:
+                publish = publish.replace("\\", "/").split("04_Maya")
+                publish = "".join([root, publish[1]])
+
+            files = pm.util.common.path(publish).dirname().files("*.ma")
+            items = sorted([f.split(".")[1] for f in files])[::-1]
+            references += [[number, asset_name, current, items]]
+            return
+
+        # add assets to every scene process except lighting
         assets = sg.find_one(type,
                              [["project", "is", project],
                               ["code", "is", entity]],
                              ["assets"])["assets"]
 
-        references = []
         for asset in assets:
             # create row only if published file exists
             publish = None
@@ -151,22 +187,6 @@ class MyWindow(QtWidgets.QDialog):
                 if match == number:
                     current = ref.path.split(".")[1]
                     break
-            references += [[number, asset_name, current, items]]
-
-        if type == "Shot":
-            number = 1
-            asset_name = "Render Camera"
-            publish = sg.find_one(type, [["project", "is", project]], ["sg_tracked_camera"])[
-                "sg_tracked_camera"]["local_path_windows"]
-            current = publish.split(".")[1]
-
-            # root switching
-            if root:
-                publish = publish.replace("\\", "/").split("04_Maya")
-                publish = "".join([root, publish[1]])
-
-            files = pm.util.common.path(publish).dirname().files("*.ma")
-            items = sorted([f.split(".")[1] for f in files])[::-1]
             references += [[number, asset_name, current, items]]
 
         # CREATE ROWS WITH QUERIED DATA
