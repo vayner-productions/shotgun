@@ -12,7 +12,7 @@ import sgtk
 eng = sgtk.platform.current_engine()
 sg = eng.shotgun
 project = sg.find_one("Project", [["name", "is", eng.context.project["name"]]])
-
+root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
 
 def get_window():
     global mw
@@ -126,9 +126,9 @@ class MyWindow(QtWidgets.QDialog):
                 continue
 
             # root switching
-            root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
-            publish = publish.replace("\\", "/").split("04_Maya")
-            publish = "".join([root, publish[1]])
+            if root:
+                publish = publish.replace("\\", "/").split("04_Maya")
+                publish = "".join([root, publish[1]])
 
             # QUERY DATA FOR ROWS
             number = len([ref[1] for ref in references]) + 1  # times same asset is used
@@ -160,9 +160,9 @@ class MyWindow(QtWidgets.QDialog):
             current = publish.split(".")[1]
 
             # root switching
-            root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
-            publish = publish.replace("\\", "/").split("04_Maya")
-            publish = "".join([root, publish[1]])
+            if root:
+                publish = publish.replace("\\", "/").split("04_Maya")
+                publish = "".join([root, publish[1]])
 
             files = pm.util.common.path(publish).dirname().files("*.ma")
             items = sorted([f.split(".")[1] for f in files])[::-1]
