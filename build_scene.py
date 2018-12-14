@@ -42,12 +42,13 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
-    def create_row(self, number, asset_name, current, items, index):
+    def create_row(self, number, asset_name, dirname, current, items, index):
         font = QtGui.QFont("Arial", 14)
 
         # widget - horizontal hlayout, (0,3,6,3), 3 spacing
         row = QtWidgets.QWidget()
         row.setObjectName("Row_{:02}".format(index))
+        row.setWhatsThis(dirname)
 
         # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
         num = QtWidgets.QLabel("{}".format(number))
@@ -133,9 +134,10 @@ class MyWindow(QtWidgets.QDialog):
                     publish = publish.replace("\\", "/").split("04_Maya")
                     publish = "".join([root, publish[1]])
 
-                files = pm.util.common.path(publish).dirname().files("*.ma")
+                dirname = pm.util.common.path(publish).dirname()
+                files = dirname.files("*.ma")
                 items = sorted([f.split(".")[1] for f in files])[::-1]
-                references += [[number, asset_name, current, items]]
+                references += [[number, asset_name, dirname, current, items]]
 
         # add cache to lighting scene process
         if "Lighting" in scene_process:
@@ -153,9 +155,10 @@ class MyWindow(QtWidgets.QDialog):
                     publish = publish.replace("\\", "/").split("04_Maya")
                     publish = "".join([root, publish[1]])
 
-                files = pm.util.common.path(publish).dirname().files("*.ma")
+                dirname = pm.util.common.path(publish).dirname()
+                files = dirname.files("*.ma")
                 items = sorted([f.split(".")[1] for f in files])[::-1]
-                references += [[number, asset_name, current, items]]
+                references += [[number, asset_name, dirname, current, items]]
 
             # CREATE ROWS WITH QUERIED DATA
             index = 0  # first row is the header
@@ -192,7 +195,8 @@ class MyWindow(QtWidgets.QDialog):
             asset_name = asset["name"]
 
             # combo items
-            files = pm.util.common.path(publish).dirname().files("*.ma")
+            dirname = pm.util.common.path(publish).dirname()
+            files = dirname.files("*.ma")
             items = sorted([f.split(".")[1] for f in files])[::-1]
 
             # combo current text
@@ -207,7 +211,7 @@ class MyWindow(QtWidgets.QDialog):
                 if match == number:
                     current = ref.path.split(".")[1]
                     break
-            references += [[number, asset_name, current, items]]
+            references += [[number, asset_name, dirname, current, items]]
 
         # CREATE ROWS WITH QUERIED DATA
         index = 0  # first row is the header
@@ -219,9 +223,12 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def set_latest(self):
+        for child in self.ui.findChildren(QtWidgets.QComboBox):
+            child.setCurrentIndex(0)
         return
 
     def update_scene(self):
+        print ">>", self.ui.widget.whatsThis()
         return
 
     def init_ui(self):
