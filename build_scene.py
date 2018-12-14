@@ -257,9 +257,9 @@ class MyWindow(QtWidgets.QDialog):
             reference_node = child.toolTip()
 
             if reference_node:  # asset already referenced in scene
-                pass
+                pm.FileReference(refnode=reference_node).replaceWith(reference_file)
             else:
-                pass
+                pm.createReference(reference_file, namespace=":")
         return
 
     def init_ui(self):
