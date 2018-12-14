@@ -107,7 +107,6 @@ class MyWindow(QtWidgets.QDialog):
             row.setStyleSheet("background-color: rgb(115, 115, 115)")  # dark
         return row
 
-#TODO: SET LATEST
 #TODO: LOAD TO EMPTY SCENE
 #TODO: LOAD TO HALF FILLED SCENE
 #TODO: LOAD TO FILLED HALF UPDATED SCENE
@@ -143,7 +142,7 @@ class MyWindow(QtWidgets.QDialog):
                 match = publish.stripext().stripext()
                 for ref in pm.listReferences():
                     if match in ref.path:
-                        reference = ref
+                        reference = ref.refNode.__unicode__()
 
                 references += [[number, asset_name, publish, reference, current, items]]
 
@@ -171,7 +170,7 @@ class MyWindow(QtWidgets.QDialog):
                 match = publish.stripext().stripext()
                 for ref in pm.listReferences():
                     if match in ref.path:
-                        reference = ref
+                        reference = ref.refNode.__unicode__()
 
                 references += [[number, asset_name, publish, reference, current, items]]
 
@@ -222,7 +221,7 @@ class MyWindow(QtWidgets.QDialog):
                 # find the reference matching this asset name
                 if asset_name == ref.path.dirname().basename():
                     match += 1
-                    reference = ref
+                    reference = ref.refNode.__unicode__()
                 else:
                     continue
 
@@ -230,7 +229,7 @@ class MyWindow(QtWidgets.QDialog):
                 # find the reference linked to this specific extra
                 if match == number:
                     current = ref.path.split(".")[1]
-                    reference = ref
+                    reference = ref.refNode.__unicode__()
                     break
             references += [[number, asset_name, publish, reference, current, items]]
 
@@ -255,7 +254,12 @@ class MyWindow(QtWidgets.QDialog):
             asset_file = child.whatsThis()
             version = child.findChild(QtWidgets.QComboBox).currentText()
             reference_file = asset_file.replace(asset_file[-7:-3], version)
-            print ">>", child.toolTip()
+            reference_node = child.toolTip()
+
+            if reference_node:  # asset already referenced in scene
+                pass
+            else:
+                pass
         return
 
     def init_ui(self):
