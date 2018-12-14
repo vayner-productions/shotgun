@@ -12,7 +12,7 @@ import sgtk
 eng = sgtk.platform.current_engine()
 sg = eng.shotgun
 project = sg.find_one("Project", [["name", "is", eng.context.project["name"]]])
-root = None
+root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
 
 
 def get_window():
