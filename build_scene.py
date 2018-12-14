@@ -110,7 +110,7 @@ class MyWindow(QtWidgets.QDialog):
 #TODO: LOAD TO HALF FILLED SCENE
 #TODO: LOAD TO FILLED HALF UPDATED SCENE
 #TODO: ROLLBACK
-    def init_ui(self):
+    def init_rows(self):
         references = []
         type = "Shot"
         scene_process, entity = pm.workspace.fileRules["scene"].split("/")[1:]
@@ -216,6 +216,18 @@ class MyWindow(QtWidgets.QDialog):
             ast.append(index)
             row = self.create_row(*ast)
             self.ui.central_vlayout.insertWidget(index, row)
+        return
+
+    def set_latest(self):
+        return
+
+    def update_scene(self):
+        return
+
+    def init_ui(self):
+        self.init_rows()
+        self.ui.latest_btn.clicked.connect(self.set_latest)
+        self.ui.update_btn.clicked.connect(self.update_scene)
         return
 
     def setup_ui(self):
