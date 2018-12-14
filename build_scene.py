@@ -116,34 +116,48 @@ class MyWindow(QtWidgets.QDialog):
             number = 1
             asset_name = "Render Camera"
             publish = sg.find_one(type, [["project", "is", project]], ["sg_tracked_camera"])[
-                "sg_tracked_camera"]["local_path_windows"]
-            current = publish.split(".")[1]
+                "sg_tracked_camera"]
 
-            # root switching
-            if root:
-                publish = publish.replace("\\", "/").split("04_Maya")
-                publish = "".join([root, publish[1]])
+            if publish is not None:
+                publish = publish["local_path_windows"]
+                current = publish.split(".")[1]
 
-            files = pm.util.common.path(publish).dirname().files("*.ma")
-            items = sorted([f.split(".")[1] for f in files])[::-1]
-            references += [[number, asset_name, current, items]]
+                # root switching
+                if root:
+                    publish = publish.replace("\\", "/").split("04_Maya")
+                    publish = "".join([root, publish[1]])
+
+                files = pm.util.common.path(publish).dirname().files("*.ma")
+                items = sorted([f.split(".")[1] for f in files])[::-1]
+                references += [[number, asset_name, current, items]]
 
         # add cache to lighting scene process
         if "Lighting" in scene_process:
             number = 1
             asset_name = "Alembic Cache"
             publish = sg.find_one(type, [["project", "is", project]], ["sg_alembic_cache"])[
-                "sg_alembic_cache"]["local_path_windows"]
-            current = publish.split(".")[1]
+                "sg_alembic_cache"]
 
-            # root switching
-            if root:
-                publish = publish.replace("\\", "/").split("04_Maya")
-                publish = "".join([root, publish[1]])
+            if publish is not None:
+                publish = publish["local_path_windows"]
+                current = publish.split(".")[1]
 
-            files = pm.util.common.path(publish).dirname().files("*.ma")
-            items = sorted([f.split(".")[1] for f in files])[::-1]
-            references += [[number, asset_name, current, items]]
+                # root switching
+                if root:
+                    publish = publish.replace("\\", "/").split("04_Maya")
+                    publish = "".join([root, publish[1]])
+
+                files = pm.util.common.path(publish).dirname().files("*.ma")
+                items = sorted([f.split(".")[1] for f in files])[::-1]
+                references += [[number, asset_name, current, items]]
+
+            # CREATE ROWS WITH QUERIED DATA
+            index = 0  # first row is the header
+            for ast in references:
+                index += 1  # which row
+                ast.append(index)
+                row = self.create_row(*ast)
+                self.ui.central_vlayout.insertWidget(index, row)
             return
 
         # add assets to every scene process except lighting
@@ -196,7 +210,6 @@ class MyWindow(QtWidgets.QDialog):
             ast.append(index)
             row = self.create_row(*ast)
             self.ui.central_vlayout.insertWidget(index, row)
-        #TODO: CHECK UI APPEARS CORRECT FOR ALL SCENE PROCESSES
         return
 
     def setup_ui(self):
