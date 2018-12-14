@@ -12,7 +12,8 @@ import sgtk
 eng = sgtk.platform.current_engine()
 sg = eng.shotgun
 project = sg.find_one("Project", [["name", "is", eng.context.project["name"]]])
-root = None
+root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
+
 
 
 def get_window():
@@ -31,7 +32,6 @@ class MyWindow(QtWidgets.QDialog):
     def __init__(self):
         self.ui = self.import_ui()
         self.init_ui()
-        self.setup_ui()
 
     def import_ui(self):
         ui_path = __file__.split(".")[0] + ".ui"
@@ -42,12 +42,14 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
-    def create_row(self, number, asset_name, current, items, index):
+    def create_row(self, number, asset_name, publish, reference, current, items, index):
         font = QtGui.QFont("Arial", 14)
 
         # widget - horizontal hlayout, (0,3,6,3), 3 spacing
         row = QtWidgets.QWidget()
         row.setObjectName("Row_{:02}".format(index))
+        row.setWhatsThis(publish)
+        row.setToolTip(reference)
 
         # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
         num = QtWidgets.QLabel("{}".format(number))
@@ -105,12 +107,7 @@ class MyWindow(QtWidgets.QDialog):
             row.setStyleSheet("background-color: rgb(115, 115, 115)")  # dark
         return row
 
-#TODO: SET LATEST
-#TODO: LOAD TO EMPTY SCENE
-#TODO: LOAD TO HALF FILLED SCENE
-#TODO: LOAD TO FILLED HALF UPDATED SCENE
-#TODO: ROLLBACK
-    def init_ui(self):
+    def init_rows(self):
         references = []
         type = "Shot"
         scene_process, entity = pm.workspace.fileRules["scene"].split("/")[1:]
@@ -133,9 +130,17 @@ class MyWindow(QtWidgets.QDialog):
                     publish = publish.replace("\\", "/").split("04_Maya")
                     publish = "".join([root, publish[1]])
 
-                files = pm.util.common.path(publish).dirname().files("*.ma")
+                publish = pm.util.common.path(publish)
+                files = publish.dirname().files("*.ma")
                 items = sorted([f.split(".")[1] for f in files])[::-1]
-                references += [[number, asset_name, current, items]]
+
+                reference = None
+                match = publish.stripext().stripext()
+                for ref in pm.listReferences():
+                    if match in ref.path:
+                        reference = ref.refNode.__unicode__()
+
+                references += [[number, asset_name, publish, reference, current, items]]
 
         # add cache to lighting scene process
         if "Lighting" in scene_process:
@@ -153,9 +158,17 @@ class MyWindow(QtWidgets.QDialog):
                     publish = publish.replace("\\", "/").split("04_Maya")
                     publish = "".join([root, publish[1]])
 
-                files = pm.util.common.path(publish).dirname().files("*.ma")
+                publish = pm.util.common.path(publish)
+                files = publish.dirname().files("*.ma")
                 items = sorted([f.split(".")[1] for f in files])[::-1]
-                references += [[number, asset_name, current, items]]
+
+                reference = None
+                match = publish.stripext().stripext()
+                for ref in pm.listReferences():
+                    if match in ref.path:
+                        reference = ref.refNode.__unicode__()
+
+                references += [[number, asset_name, publish, reference, current, items]]
 
             # CREATE ROWS WITH QUERIED DATA
             index = 0  # first row is the header
@@ -192,22 +205,29 @@ class MyWindow(QtWidgets.QDialog):
             asset_name = asset["name"]
 
             # combo items
-            files = pm.util.common.path(publish).dirname().files("*.ma")
+            publish = pm.util.common.path(publish)
+            files = publish.dirname().files("*.ma")
             items = sorted([f.split(".")[1] for f in files])[::-1]
 
             # combo current text
             match = 0
             current = None
+            reference = None
             for ref in pm.listReferences():
+                # find the reference matching this asset name
                 if asset_name == ref.path.dirname().basename():
                     match += 1
+                    reference = ref.refNode.__unicode__()
                 else:
                     continue
 
+                # if this asset is referenced multiple times
+                # find the reference linked to this specific extra
                 if match == number:
                     current = ref.path.split(".")[1]
+                    reference = ref.refNode.__unicode__()
                     break
-            references += [[number, asset_name, current, items]]
+            references += [[number, asset_name, publish, reference, current, items]]
 
         # CREATE ROWS WITH QUERIED DATA
         index = 0  # first row is the header
@@ -218,5 +238,29 @@ class MyWindow(QtWidgets.QDialog):
             self.ui.central_vlayout.insertWidget(index, row)
         return
 
-    def setup_ui(self):
+    def set_latest(self):
+        for child in self.ui.findChildren(QtWidgets.QComboBox):
+            child.setCurrentIndex(0)
+        return
+
+    def update_scene(self):
+        rx = QtCore.QRegExp("Row_*")
+        rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
+        for child in self.ui.findChildren(QtWidgets.QWidget, rx):
+            asset_file = child.whatsThis()
+            version = child.findChild(QtWidgets.QComboBox).currentText()
+            reference_file = asset_file.replace(asset_file[-7:-3], version)
+            reference_node = child.toolTip()
+
+            if reference_node:  # asset already referenced in scene
+                pm.FileReference(refnode=reference_node).replaceWith(reference_file)
+            else:
+                pm.createReference(reference_file, namespace=":")
+        self.ui.close()
+        return
+
+    def init_ui(self):
+        self.init_rows()
+        self.ui.latest_btn.clicked.connect(self.set_latest)
+        self.ui.update_btn.clicked.connect(self.update_scene)
         return
