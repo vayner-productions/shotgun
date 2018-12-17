@@ -210,6 +210,7 @@ class MyWindow(QtWidgets.QDialog):
             items = sorted([f.split(".")[1] for f in files])[::-1]
 
             # combo current text
+            #TODO: LOOP WITHIN A LOOP IS CONFUSING, REVISE THIS AREA
             match = 0
             current = None
             reference = None
@@ -217,6 +218,7 @@ class MyWindow(QtWidgets.QDialog):
                 # find the reference matching this asset name
                 if asset_name == ref.path.dirname().basename():
                     match += 1
+                    current = ref.path.split(".")[1]
                     reference = ref.refNode.__unicode__()
                 else:
                     continue
