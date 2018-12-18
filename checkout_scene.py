@@ -29,9 +29,9 @@ def get_version(file):
 
 def increment_and_save(current_file, entity_type="Asset", publish=0):
     scene_directory = pm.workspace.expandName(pm.workspace.fileRules["scene"])
-    file_name = scene_directory.rsplit("/", 1)[1][4:]
+    file_name = scene_directory.rsplit("/", 1)[1][4:]  # model_a
     if "Shot" == entity_type:
-        file_name = scene_directory.rsplit("/", 1)[1]
+        file_name = scene_directory.rsplit("/", 1)[1]  # Shot_###
     processed_file = None
 
     if current_file and publish:
@@ -69,6 +69,7 @@ def checkout_scene():
         "Rigs": "sg_file",
         "Assets": "sg_file",
         "Cameras": "sg_tracked_camera",
+        "Layouts": None,
         "Animation": "sg_maya_scene",
         "Lighting": "sg_maya_scene__light_"
     }
