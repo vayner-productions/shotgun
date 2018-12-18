@@ -185,6 +185,7 @@ class MyWindow(QtWidgets.QDialog):
                               ["code", "is", entity]],
                              ["assets"])["assets"]
 
+        asset_names = []
         for asset in assets:
             # create row only if published file exists
             publish = None
@@ -201,8 +202,10 @@ class MyWindow(QtWidgets.QDialog):
                 publish = "".join([root, publish[1]])
 
             # QUERY DATA FOR ROWS
-            number = len([ref[1] for ref in references]) + 1  # times same asset is used
+            #TODO: SG SITE "assets" doesn't allow inputting the entities multiple times, need to find a work around
             asset_name = asset["name"]
+            asset_names += [asset_name]
+            number = asset_names.count(asset_name)  # times same asset is used
 
             # combo items
             publish = pm.util.common.path(publish)
@@ -210,11 +213,10 @@ class MyWindow(QtWidgets.QDialog):
             items = sorted([f.split(".")[1] for f in files])[::-1]
 
             # combo current text
-            #TODO: LOOP WITHIN A LOOP IS CONFUSING, REVISE THIS AREA
             match = 0
             current = None
             reference = None
-            for ref in pm.listReferences():
+            for ref in pm.listReferences(recursive=0):
                 # find the reference matching this asset name
                 if asset_name == ref.path.dirname().basename():
                     match += 1
