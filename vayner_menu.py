@@ -50,7 +50,7 @@ from shotgun import build_scene as sg
 reload(sg)
 sg.get_window()
 """
-checkout_scene_item = pm.menuItem(label="Build Scene",
+build_scene_item = pm.menuItem(label="Build Scene",
                                   command=build_scene,
                                   parent=vayner_menu)
 
