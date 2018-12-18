@@ -43,6 +43,18 @@ checkout_scene_item = pm.menuItem(label="Increment and Save",
                                   parent=vayner_menu)
 
 
+# check out scene - open the latest published scene
+build_scene = """
+from shotgun import build_scene as sg
+
+reload(sg)
+sg.get_window()
+"""
+checkout_scene_item = pm.menuItem(label="Build Scene",
+                                  command=build_scene,
+                                  parent=vayner_menu)
+
+
 # update timeline - timeline reflects sg_frame_range
 update_timeline = """
 import shotgun.update_timeline as sg
