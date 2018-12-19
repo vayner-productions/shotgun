@@ -169,7 +169,7 @@ def publish_scene(addressed_tasks=[], comments=None):
         playblast_image = 0
     elif scene_process in ["Animation"]:
         data = {
-            "sg_maya_scene": {
+            "sg_maya_anim": {
                 "link_type": "local",
                 "local_path": local_path
             },
@@ -181,7 +181,7 @@ def publish_scene(addressed_tasks=[], comments=None):
         playblast_image = 0
     elif scene_process in ["Lighting"]:
         data = {
-            "sg_maya_scene__light_": {
+            "sg_maya_light": {
                 "link_type": "local",
                 "local_path": local_path
             }
