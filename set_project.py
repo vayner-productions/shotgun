@@ -88,7 +88,7 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
-    def add_scene_items(self):
+    def add_scene_items(self, project_path=root):
         # root allows for remote and in-office work
         # when set to None, you're working from office
         if root is None:
@@ -105,7 +105,9 @@ class MyWindow(QtWidgets.QDialog):
             )
 
         scene_dir = project_path + "/scenes"
-        scene_items = [dir.basename()[3:] for dir in path(scene_dir).dirs()]
+        scene_items = sorted([dir.basename() for dir in path(scene_dir).dirs()])
+        scene_items = [dir[3:] for dir in scene_items]
+        self.ui.scene_cbx.addItems(scene_items)
         return
 
     def init_ui(self):
