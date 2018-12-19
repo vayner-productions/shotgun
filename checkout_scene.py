@@ -1,7 +1,5 @@
 import pymel.core as pm
 import sgtk.platform
-import os
-import fnmatch
 
 engine = sgtk.platform.current_engine()
 sg = engine.shotgun
