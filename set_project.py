@@ -1,5 +1,6 @@
 import sgtk
 from pymel.core.system import workspace
+from pymel.util.common import path
 import maya.mel as mel
 import os
 from PySide2 import QtCore, QtWidgets, QtUiTools
@@ -87,8 +88,32 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
+    def add_scene_items(self):
+        # root allows for remote and in-office work
+        # when set to None, you're working from office
+        if root is None:
+            project = sg.find_one("Project", [["name", "is", project_name]],
+                                  ["sg_client", "sg_brand"])
+            client_brand = project["sg_client"]["name"]
+            sub_brand = project["sg_brand"]["name"]
+            project_path = r"/".join(
+                ["A:/Animation/Projects/Client",
+                 client_brand,
+                 sub_brand,
+                 project_name,
+                 "Project Directory/02_Production/04_Maya"]
+            )
+
+        scene_dir = project_path + "/scenes"
+        scene_items = [dir.basename()[3:] for dir in path(scene_dir).dirs()]
+        return
+
     def init_ui(self):
+        self.add_scene_items()
         return
 
     def setup_ui(self):
+        # self.ui.scene_cbx
+        # self.ui.asset_cbx
+        # self.ui.set_project_btn
         return
