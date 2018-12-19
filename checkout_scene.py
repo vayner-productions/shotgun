@@ -65,11 +65,19 @@ def increment_and_save(current_file, entity_type="Asset", publish=0):
 
 def checkout_scene():
     scene_directory = pm.workspace.expandName(pm.workspace.fileRules["scene"])
+    key = scene_directory.split("scenes/")[1].split("/")[0][3:]
+    if key == "Layouts":
+        current_file = None
+        entity = get_entity(scene_directory)
+        new_file = pm.util.path(increment_and_save(current_file, entity_type=entity["type"]))
+        print ">> opened: {}".format(pm.util.path.basename(new_file)),
+        return current_file
+
     data = {
         "Rigs": "sg_file",
         "Assets": "sg_file",
         "Cameras": "sg_tracked_camera",
-        "Layouts": None,
+        "Layouts": None,  # may need to track versions later
         "Animation": "sg_maya_scene",
         "Lighting": "sg_maya_scene__light_"
     }
@@ -79,7 +87,7 @@ def checkout_scene():
         ["project", "is", project],
         ["id", "is", entity["id"]]
     ]
-    entity_fields = data[scene_directory.split("scenes/")[1].split("/")[0][3:]]
+    entity_fields = data[key]
     current_file = sg.find_one(entity["type"],
                                entity_filters,
                                [entity_fields])[entity_fields]
