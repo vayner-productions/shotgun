@@ -260,6 +260,7 @@ class MyWindow(QtWidgets.QDialog):
                 pm.FileReference(refnode=reference_node).replaceWith(reference_file)
             else:
                 pm.createReference(reference_file, namespace=":")
+        print ">> references loaded/updated",
         self.ui.close()
         return
 
