@@ -7,9 +7,14 @@ from PySide2 import QtCore, QtWidgets, QtUiTools
 eng = sgtk.platform.current_engine()
 project_name = eng.context.project["name"]
 sg = eng.shotgun
+root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
 
 
-def get_project_path():
+def get_project_path(project_path=None):
+    if root:
+        project_path = root
+        return project_path
+
     client_brand, sub_brand = [
         sg.find_one("Project", [["name", "is", project_name]], [i, "name"])[i]["name"] for i in
         ["sg_client", "sg_brand"]]
@@ -20,7 +25,7 @@ def get_project_path():
 
 
 def get_subfolders(full_path=None, parent_folder=None):
-    subfolders = [x for x in os.listdir(full_path)]
+    subfolders = os.listdir(full_path)
     if not parent_folder:
         return subfolders
 
