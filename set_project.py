@@ -107,14 +107,21 @@ class MyWindow(QtWidgets.QDialog):
         scene_dir = project_path + "/scenes"
         scene_subfolders = sorted([dir.basename() for dir in path(scene_dir).dirs()])
         scene_items = [dir[3:] for dir in scene_subfolders]
+
         self.ui.scene_cbx.addItems(scene_items)
         self.ui.scene_cbx.setToolTip(scene_subfolders[0])
+        return
 
-        # self.ui.scene_cbx.currentTextChanged.connect(self.ui.scene_cbx.setToolTip("s"))
+    def change_scene_tooltip(self):
+        scene_process = self.ui.scene_cbx.currentText()
+        tool_tip = None
+        self.ui.scene_cbx.setToolTip(tool_tip)
+        print ">>", scene_process
         return
 
     def init_ui(self):
         self.add_scene_items()
+        self.ui.scene_cbx.currentTextChanged.connect(self.change_scene_tooltip)
         return
 
     def setup_ui(self):
