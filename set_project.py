@@ -2,64 +2,12 @@ import sgtk
 from pymel.core.system import workspace
 from pymel.util.common import path
 import maya.mel as mel
-import os
 from PySide2 import QtCore, QtWidgets, QtUiTools
 
 eng = sgtk.platform.current_engine()
 project_name = eng.context.project["name"]
 sg = eng.shotgun
-root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
-
-
-def get_project_path(project_path=None):
-    # used for remote-work, change the root variable
-    if root:
-        project_path = root
-        return project_path
-
-    # used for in-office development
-    client_brand, sub_brand = [
-        sg.find_one("Project", [["name", "is", project_name]], [i, "name"])[i]["name"] for i in
-        ["sg_client", "sg_brand"]]
-    client_brand = client_brand
-    project_path = r"A:/Animation/Projects/Client/{}/{}/{}/Project Directory/02_Production/04_Maya".format(
-        client_brand, sub_brand, project_name)
-    return project_path
-
-
-def get_subfolders(full_path=None, parent_folder=None):
-    subfolders = os.listdir(full_path)
-    if not parent_folder:
-        return subfolders
-
-    folders = []
-    if parent_folder in ["scenes", "Tests", "Assets", "Rigs"]:
-        for f in subfolders:
-            if ("_" in f) and (os.path.isdir(full_path + "/" + f)):
-                folders += [f]
-    else:
-        folders = [s for s in subfolders if s not in ["[Archive]"]]
-    return folders
-
-
-def set_project(project_path=None, scene_path=None, alembic_cache=""):
-    # set workspace to project path and scene to scene path
-
-    # scenes
-    workspace.open(project_path)
-    if scene_path:
-        workspace.fileRules["scene"] = scene_path
-
-    # alembic
-    workspace.fileRules["Alembic"] = alembic_cache
-
-    # shaders
-    workspace.fileRules["shaders"] = "data/001_Shaders"
-
-    # project
-    mel.eval('setProject \"' + project_path + '\"')
-    print ">> project set",
-    return project_path, scene_path
+root = None
 
 
 def get_window():
@@ -76,8 +24,10 @@ def get_window():
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
         self.ui = self.import_ui()
+        self.project_path = None
+        self.get_project_path()
+        self.scene_dict = {}
         self.init_ui()
-        self.setup_ui()
 
     def import_ui(self):
         ui_path = __file__.split(".")[0] + ".ui"
@@ -88,44 +38,72 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
-    def add_scene_items(self, project_path=root):
-        # root allows for remote and in-office work
-        # when set to None, you're working from office
-        if root is None:
-            project = sg.find_one("Project", [["name", "is", project_name]],
-                                  ["sg_client", "sg_brand"])
-            client_brand = project["sg_client"]["name"]
-            sub_brand = project["sg_brand"]["name"]
-            project_path = r"/".join(
-                ["A:/Animation/Projects/Client",
-                 client_brand,
-                 sub_brand,
-                 project_name,
-                 "Project Directory/02_Production/04_Maya"]
-            )
+    def get_project_path(self):
+        # used for remote-work, change the root variable
+        if root:
+            self.project_path = root
+            return
 
-        scene_dir = project_path + "/scenes"
-        scene_subfolders = sorted([dir.basename() for dir in path(scene_dir).dirs()])
-        scene_items = [dir[3:] for dir in scene_subfolders]
-
-        self.ui.scene_cbx.addItems(scene_items)
-        self.ui.scene_cbx.setToolTip(scene_subfolders[0])
+        # used for in-office development
+        client_brand, sub_brand = [
+            sg.find_one("Project", [["name", "is", project_name]], [i, "name"])[i]["name"] for i in
+            ["sg_client", "sg_brand"]]
+        client_brand = client_brand
+        self.project_path = r"A:/Animation/Projects/Client/{}/{}/{}/Project Directory/02_Production/04_Maya".format(
+            client_brand, sub_brand, project_name)
         return
 
-    def change_scene_tooltip(self):
+    def add_scene_items(self):
+        scene_dir = self.project_path + "/scenes"
+        scene_subfolders = sorted([r"{}".format(dir.basename()) for dir in path(scene_dir).dirs()])
+        scene_items = [dir[3:] for dir in scene_subfolders]
+
+        for item, subfolder in zip(scene_items, scene_subfolders):
+            if item in ["Cameras", "Layouts", "Cache"]:
+                scene_items.remove(item)
+                scene_subfolders.remove(subfolder)
+                continue
+            self.scene_dict[item] = subfolder
+
+        self.ui.scene_cbx.addItems(scene_items)
+        return
+
+    def change_entity_items(self):
         scene_process = self.ui.scene_cbx.currentText()
-        tool_tip = None
-        self.ui.scene_cbx.setToolTip(tool_tip)
-        print ">>", scene_process
+        scene_process_folder = self.scene_dict[scene_process]
+
+        scene_process_dir = path(r"{}{}{}".format(
+            self.project_path,
+            "/scenes/",
+            scene_process_folder))
+
+        self.ui.asset_cbx.clear()
+        for dir in scene_process_dir.dirs():
+            folder = dir.basename()
+            if "Archive" not in folder:
+                self.ui.asset_cbx.addItem(folder)
+        return
+
+    def set_project(self):
+        workspace.open(self.project_path)
+
+        workspace.fileRules["scene"] = "/".join([
+            "scenes",
+            self.scene_dict[self.ui.scene_cbx.currentText()],
+            self.ui.asset_cbx.currentText()])
+
+        if "Shot" in self.ui.asset_cbx.currentText():
+            workspace.fileRules["Alembic"] = "scenes/06_Cache/08_Animation/{}".format(self.ui.asset_cbx.currentText())
+
+            workspace.fileRules["shaders"] = "data/001_Shaders"
+
+        mel.eval('setProject \"' + self.project_path + '\"')
+        self.ui.close()
+        print ">> project set",
         return
 
     def init_ui(self):
+        self.ui.scene_cbx.currentTextChanged.connect(self.change_entity_items)
         self.add_scene_items()
-        self.ui.scene_cbx.currentTextChanged.connect(self.change_scene_tooltip)
-        return
-
-    def setup_ui(self):
-        # self.ui.scene_cbx
-        # self.ui.asset_cbx
-        # self.ui.set_project_btn
+        self.ui.set_project_btn.clicked.connect(self.set_project)
         return
