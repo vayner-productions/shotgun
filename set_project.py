@@ -7,7 +7,7 @@ from PySide2 import QtCore, QtWidgets, QtUiTools
 eng = sgtk.platform.current_engine()
 project_name = eng.context.project["name"]
 sg = eng.shotgun
-root = None
+root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya"
 
 
 def get_window():
