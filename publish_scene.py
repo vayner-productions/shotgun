@@ -16,7 +16,7 @@ def set_playblast(image=True):
     media_file = None
     if image:
         current_time = pm.currentTime(q=1)
-        file_name = pm.sceneName().replace(".ma", ".jpg").replace("scenes", "published")
+        file_name = pm.sceneName().replace(".ma", ".jpg").replace("scenes", "published").replace("processed", "original")
         media_file = pm.playblast(
             frame=current_time,
             format="image",
@@ -32,7 +32,7 @@ def set_playblast(image=True):
         )
     else:
         start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
-        file_name = pm.sceneName().replace(".ma", ".mov").replace("scenes", "published")
+        file_name = pm.sceneName().replace(".ma", ".mov").replace("scenes", "published").replace("processed", "original")
         media_file = pm.playblast(
             startTime=start_time,
             endTime=end_time,
@@ -54,9 +54,9 @@ def get_alembic_file(file_path):
     alembic_file = "{}/scenes/{}/{}.abc".format(
         pm.workspace.getPath(),
         pm.workspace.fileRules["Alembic"],
-        ut.path.basename(pm.sceneName()).stripext().replace(".", "_")
+        ut.path.basename(pm.sceneName()).stripext().replace(".", "_").replace("processed", "original")
     )
-
+    print ">> before", alembic_file
     alembic_dir = os.path.dirname(alembic_file)
     if not os.path.exists(alembic_dir):
         os.makedirs(alembic_dir)
@@ -67,7 +67,7 @@ def get_alembic_file(file_path):
     for p in pm.ls(type="mesh"):
         poly.add("-root {}".format(p.getParent().longName()))
     poly = " ".join(list(poly))
-
+    print ">> after", alembic_file
     mel_code = """
     AbcExport -j "-frameRange {0:.0f} {1:.0f} -dataFormat ogawa {3} -file \\"{2}\\"";
     """.format(
