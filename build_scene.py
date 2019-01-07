@@ -135,11 +135,10 @@ class MyWindow(QtWidgets.QDialog):
                 items = sorted([f.split(".")[1] for f in files])[::-1]
 
                 reference = None
-                match = publish.replace("\\", "/")
+                match = publish.replace("\\", "/").split(".")[0]
                 for ref in pm.listReferences():
                     if match in ref.path:
                         reference = ref.refNode.__unicode__()
-
                 references += [[number, asset_name, publish, reference, current, items]]
 
         # add cache to lighting scene process
@@ -162,7 +161,7 @@ class MyWindow(QtWidgets.QDialog):
                 items = sorted([f.stripext().rsplit("_", 1)[1] for f in files])[::-1]
 
                 reference = None
-                match = publish.replace("\\", "/")
+                match = publish.dirname().replace("\\", "/")
                 for ref in pm.listReferences():
                     if match in ref.path:
                         reference = ref.refNode.__unicode__()
@@ -249,13 +248,12 @@ class MyWindow(QtWidgets.QDialog):
         rx = QtCore.QRegExp("Row_*")
         rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
         for child in self.ui.findChildren(QtWidgets.QWidget, rx):
-            asset_file = pm.util.common.path(child.whatsThis()).splitext()
+            asset_file = pm.util.common.path(child.whatsThis())
             version = child.findChild(QtWidgets.QComboBox).currentText()
-            reference_file = "{}{}{}".format(
-                asset_file[0][:-4],
-                version,
-                asset_file[1])
+            search = "*{}{}".format(version, asset_file.ext)
+            reference_file = asset_file.dirname().files(search)[0]
             reference_node = child.toolTip()
+            print ">>", reference_node
             if reference_node:  # asset already referenced in scene
                 pm.FileReference(refnode=reference_node).replaceWith(reference_file)
             else:
