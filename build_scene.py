@@ -135,7 +135,7 @@ class MyWindow(QtWidgets.QDialog):
                 items = sorted([f.split(".")[1] for f in files])[::-1]
 
                 reference = None
-                match = publish.stripext().stripext()
+                match = publish.replace("\\", "/")
                 for ref in pm.listReferences():
                     if match in ref.path:
                         reference = ref.refNode.__unicode__()
@@ -150,24 +150,22 @@ class MyWindow(QtWidgets.QDialog):
                 "sg_alembic_cache"]
 
             if publish is not None:
-                publish = publish["local_path_windows"]
-                current = publish.split(".")[1]
+                publish = pm.util.common.path(publish["local_path_windows"])
+                current = publish.stripext().rsplit("_", 1)[1]
 
                 # root switching
                 if root:
                     publish = publish.replace("\\", "/").split("04_Maya")
                     publish = "".join([root, publish[1]])
 
-                publish = pm.util.common.path(publish)
-                files = publish.dirname().files("*.ma")
-                items = sorted([f.split(".")[1] for f in files])[::-1]
+                files = publish.dirname().files("*.abc")
+                items = sorted([f.stripext().rsplit("_", 1)[1] for f in files])[::-1]
 
                 reference = None
-                match = publish.stripext().stripext()
+                match = publish.replace("\\", "/")
                 for ref in pm.listReferences():
                     if match in ref.path:
                         reference = ref.refNode.__unicode__()
-
                 references += [[number, asset_name, publish, reference, current, items]]
 
             # CREATE ROWS WITH QUERIED DATA
@@ -251,11 +249,13 @@ class MyWindow(QtWidgets.QDialog):
         rx = QtCore.QRegExp("Row_*")
         rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
         for child in self.ui.findChildren(QtWidgets.QWidget, rx):
-            asset_file = child.whatsThis()
+            asset_file = pm.util.common.path(child.whatsThis()).splitext()
             version = child.findChild(QtWidgets.QComboBox).currentText()
-            reference_file = asset_file.replace(asset_file[-7:-3], version)
+            reference_file = "{}{}{}".format(
+                asset_file[0][:-4],
+                version,
+                asset_file[1])
             reference_node = child.toolTip()
-
             if reference_node:  # asset already referenced in scene
                 pm.FileReference(refnode=reference_node).replaceWith(reference_file)
             else:
