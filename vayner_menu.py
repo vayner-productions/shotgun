@@ -21,6 +21,18 @@ set_project_item = pm.menuItem(label="Set Project",
 
 # check out scene - open the latest published scene
 checkout_scene = """
+import shotgun.checkout_scene as sg
+
+reload(sg)
+sg.checkout_scene()
+"""
+checkout_scene_item = pm.menuItem(label="Checkout Scene",
+                                  command=checkout_scene,
+                                  parent=vayner_menu)
+
+
+# check out scene - open the latest published scene
+increment_and_save = """
 import pymel.core as pm
 import shotgun.checkout_scene as sg
 
@@ -30,18 +42,6 @@ type="Shot"
 if type not in pm.sceneName().dirname().rsplit("/", 1)[1]:
     type="Asset"
 sg.increment_and_save(current_file, entity_type=type, publish=0)
-"""
-checkout_scene_item = pm.menuItem(label="Checkout Scene",
-                                  command=checkout_scene,
-                                  parent=vayner_menu)
-
-
-# check out scene - open the latest published scene
-increment_and_save = """
-from shotgun import checkout_scene as sg
-
-reload(sg)
-sg.increment_and_save(None)
 """
 checkout_scene_item = pm.menuItem(label="Increment and Save",
                                   command=increment_and_save,
