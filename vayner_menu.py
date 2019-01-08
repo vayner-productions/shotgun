@@ -56,8 +56,8 @@ reload(sg)
 sg.get_window()
 """
 build_scene_item = pm.menuItem(label="Build Scene",
-                                  command=build_scene,
-                                  parent=vayner_menu)
+                               command=build_scene,
+                               parent=vayner_menu)
 
 
 # update timeline - timeline reflects sg_frame_range
@@ -68,8 +68,8 @@ reload(sg)
 sg.update_timeline()
 """
 update_timeline_item = pm.menuItem(label="Update Timeline",
-                                 command=update_timeline,
-                                 parent=vayner_menu)
+                                   command=update_timeline,
+                                   parent=vayner_menu)
 
 # publish scene - increment and save this file and update shotgun fields
 organize_textures = """
@@ -79,8 +79,8 @@ reload(sg)
 sg.organize_textures()
 """
 organize_textures_item = pm.menuItem(label="Organize Textures",
-                                 command=organize_textures,
-                                 parent=vayner_menu)
+                                     command=organize_textures,
+                                     parent=vayner_menu)
 
 # publish scene - increment and save this file and update shotgun fields
 publish_scene = """
