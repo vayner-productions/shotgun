@@ -118,8 +118,10 @@ class MyWindow(QtWidgets.QDialog):
         if type == "Shot":
             number = 1
             asset_name = "Render Camera"
-            publish = sg.find_one(type, [["project", "is", project]], ["sg_tracked_camera"])[
-                "sg_tracked_camera"]
+            publish = sg.find_one(
+                type,
+                [["project", "is", project], ["code", "is", entity]],
+                ["sg_tracked_camera"])["sg_tracked_camera"]
 
             if publish is not None:
                 publish = publish["local_path_windows"]
@@ -145,8 +147,10 @@ class MyWindow(QtWidgets.QDialog):
         if "Lighting" in scene_process:
             number = 1
             asset_name = "Alembic Cache"
-            publish = sg.find_one(type, [["project", "is", project]], ["sg_alembic_cache"])[
-                "sg_alembic_cache"]
+            publish = sg.find_one(
+                type,
+                [["project", "is", project], ["code", "is", entity]],
+                ["sg_alembic_cache"])["sg_alembic_cache"]
 
             if publish is not None:
                 publish = pm.util.common.path(publish["local_path_windows"])
