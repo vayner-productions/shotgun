@@ -41,7 +41,7 @@ def set_playblast(image=True):
             percent=100,
             compression="H.264",
             quality=100,
-            widthHeight=(1820, 1080),
+            widthHeight=(1920, 1080),  # station 17 cannot playblast (1920, 1080)
             viewer=0,
             forceOverwrite=1,
             clearCache=1,
@@ -51,12 +51,11 @@ def set_playblast(image=True):
 
 
 def get_alembic_file(file_path):
-    alembic_file = "{}/scenes/{}/{}.abc".format(
+    alembic_file = "{}/{}/{}.abc".format(
         pm.workspace.getPath(),
         pm.workspace.fileRules["Alembic"],
         ut.path.basename(pm.sceneName()).stripext().replace(".", "_").replace("processed", "original")
     )
-    print ">> before", alembic_file
     alembic_dir = os.path.dirname(alembic_file)
     if not os.path.exists(alembic_dir):
         os.makedirs(alembic_dir)
@@ -67,7 +66,6 @@ def get_alembic_file(file_path):
     for p in pm.ls(type="mesh"):
         poly.add("-root {}".format(p.getParent().longName()))
     poly = " ".join(list(poly))
-    print ">> after", alembic_file
     mel_code = """
     AbcExport -j "-frameRange {0:.0f} {1:.0f} -dataFormat ogawa {3} -file \\"{2}\\"";
     """.format(
