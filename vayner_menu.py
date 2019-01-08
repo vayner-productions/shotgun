@@ -21,10 +21,15 @@ set_project_item = pm.menuItem(label="Set Project",
 
 # check out scene - open the latest published scene
 checkout_scene = """
+import pymel.core as pm
 import shotgun.checkout_scene as sg
 
 reload(sg)
-sg.checkout_scene()
+current_file = None
+type="Shot"
+if type not in pm.sceneName().dirname().rsplit("/", 1)[1]:
+    type="Asset"
+sg.increment_and_save(current_file, entity_type=type, publish=0)
 """
 checkout_scene_item = pm.menuItem(label="Checkout Scene",
                                   command=checkout_scene,
