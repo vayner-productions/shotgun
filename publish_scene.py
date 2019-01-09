@@ -63,7 +63,7 @@ def get_alembic_file(file_path):
 
     if outliner:
         pm.parent(outliner, top_node)
-    pm.select(top_node)
+    pm.select(clear=1)
 
     alembic_file = "{}/{}/{}.abc".format(
         pm.workspace.getPath(),
