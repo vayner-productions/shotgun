@@ -82,7 +82,6 @@ def get_alembic_file(file_path):
         top_node,
         alembic_file)
     pm.mel.eval(mel_code)
-    print ">>", alembic_file
     return alembic_file
 
 
