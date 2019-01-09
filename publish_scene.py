@@ -24,7 +24,7 @@ def set_playblast(image=True):
             percent=100,
             compression="jpg",
             quality=100,
-            widthHeight=(1820, 1080),
+            widthHeight=(1920, 1080),
             viewer=0,
             forceOverwrite=1,
             clearCache=1,
@@ -51,6 +51,20 @@ def set_playblast(image=True):
 
 
 def get_alembic_file(file_path):
+    # parent everything in the outliner for alembic top node selection export
+    top_node, name = None, pm.workspace.fileRules["scene"].rsplit("/", 1)[1] + "_ANIM"
+    if pm.objExists(name):
+        top_node = pm.PyNode(name)
+    else:
+        top_node = pm.group(em=1, n=name)
+
+    default_cameras = set([pm.PyNode(cam) for cam in ["persp", "top", "front", "side"]])
+    outliner = list(set(pm.ls(assemblies=1)).difference(default_cameras).difference(set([top_node])))
+
+    if outliner:
+        pm.parent(outliner, top_node)
+    pm.select(top_node)
+
     alembic_file = "{}/{}/{}.abc".format(
         pm.workspace.getPath(),
         pm.workspace.fileRules["Alembic"],
@@ -60,20 +74,15 @@ def get_alembic_file(file_path):
     if not os.path.exists(alembic_dir):
         os.makedirs(alembic_dir)
 
-    # nonlinear deformers like squash and stretch are considered meshes, too, and would show up in
-    # pm.ls(type="mesh"), create a set() then list() removes deformers
-    poly = set([])
-    for p in pm.ls(type="mesh"):
-        poly.add("-root {}".format(p.getParent().longName()))
-    poly = " ".join(list(poly))
     mel_code = """
-    AbcExport -j "-frameRange {0:.0f} {1:.0f} -dataFormat ogawa {3} -file \\"{2}\\"";
+    AbcExport -j "-frameRange {0:.0f} {1:.0f} -stripNamespaces -uvWrite -worldSpace -writeVisibility -eulerFilter -writeUVSets -dataFormat ogawa -root |{2} -file \\"{3}\\"";
     """.format(
         pm.playbackOptions(q=1, ast=1),
         pm.playbackOptions(q=1, aet=1),
-        alembic_file,
-        poly)
+        top_node,
+        alembic_file)
     pm.mel.eval(mel_code)
+    print ">>", alembic_file
     return alembic_file
 
 
