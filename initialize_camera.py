@@ -44,3 +44,9 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.vayner_btn.clicked.connect(self.load_vayner)
         self.ui.tracked_btn.clicked.connect(self.load_tracked)
         return
+
+"""
+import pymel.util.common as common
+root = r"A:\Animation\Shotgun\System\Tools\shotgun\render_cam_RIG"
+vayner_camera = sorted(common.path(root).files("render_cam.*.ma"))[::-1][0]
+"""
