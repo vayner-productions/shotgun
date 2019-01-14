@@ -1,7 +1,7 @@
+from shotgun import checkout_scene
 import pymel.core as pm
 import sgtk.platform
 engine = sgtk.platform.current_engine()
-from shotgun import checkout_scene
 
 
 def update_timeline():
