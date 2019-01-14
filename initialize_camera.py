@@ -47,7 +47,8 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def load_vayner(self):
-        camera_path = ppath.path(__file__.rsplit("/", 1)[0] + "/render_cam_RIG")
+        # camera_path = ppath.path(__file__.rsplit("/", 1)[0] + "/render_cam_RIG")
+        camera_path = ppath.path(__file__).dirname().joinpath("render_cam_RIG")
         camera_file = sorted(camera_path.files())[::-1][0]  # ensures latest version
         nodes = pm.system.importFile(camera_file, defaultNamespace=1, returnNewNodes=1)
         top_node = pm.ls(nodes, assemblies=1)[0]
