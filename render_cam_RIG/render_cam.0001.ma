@@ -1,3 +1,4 @@
+//Maya ASCII 2018ff09 scene
 //Name: render_cam.0001.ma
 //Last modified: Wed, Jan 09, 2019 03:46:13 PM
 //Codeset: 1252
