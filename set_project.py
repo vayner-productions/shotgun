@@ -55,17 +55,14 @@ class MyWindow(QtWidgets.QDialog):
 
     def add_scene_items(self):
         scene_dir = self.project_path + "/scenes"
-        scene_subfolders = sorted([r"{}".format(dir.basename()) for dir in path(scene_dir).dirs()])
-        scene_items = [dir[3:] for dir in scene_subfolders]
+        scene_subfolders = {r"{}".format(sub.basename()) for sub in path(scene_dir).dirs()}
+        exclude = {"edits",
+                   "03_Cameras",
+                   "04_Layouts",
+                   "06_Cache"}
 
-        for item, subfolder in zip(scene_items, scene_subfolders):
-            if item in ["Cameras", "Layouts", "Cache"]:
-                scene_items.remove(item)
-                scene_subfolders.remove(subfolder)
-                continue
-            self.scene_dict[item] = subfolder
-
-        self.ui.scene_cbx.addItems(scene_items)
+        self.scene_dict = {sub[3:]: sub for sub in sorted(list(scene_subfolders.difference(exclude)))}
+        self.ui.scene_cbx.addItems(self.scene_dict.keys())
         return
 
     def change_entity_items(self):
