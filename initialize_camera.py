@@ -16,9 +16,9 @@ from PySide2 import QtCore, QtWidgets, QtUiTools
 import pymel.util.common as ppath
 import pymel.core as pm
 
-eng = sgtk.platform.current_engine()
-project_name = eng.context.project["name"]
-sg = eng.shotgun
+engine = sgtk.platform.current_engine()
+sg = engine.shotgun
+project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]])
 
 
 def get_window():
@@ -51,7 +51,7 @@ class MyWindow(QtWidgets.QDialog):
             camera_path = ppath.path(__file__).dirname().joinpath("render_cam_RIG")
             camera_file = sorted(camera_path.files())[::-1][0]  # ensures latest version
         nodes = pm.system.importFile(camera_file, defaultNamespace=1, returnNewNodes=1)
-        top_node = pm.ls(nodes, assemblies=1)[0]
+        top_node = pm.PyNode("render_cam_RIG")  # pm.ls(nodes, assemblies=1)[0]
         self.ui.close()
         print ">> loaded: {}".format(top_node),
         return top_node
@@ -83,33 +83,55 @@ class MyWindow(QtWidgets.QDialog):
         print ">> loaded: {}".format(imported),
         return
 
+    def update_shotgun(self, camera_file=None):
+        sg_frame_range = "{0:.0f}-{1:.0f}".format(pm.playbackOptions(q=1, ast=1),
+                                                  pm.playbackOptions(q=1, aet=1))
+        data = {
+            "sg_frame_range": sg_frame_range,
+            "sg_maya_camera": {
+                "link_type": "local",
+                "local_path": camera_file
+            }
+        }
+
+        workspace = pm.system.Workspace()
+        entity_name = ppath.path(workspace.fileRules["scene"]).basename()
+        filters = [
+            ["project", "is", project],
+            ["code", "is", entity_name]
+        ]
+        entity = sg.find_one("Shot", filters)
+        sg.update("Shot", entity["id"], data)
+        print ">> published render_cam_RIG to shotgun",
+        return
+
     def publish_camera(self):
-        camera_top_node = pm.ls("render_cam_RIG")[0]
+        camera_top_node = pm.PyNode("render_cam_RIG")
         cameras = camera_top_node.getChildren(ad=1, typ="camera")
         if len(cameras) > 1:
-            pm.warning(">> too many cameras in render_cam_RIG, choose one")
+            pm.warning("too many cameras in render_cam_RIG, choose one")
             return
         elif len(cameras) == 0:
             pm.warning("place camera in render_cam_RIG")
             return
-        else:
-            render_cam = cameras[0].getParent().rename("render_cam")
-            workspace = pm.system.Workspace()
-            shot = ppath.path(workspace.fileRules["scene"]).basename()
-            camera_path = ppath.path(workspace.getName()).joinpath("published", "03_Cameras", shot).normpath()
-            camera_path.makedirs_p()
 
-            pm.select(camera_top_node)
-            camera_files = sorted(camera_path.files("{}_original.*.ma".format(shot)))[::-1]
-            if camera_files:
-                latest_file = camera_files[0].split(".")
-                latest_file[1] = str(int(latest_file[1]) + 1).zfill(4)
-                camera_file = ppath.path(".".join(latest_file))
-                pm.system.exportAsReference(camera_file, namespace=":")
-            else:
-                camera_file = camera_path.__div__("{}_original.0001.ma".format(shot))
-                pm.system.exportAsReference(camera_file, namespace=":")
-            print ">> published render_cam_RIG to shotgun",
+        render_cam = cameras[0].getParent().rename("render_cam")
+        workspace = pm.system.Workspace()
+        shot = ppath.path(workspace.fileRules["scene"]).basename()
+        camera_path = ppath.path(workspace.getName()).joinpath("published", "03_Cameras", shot).normpath()
+        camera_path.makedirs_p()
+
+        pm.select(camera_top_node)
+        camera_files = sorted(camera_path.files("{}_original.*.ma".format(shot)))[::-1]
+        camera_file = None
+        if camera_files:
+            latest_file = camera_files[0].split(".")
+            latest_file[1] = str(int(latest_file[1]) + 1).zfill(4)
+            camera_file = ppath.path(".".join(latest_file))
+            pm.system.exportAsReference(camera_file, namespace=":")
+        else:
+            camera_file = camera_path.__div__("{}_original.0001.ma".format(shot))
+            pm.system.exportAsReference(camera_file, namespace=":")
 
         try:
             imported = pm.ls("*_IMPORT")[0]
@@ -117,6 +139,8 @@ class MyWindow(QtWidgets.QDialog):
                 pm.delete(imported)
         except:
             pass
+
+        self.update_shotgun(camera_file=camera_file)
         self.ui.close()
         return
 
