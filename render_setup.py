@@ -1,4 +1,5 @@
 import pymel.core as pm
+import pymel.util.path as pth
 from PySide2 import QtCore, QtWidgets, QtUiTools
 import os
 workspace = pm.system.workspace
@@ -206,8 +207,8 @@ class MyWindow(QtWidgets.QDialog):
         lights = [sel.text() for sel in self.ui.light_lsw.selectedItems()]
         camera = [sel.text() for sel in self.ui.camera_lsw.selectedItems()]
 
-        if not lights or not camera:
-            pm.warning(">> selection incomplete, select light(s) and camera")
+        if not camera:
+            pm.warning(">> selection incomplete, select render camera")
             return
 
         if lights:
@@ -216,6 +217,10 @@ class MyWindow(QtWidgets.QDialog):
         camera = camera[0]  # only one camera selection
         if camera:
             render_setup(camera)
+            render_root = pm.workspace.expandName(pm.workspace.fileRules["images"])
+            filename = pm.rendering.renderSettings(firstImageName=1)[0]
+            output_path = pth("/".join([render_root, filename])).dirname().dirname()
+            output_path.makedirs_p()
         print ">> render setup complete",
         self.ui.close()
         return
