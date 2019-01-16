@@ -73,9 +73,15 @@ def render_setup(camera):
     filename_prefix = "{0}/<Version>/<RenderLayer>/{0}_<Version>_<RenderLayer>".format(shot_id)
     start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
 
+    next_version = None
     shot_path = pth(pm.workspace.expandName(pm.workspace.fileRules["images"]) + "/" + shot_id)
     shot_path.makedirs_p()
-    next_version = "v" + str(int(sorted(shot_path.dirs("v*"))[::-1][0].basename()[1:]) + 1).zfill(3)
+    latest_path = sorted(shot_path.dirs("v*"))[::-1][0]
+    if latest_path.dirs():
+        current_version = latest_path.basename()
+        next_version = "v" + str(int(current_version[1:]) + 1).zfill(3)
+    else:
+        next_version = latest_path.basename()
 
     # update default render globals
     drg = pm.PyNode("defaultRenderGlobals")
