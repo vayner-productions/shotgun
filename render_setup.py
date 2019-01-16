@@ -65,41 +65,6 @@ def render_setup(camera):
     # make sure images file rule is set to default
     workspace.fileRules["images"] = "images"
 
-    # create a /images/Shots directory
-    shots_dir = workspace.expandName(workspace.fileRules["images"]) + "/Shots"
-    try:
-        os.makedirs(shots_dir)
-    except:
-        pass
-
-    #
-    # version
-    #
-
-    # check version inside images/Shots
-    current_version = None
-    for ver in os.listdir(shots_dir):
-        if (len(ver) == 4) and (ver[1:].isdigit()):
-            current_version = ver
-
-    if not current_version:
-        current_version = "v001"
-        os.makedirs(shots_dir + "/" + current_version)
-
-    # get the next version
-    next_version = None
-    if not os.listdir(shots_dir + "/" + current_version):
-        next_version = current_version  # use empty folder
-    else:
-        next_version = str(int(current_version[1:].isdigit()) + 1).zfill(3)
-
-    # create the next version directory
-    next_version_dir = shots_dir + "/" + next_version
-    try:
-        os.makedirs(next_version_dir)
-    except:
-        pass
-
     #
     # render settings
     #
@@ -107,6 +72,10 @@ def render_setup(camera):
     shot_id = os.path.basename(workspace.fileRules["scene"])
     filename_prefix = "{0}/<Version>/<RenderLayer>/{0}_<Version>_<RenderLayer>".format(shot_id)
     start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
+
+    shot_path = pth(pm.workspace.expandName(pm.workspace.fileRules["images"]) + "/" + shot_id)
+    shot_path.makedirs_p()
+    next_version = "v" + str(int(sorted(shot_path.dirs("v*"))[::-1][0].basename()[1:]) + 1).zfill(3)
 
     # update default render globals
     drg = pm.PyNode("defaultRenderGlobals")
