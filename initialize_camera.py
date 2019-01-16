@@ -107,6 +107,22 @@ class MyWindow(QtWidgets.QDialog):
 
     def publish_camera(self):
         camera_top_node = pm.PyNode("render_cam_RIG")
+
+        # VERSION UP FROM REFERENCE
+        referenced = pm.referenceQuery(camera_top_node, isNodeReferenced=1)
+        if referenced:
+            latest_file = pm.referenceQuery(camera_top_node, filename=1).split(".")
+            latest_file[1] = str(int(latest_file[1]) + 1).zfill(4)
+            camera_file = ppath.path(".".join(latest_file))
+
+            pm.system.FileReference(camera_top_node).importContents()
+            pm.system.exportAsReference(camera_file, namespace=":")
+
+            self.update_shotgun(camera_file=camera_file)
+            self.ui.close()
+            return
+
+        # VERSION 1 AND VERSION UP FROM IMPORTS
         cameras = camera_top_node.getChildren(ad=1, typ="camera")
         if len(cameras) > 1:
             pm.warning("too many cameras in render_cam_RIG, choose one")
@@ -115,25 +131,23 @@ class MyWindow(QtWidgets.QDialog):
             pm.warning("place camera in render_cam_RIG")
             return
 
-        #TODO: below is imported in the scene; anticipate if it is a reference
+        render_cam = cameras[0].getParent().rename("render_cam")
+        workspace = pm.system.Workspace()
+        shot = ppath.path(workspace.fileRules["scene"]).basename()
+        camera_path = ppath.path(workspace.getName()).joinpath("published", "03_Cameras", shot).normpath()
+        camera_path.makedirs_p()
 
-        # render_cam = cameras[0].getParent().rename("render_cam")
-        # workspace = pm.system.Workspace()
-        # shot = ppath.path(workspace.fileRules["scene"]).basename()
-        # camera_path = ppath.path(workspace.getName()).joinpath("published", "03_Cameras", shot).normpath()
-        # camera_path.makedirs_p()
-        #
-        # pm.select(camera_top_node)
-        # camera_files = sorted(camera_path.files("{}_original.*.ma".format(shot)))[::-1]
-        # camera_file = None
-        # if camera_files:
-        #     latest_file = camera_files[0].split(".")
-        #     latest_file[1] = str(int(latest_file[1]) + 1).zfill(4)
-        #     camera_file = ppath.path(".".join(latest_file))
-        #     pm.system.exportAsReference(camera_file, namespace=":")
-        # else:
-        #     camera_file = camera_path.__div__("{}_original.0001.ma".format(shot))
-        #     pm.system.exportAsReference(camera_file, namespace=":")
+        pm.select(camera_top_node)
+        camera_files = sorted(camera_path.files("{}_original.*.ma".format(shot)))[::-1]
+        camera_file = None
+        if camera_files:
+            latest_file = camera_files[0].split(".")
+            latest_file[1] = str(int(latest_file[1]) + 1).zfill(4)
+            camera_file = ppath.path(".".join(latest_file))
+            pm.system.exportAsReference(camera_file, namespace=":")
+        else:
+            camera_file = camera_path.__div__("{}_original.0001.ma".format(shot))
+            pm.system.exportAsReference(camera_file, namespace=":")
 
         try:
             imported = pm.ls("*_IMPORT")[0]
