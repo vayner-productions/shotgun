@@ -84,6 +84,7 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def update_shotgun(self, camera_file=None):
+        #TODO: SG_MAYA_CAMERA IS A LINK DATA TYPE, BUT EVENTUALLY, IT SHOULD BE A MULTI-ENTITY DATA TYPE SO COMMENTS AND VERSION TRACKING COULD BE POSSIBLE
         sg_frame_range = "{0:.0f}-{1:.0f}".format(pm.playbackOptions(q=1, ast=1),
                                                   pm.playbackOptions(q=1, aet=1))
         data = {
