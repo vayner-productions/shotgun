@@ -188,7 +188,7 @@ def publish_scene(addressed_tasks=[], comments=None):
     elif scene_process in ["Lighting"]:
         render_root = pm.workspace.expandName(pm.workspace.fileRules["images"])
         filename = pm.rendering.renderSettings(firstImageName=1)[0]
-        output_path = ut.path("/".join([render_root, filename])).dirname().dirname()
+        output_path = ut.path("/".join([render_root, filename])).dirname().dirname().normpath()
 
         data = {
             "sg_maya_light": {
