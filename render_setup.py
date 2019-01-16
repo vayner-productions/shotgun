@@ -104,11 +104,12 @@ def render_setup(camera):
     #
 
     shot_id = os.path.basename(workspace.fileRules["scene"])
-    filename_prefix = "Shots/{0}/{1}/<RenderLayer>/{0}".format(shot_id, next_version)
+    filename_prefix = "{0}/<Version>/<RenderLayer>/{0}_<Version>_<RenderLayer>".format(shot_id)
     start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
 
     # update default render globals
     drg = pm.PyNode("defaultRenderGlobals")
+    drg.renderVersion.set(next_version)
     drg.imageFilePrefix.set(filename_prefix)
     drg.animation.set(1)
     drg.putFrameBeforeExt.set(1)
