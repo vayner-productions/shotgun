@@ -1,6 +1,5 @@
 import pymel.core as pm
 import pymel.util.common as ut
-import pymel.util.path as pth
 import sgtk.platform
 from PySide2 import QtCore, QtWidgets, QtUiTools
 import os
@@ -189,7 +188,7 @@ def publish_scene(addressed_tasks=[], comments=None):
     elif scene_process in ["Lighting"]:
         render_root = pm.workspace.expandName(pm.workspace.fileRules["images"])
         filename = pm.rendering.renderSettings(firstImageName=1)[0]
-        output_path = pth("/".join([render_root, filename]))
+        output_path = ut.path("/".join([render_root, filename])).dirname().dirname()
 
         data = {
             "sg_maya_light": {
