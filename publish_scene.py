@@ -197,7 +197,7 @@ def publish_scene(addressed_tasks=[], comments=None):
             },
             "sg_maya_render": {
                 "link_type": "local",
-                "local_path": output_path
+                "local_path": r"{}".format(output_path)
             }
         }
         playblast_image = 0
