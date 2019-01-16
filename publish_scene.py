@@ -1,5 +1,6 @@
 import pymel.core as pm
 import pymel.util.common as ut
+import pymel.util.path as pth
 import sgtk.platform
 from PySide2 import QtCore, QtWidgets, QtUiTools
 import os
@@ -186,10 +187,18 @@ def publish_scene(addressed_tasks=[], comments=None):
         }
         playblast_image = 0
     elif scene_process in ["Lighting"]:
+        render_root = pm.workspace.expandName(pm.workspace.fileRules["images"])
+        filename = pm.rendering.renderSettings(firstImageName=1)[0]
+        output_path = pth("/".join([render_root, filename]))
+
         data = {
             "sg_maya_light": {
                 "link_type": "local",
                 "local_path": local_path
+            },
+            "sg_maya_render": {
+                "link_type": "local",
+                "local_path": output_path
             }
         }
         playblast_image = 0
@@ -225,8 +234,9 @@ def publish_scene(addressed_tasks=[], comments=None):
         "description": comments
     }
     version = sg.create("Version", version_data)
-    media_file = set_playblast(image=playblast_image)
-    sg.upload("Version", version["id"], media_file, field_name="sg_uploaded_movie")
+    if scene_process not in ["Lighting"]:
+        media_file = set_playblast(image=playblast_image)
+        sg.upload("Version", version["id"], media_file, field_name="sg_uploaded_movie")
     print ">> published all files to shotgun",
     return
 
