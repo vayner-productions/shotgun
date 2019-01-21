@@ -19,6 +19,7 @@ import pymel.core as pm
 engine = sgtk.platform.current_engine()
 sg = engine.shotgun
 project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]])
+root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya/"
 
 
 def get_window():
@@ -84,25 +85,56 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def update_shotgun(self, camera_file=None):
-        #TODO: SG_MAYA_CAMERA IS A LINK DATA TYPE, BUT EVENTUALLY, IT SHOULD BE A MULTI-ENTITY DATA TYPE SO COMMENTS AND VERSION TRACKING COULD BE POSSIBLE
-        sg_frame_range = "{0:.0f}-{1:.0f}".format(pm.playbackOptions(q=1, ast=1),
-                                                  pm.playbackOptions(q=1, aet=1))
-        data = {
-            "sg_frame_range": sg_frame_range,
-            "sg_maya_camera": {
-                "link_type": "local",
-                "local_path": camera_file
-            }
-        }
+        # sg_frame_range = "{0:.0f}-{1:.0f}".format(pm.playbackOptions(q=1, ast=1),
+        #                                           pm.playbackOptions(q=1, aet=1))
+        # data = {
+        #     "sg_frame_range": sg_frame_range,
+        #     "sg_maya_camera": {
+        #         "link_type": "local",
+        #         "local_path": camera_file
+        #     }
+        # }
+        #
+        # workspace = pm.system.Workspace()
+        # entity_name = ppath.path(workspace.fileRules["scene"]).basename()
+        # filters = [
+        #     ["project", "is", project],
+        #     ["code", "is", entity_name]
+        # ]
+        # entity = sg.find_one("Shot", filters)
+        # sg.update("Shot", entity["id"], data)
 
         workspace = pm.system.Workspace()
         entity_name = ppath.path(workspace.fileRules["scene"]).basename()
-        filters = [
-            ["project", "is", project],
-            ["code", "is", entity_name]
-        ]
-        entity = sg.find_one("Shot", filters)
-        sg.update("Shot", entity["id"], data)
+        print entity_name + "_Cam"
+        # filters = [["project", "is", project],
+        #            ["code", "is", camera_code]]
+        # camera_entity = sg.find_one("Camera", filters)
+        # comment = "published from code, upload"
+        #
+        # data = {
+        #     "project": project,
+        #     "code": "Shot_001_Cam",  # Version Name
+        #     "entity": camera_entity,  # Link - Shot_001_Cam entity
+        #     "description": comment,  # Description - comment
+        # }
+        # version = sg.create("Version", data)
+        #
+        # camera_display_name = ppath.path(camera_file).basename()
+        # if root in camera_file:
+        #     # attaching local file
+        #     sg.update("Version",
+        #               version["id"],
+        #               {"link_type": "local",
+        #                "local_path": camera_file,
+        #                "name": camera_display_name})
+        # else:
+        #     # uploading manually/remotely
+        #     sg.upload("Version",
+        #               version["id"],
+        #               camera_file,
+        #               field_name="sg_maya_camera",
+        #               display_name=camera_display_name)
         print ">> published render_cam_RIG to shotgun",
         return
 
