@@ -59,7 +59,8 @@ class MyWindow(QtWidgets.QDialog):
         exclude = {"edits",
                    "03_Cameras",
                    "04_Layouts",
-                   "06_Cache"}
+                   "06_Cache",
+                   "None"}
 
         self.scene_dict = {sub[3:]: sub for sub in sorted(list(scene_subfolders.difference(exclude)))}
         self.ui.scene_cbx.addItems(self.scene_dict.keys())
