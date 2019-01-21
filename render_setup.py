@@ -76,12 +76,17 @@ def render_setup(camera):
     next_version = None
     shot_path = pth(pm.workspace.expandName(pm.workspace.fileRules["images"]) + "/" + shot_id)
     shot_path.makedirs_p()
-    latest_path = sorted(shot_path.dirs("v*"))[::-1][0]
-    if latest_path.dirs():
+
+    versions = shot_path.dirs("v*")
+    if versions:
+        latest_path = sorted(shot_path.dirs("v*"))[::-1][0]
         current_version = latest_path.basename()
-        next_version = "v" + str(int(current_version[1:]) + 1).zfill(3)
+        if latest_path.files():
+            next_version = "v" + str(int(current_version[1:]) + 1).zfill(3)
+        else:
+            next_version = current_version
     else:
-        next_version = latest_path.basename()
+        next_version = "v001"
 
     # update default render globals
     drg = pm.PyNode("defaultRenderGlobals")
