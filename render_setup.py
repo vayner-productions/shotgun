@@ -28,7 +28,7 @@ def aovs_setup(lights):
                     "crypto_material",
                     "crypto_object",
                     "AO"]
-    default_aovs.extend(lights)
+    # default_aovs.extend(lights)
     for aov in default_aovs:
         if not aovs.AOVInterface().getAOVNode(aov):
             aovs.AOVInterface().addAOV(aov)
@@ -43,10 +43,10 @@ def aovs_setup(lights):
         ao_shader.outColor >> ao_aov.defaultValue
         ao_shader.outColor >> ao_sg.surfaceShader
 
-    # create light group for each of the lights
-    for light in lights:
-        shape = pm.PyNode(light).getShape()
-        shape.aiAov.set(light)
+    # # create light group for each of the lights
+    # for light in lights:
+    #     shape = pm.PyNode(light).getShape()
+    #     shape.aiAov.set(light)
 
     # merge aovs
     arnold_driver = pm.PyNode("defaultArnoldDriver")
@@ -115,20 +115,20 @@ def get_window():
     except:
         pass
 
-    is_light = 0
-
-    lights = list(set(pm.nodeType("shape", derived=True, isTypeName=True)).intersection(
-        pm.listNodeTypes("light")))
-    for l in pm.ls(type=lights):
-        light = str(l.getParent())
-        if (len(light) == 8) and ("Light_" in light) and (light[-2:].isdigit()):
-            is_light = 1
-        else:
-            is_light = 0
-            break
-
-    if not is_light:
-        pm.warning(">> use arnold lights with this naming convention: Light_##")
+    # is_light = 0
+    #
+    # lights = list(set(pm.nodeType("shape", derived=True, isTypeName=True)).intersection(
+    #     pm.listNodeTypes("light")))
+    # for l in pm.ls(type=lights):
+    #     light = str(l.getParent())
+    #     if (len(light) == 8) and ("Light_" in light) and (light[-2:].isdigit()):
+    #         is_light = 1
+    #     else:
+    #         is_light = 0
+    #         break
+    #
+    # if not is_light:
+    #     pm.warning(">> use arnold lights with this naming convention: Light_##")
 
     is_camera = 0
 
@@ -141,9 +141,11 @@ def get_window():
     if not is_camera:
         pm.warning(">> could not find render camera in scene")
 
-    if is_light and is_camera:
-        mw = MyWindow()
-        mw.ui.show()
+    # if is_light and is_camera:
+    #     mw = MyWindow()
+    #     mw.ui.show()
+    mw = MyWindow()
+    mw.ui.show()
 
 
 class MyWindow(QtWidgets.QDialog):
@@ -152,7 +154,7 @@ class MyWindow(QtWidgets.QDialog):
         self.init_ui()
 
     def import_ui(self):
-        ui_path = __file__.split(".")[0] + ".ui"
+        ui_path = __file__.split(".")[0] + "_.ui"
         loader = QtUiTools.QUiLoader()
         ui_file = QtCore.QFile(ui_path)
         ui_file.open(QtCore.QFile.ReadOnly)
@@ -161,14 +163,14 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def init_ui(self):
-        lights = set(pm.ls("Light_*", type="transform"))
-        all_maya_lights = set(light.getParent() for light in pm.ls(type="light"))
-        arnold_lights = list(lights.difference(all_maya_lights))
-
-        for light in arnold_lights:
-            light = str(light)
-            if (len(light) == 8) and ("Light_" in light) and (light[-2:].isdigit()):
-                self.ui.light_lsw.addItem(light)
+        # lights = set(pm.ls("Light_*", type="transform"))
+        # all_maya_lights = set(light.getParent() for light in pm.ls(type="light"))
+        # arnold_lights = list(lights.difference(all_maya_lights))
+        #
+        # for light in arnold_lights:
+        #     light = str(light)
+        #     if (len(light) == 8) and ("Light_" in light) and (light[-2:].isdigit()):
+        #         self.ui.light_lsw.addItem(light)
 
         for c in pm.ls(type="camera"):
             camera = str(c.getParent())
@@ -179,15 +181,15 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def run(self):
-        lights = [sel.text() for sel in self.ui.light_lsw.selectedItems()]
+        # lights = [sel.text() for sel in self.ui.light_lsw.selectedItems()]
         camera = [sel.text() for sel in self.ui.camera_lsw.selectedItems()]
 
         if not camera:
             pm.warning(">> selection incomplete, select render camera")
             return
 
-        if lights:
-            aovs_setup(lights)
+        # if lights:
+        #     aovs_setup(lights)
 
         camera = camera[0]  # only one camera selection
         if camera:
