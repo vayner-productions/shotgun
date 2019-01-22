@@ -74,14 +74,14 @@ def render_setup(camera):
     start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
 
     next_version = None
-    shot_path = pth(pm.workspace.expandName(pm.workspace.fileRules["images"]) + "/" + shot_id)
+    shot_path = pth(pm.workspace.expandName(pm.workspace.fileRules["images"]) + "/Shots/" + shot_id)
     shot_path.makedirs_p()
 
     versions = shot_path.dirs("v*")
     if versions:
         latest_path = sorted(shot_path.dirs("v*"))[::-1][0]
         current_version = latest_path.basename()
-        if latest_path.files():
+        if latest_path.files() or latest_path.dirs():
             next_version = "v" + str(int(current_version[1:]) + 1).zfill(3)
         else:
             next_version = current_version
@@ -110,6 +110,7 @@ def render_setup(camera):
             cam.renderable.set(0)
     render_camera = pm.PyNode(camera)
     render_camera.renderable.set(1)
+    pm.saveFile(f=1)
     return
 
 
