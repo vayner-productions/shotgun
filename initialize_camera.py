@@ -105,36 +105,54 @@ class MyWindow(QtWidgets.QDialog):
         # sg.update("Shot", entity["id"], data)
 
         workspace = pm.system.Workspace()
-        entity_name = ppath.path(workspace.fileRules["scene"]).basename()
-        print entity_name + "_Cam"
-        # filters = [["project", "is", project],
-        #            ["code", "is", camera_code]]
-        # camera_entity = sg.find_one("Camera", filters)
-        # comment = "published from code, upload"
-        #
-        # data = {
-        #     "project": project,
-        #     "code": "Shot_001_Cam",  # Version Name
-        #     "entity": camera_entity,  # Link - Shot_001_Cam entity
-        #     "description": comment,  # Description - comment
-        # }
-        # version = sg.create("Version", data)
-        #
-        # camera_display_name = ppath.path(camera_file).basename()
-        # if root in camera_file:
-        #     # attaching local file
-        #     sg.update("Version",
-        #               version["id"],
-        #               {"link_type": "local",
-        #                "local_path": camera_file,
-        #                "name": camera_display_name})
-        # else:
-        #     # uploading manually/remotely
-        #     sg.upload("Version",
-        #               version["id"],
-        #               camera_file,
-        #               field_name="sg_maya_camera",
-        #               display_name=camera_display_name)
+        camera_code = ppath.path(workspace.fileRules["scene"]).basename() + "_CAM"
+        camera_filters = [
+            ["project", "is", project],
+            ["code", "is", camera_code]
+        ]
+        camera_entity = sg.find_one("Camera", camera_filters)
+        comment = "local publish"
+
+        # using a descriptive name to help search for versions later on
+        version_name = camera_code + "_v001"
+        version_filters = [
+            ["project", "is", project],
+            ["entity", "is", camera_entity]
+        ]
+        additional_filter_presets = [
+            {
+                "preset_name": "LATEST",
+                "latest_by": "ENTITIES_CREATED_AT"
+            }
+        ]
+        version_entity = sg.find_one("Version", version_filters, additional_filter_presets=additional_filter_presets)
+        if version_entity:
+            latest_version = sg.find_one("Version", [["id", "is", version_entity["id"]]], ["code"])["code"][-3:]
+            version_name = camera_code + "_v" + str(int(latest_version) + 1).zfill(3)
+
+        data = {
+            "project": project,
+            "code": version_name,  # Version Name - Shot_004_v001
+            "entity": camera_entity,  # Link - Shot_001_Cam entity
+            "description": comment,  # Description - comment
+        }
+        version = sg.create("Version", data)
+
+        camera_display_name = ppath.path(camera_file).basename()
+        if root in camera_file:
+            # attaching local file
+            sg.update("Version",
+                      version["id"],
+                      {"link_type": "local",
+                       "local_path": camera_file,
+                       "name": camera_display_name})
+        else:
+            # uploading manually/remotely
+            sg.upload("Version",
+                      version["id"],
+                      camera_file,
+                      field_name="sg_maya_camera",
+                      display_name=camera_display_name)
         print ">> published render_cam_RIG to shotgun",
         return
 
