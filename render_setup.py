@@ -70,7 +70,7 @@ def render_setup(camera):
     #
 
     shot_id = os.path.basename(workspace.fileRules["scene"])
-    filename_prefix = "{0}/<Version>/<RenderLayer>/{0}_<Version>_<RenderLayer>".format(shot_id)
+    filename_prefix = "Shots/{0}/<Version>/<RenderLayer>/{0}_<Version>_<RenderLayer>".format(shot_id)
     start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
 
     next_version = None
