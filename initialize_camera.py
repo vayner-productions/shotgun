@@ -192,11 +192,11 @@ class MyWindow(QtWidgets.QDialog):
             reference_path.importContents(removeNamespace=0)
             pm.select(camera_top_node)
             pm.system.exportAsReference(camera_file, namespace=":")
+            pm.select(cl=1)
 
             #TODO: APPLY EXPORTED ANIM/POSITIONAL DATA BACK
 
             self.update_shotgun(camera_file=camera_file, comment=comment)
-            pm.select(cl=1)
             self.ui.close()
             return
 
