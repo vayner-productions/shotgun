@@ -19,7 +19,7 @@ import pymel.core as pm
 engine = sgtk.platform.current_engine()
 sg = engine.shotgun
 project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]])
-root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya/"
+root = None
 
 
 def get_window():
@@ -139,7 +139,7 @@ class MyWindow(QtWidgets.QDialog):
         version = sg.create("Version", data)
 
         camera_display_name = ppath.path(camera_file).basename()
-        if root in camera_file:
+        if root is None:
             # attaching local file
             sg.update("Version",
                       version["id"],
