@@ -19,7 +19,7 @@ import pymel.core as pm
 engine = sgtk.platform.current_engine()
 sg = engine.shotgun
 project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]])
-root = None
+root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya/"
 
 
 def get_window():
@@ -84,51 +84,68 @@ class MyWindow(QtWidgets.QDialog):
         print ">> loaded: {}".format(imported),
         return
 
-    def update_shotgun(self, camera_file=None):
-        # sg_frame_range = "{0:.0f}-{1:.0f}".format(pm.playbackOptions(q=1, ast=1),
-        #                                           pm.playbackOptions(q=1, aet=1))
-        # data = {
-        #     "sg_frame_range": sg_frame_range,
-        #     "sg_maya_camera": {
-        #         "link_type": "local",
-        #         "local_path": camera_file
-        #     }
-        # }
-        #
-        # workspace = pm.system.Workspace()
-        # entity_name = ppath.path(workspace.fileRules["scene"]).basename()
-        # filters = [
-        #     ["project", "is", project],
-        #     ["code", "is", entity_name]
-        # ]
-        # entity = sg.find_one("Shot", filters)
-        # sg.update("Shot", entity["id"], data)
-
+    def update_shotgun(self, camera_file=None, comment=""):
+        # SHOT - update frame range in shot
         workspace = pm.system.Workspace()
-        camera_code = ppath.path(workspace.fileRules["scene"]).basename() + "_CAM"
-        camera_filters = [
+        shot_name = ppath.path(workspace.fileRules["scene"]).basename()  # Shot_###
+        shot_filters = [
             ["project", "is", project],
-            ["code", "is", camera_code]
+            ["code", "is", shot_name]
         ]
-        camera_entity = sg.find_one("Camera", camera_filters)
-        comment = "local publish"
+        shot_fields = [
+            "id",
+            "type",
+            "sg_frame_range",
+            "sg_camera"
+        ]
+        shot_entity = sg.find_one(
+            "Shot",
+            shot_filters,
+            shot_fields
+        )
+        sg_frame_range = "{0:.0f}-{1:.0f}".format(
+            pm.playbackOptions(q=1, ast=1),
+            pm.playbackOptions(q=1, aet=1)
+        )
 
-        # using a descriptive name to help search for versions later on
-        version_name = camera_code + "_v001"
+        if shot_entity["sg_frame_range"] != sg_frame_range:
+            comment += "frame range changed from {} to {}".format(
+                shot_entity["sg_frame_range"],
+                sg_frame_range
+            )
+            sg.update(
+                "Shot",
+                shot_entity["id"],
+                {"sg_frame_range": sg_frame_range}
+            )
+
+        # CAMERA - find camera linked to current shot
+        camera_entity = shot_entity["sg_camera"][0]  # assumes shots are paired with one camera !!!
+        version_name = camera_entity["name"] + "_v001"
         version_filters = [
             ["project", "is", project],
             ["entity", "is", camera_entity]
         ]
-        additional_filter_presets = [
+        version_fields = [
+            "id",
+            "type",
+            "code"
+        ]
+        version_additional_filter_presets = [
             {
                 "preset_name": "LATEST",
                 "latest_by": "ENTITIES_CREATED_AT"
             }
         ]
-        version_entity = sg.find_one("Version", version_filters, additional_filter_presets=additional_filter_presets)
+        version_entity = sg.find_one(
+            "Version",
+            version_filters,
+            fields=version_fields,
+            additional_filter_presets=version_additional_filter_presets
+        )
         if version_entity:
-            latest_version = sg.find_one("Version", [["id", "is", version_entity["id"]]], ["code"])["code"][-3:]
-            version_name = camera_code + "_v" + str(int(latest_version) + 1).zfill(3)
+            latest_version = version_entity["code"][-3:]
+            version_name = version_name[:-3] + str(int(latest_version) + 1).zfill(3)
 
         data = {
             "project": project,
@@ -138,6 +155,7 @@ class MyWindow(QtWidgets.QDialog):
         }
         version = sg.create("Version", data)
 
+        # PUBLISH - local and remote files are treated differently on sg
         camera_display_name = ppath.path(camera_file).basename()
         if root is None:
             # attaching local file
@@ -156,20 +174,29 @@ class MyWindow(QtWidgets.QDialog):
         print ">> published render_cam_RIG to shotgun",
         return
 
-    def publish_camera(self):
+    def publish_camera(self, comment=""):
         camera_top_node = pm.PyNode("render_cam_RIG")
 
         # VERSION UP FROM REFERENCE
         referenced = pm.referenceQuery(camera_top_node, isNodeReferenced=1)
         if referenced:
-            latest_file = pm.referenceQuery(camera_top_node, filename=1).split(".")
-            latest_file[1] = str(int(latest_file[1]) + 1).zfill(4)
-            camera_file = ppath.path(".".join(latest_file))
+            reference_node = pm.referenceQuery(camera_top_node, referenceNode=1)
+            reference_path = pm.system.FileReference(pathOrRefNode=reference_node)
 
-            pm.system.FileReference(camera_top_node).importContents()
+            camera_file = "{}".format(reference_path).split(".")
+            camera_file[1] = str(int(camera_file[1]) + 1).zfill(4)
+            camera_file = ppath.path(".".join(camera_file))
+
+            #TODO: EXPORT ANIM/POSITIONAL DATA, ZERO OUT ATTRIBUTES
+
+            reference_path.importContents(removeNamespace=0)
+            pm.select(camera_top_node)
             pm.system.exportAsReference(camera_file, namespace=":")
 
-            self.update_shotgun(camera_file=camera_file)
+            #TODO: APPLY EXPORTED ANIM/POSITIONAL DATA BACK
+
+            self.update_shotgun(camera_file=camera_file, comment=comment)
+            pm.select(cl=1)
             self.ui.close()
             return
 
@@ -185,7 +212,10 @@ class MyWindow(QtWidgets.QDialog):
         render_cam = cameras[0].getParent().rename("render_cam")
         workspace = pm.system.Workspace()
         shot = ppath.path(workspace.fileRules["scene"]).basename()
-        camera_path = ppath.path(workspace.getName()).joinpath("published", "03_Cameras", shot).normpath()
+        camera_path = ppath.path(workspace.getName()).joinpath(
+            "published",
+            "03_Cameras",
+            shot).normpath()
         camera_path.makedirs_p()
 
         pm.select(camera_top_node)
@@ -207,7 +237,7 @@ class MyWindow(QtWidgets.QDialog):
         except:
             pass
 
-        self.update_shotgun(camera_file=camera_file)
+        self.update_shotgun(camera_file=camera_file, comment=comment)
         self.ui.close()
         return
 
