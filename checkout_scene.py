@@ -1,9 +1,11 @@
-import pymel.core as pm
-import sgtk.platform
+"""
+old check out scene tools are used by publish scene and update timeline
+"""
 
-engine = sgtk.platform.current_engine()
-sg = engine.shotgun
-project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]])
+
+from . import sg, project
+import pymel.core as pm
+import pymel.util.path as path
 
 
 def get_entity(file_path):
@@ -90,3 +92,38 @@ def checkout_scene():
     print ">> opened: {}".format(pm.util.path.basename(new_file)),
     return current_file
 
+
+class Checkout:
+    def __init__(self):
+        return
+
+    def latest_processed_file(self, processed_file=None):
+        processed_path = path(pm.workspace.expandName(pm.workspace.fileRules["scene"]))
+        processed_file = sorted(processed_path.files("*_processed.*.ma"))[::-1][0].normpath()
+        pm.openFile(processed_file, f=1)
+        print ">> Checked out latest processed file", processed_file
+        return
+
+    def latest_published_file(self, published_file=None):
+        #TODO: NEEDS WORK, TAKING LATEST PUBLISH AND INCREMENTING UP FROM LATEST PROCESSED
+        key = path(pm.workspace.fileRules["scene"]).dirname().basename()[3:]
+        data = {
+            "Rigs": "sg_file",
+            "Assets": "sg_file",
+            "Cameras": "sg_tracked_camera",
+            "Layouts": "sg_maya_layout",
+            "Animation": "sg_maya_anim",
+            "Lighting": "sg_maya_light"
+        }
+
+        entity_type = "Shot"
+        if key in ["Rigs", "Assets"]:
+            entity_type = "Asset"
+
+        entity_filters = [
+            ["project", "is", project],
+            ["code", "is", ]
+        ]
+        sg.find_one(entity_type, entity_filters, entity_field)
+        print ">> Checked out latest published file", published_file
+        return
