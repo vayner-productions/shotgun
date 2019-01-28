@@ -19,7 +19,7 @@ import pymel.core as pm
 engine = sgtk.platform.current_engine()
 sg = engine.shotgun
 project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]])
-root = r"/Users/kathyhnali/Documents/Clients/Vayner Production/04_Maya/"
+root = None
 
 
 def get_window():
@@ -159,11 +159,13 @@ class MyWindow(QtWidgets.QDialog):
         camera_display_name = ppath.path(camera_file).basename()
         if root is None:
             # attaching local file
+            camera_file = camera_file.normpath()
             sg.update("Version",
                       version["id"],
-                      {"link_type": "local",
-                       "local_path": camera_file,
-                       "name": camera_display_name})
+                      {"sg_maya_camera": {
+                          "link_type": "local",
+                          "local_path": camera_file,
+                          "name": camera_display_name}})
         else:
             # uploading manually/remotely
             sg.upload("Version",
@@ -175,6 +177,7 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def publish_camera(self, comment=""):
+        #TODO: IMPORTS PROCESSED FILE, EXPORTS PUBLISHED FILE
         camera_top_node = pm.PyNode("render_cam_RIG")
 
         # VERSION UP FROM REFERENCE
