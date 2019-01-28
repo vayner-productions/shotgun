@@ -8,6 +8,8 @@ scene, renames only camera child to top node 'render_cam'
 lastly, the camera to be published in any shot scene process and updates sg_frame_range. it does
 this by turning the camera rig into a referenced object. in scenes already containing referenced
 camera, ref cam is imported, namespace removed, and turned into a new reference (versioned up)
+
+if there's a new tracked camera to publish, open empty scene, set project to its respective shot, and publish
 """
 
 
@@ -176,6 +178,19 @@ class MyWindow(QtWidgets.QDialog):
         print ">> published render_cam_RIG to shotgun",
         return
 
+    def create_reference(self, output_file=None, top_node=None):
+        """Creates a reference for a local object in the scene. Requires output file location and top node.
+        Increments and saves file first. It reverts back to this saved file if something goes wrong in the process.
+        """
+        pm.select(top_node)
+        #TODO: EXPORT ANIM/POSITIONAL DATA, ZERO OUT ATTRIBUTES
+        #TODO: APPLY EXPORTED ANIM/POSITIONAL DATA BACK
+        # pm.select(camera_top_node)
+        # camera_anim_file = camera_file.replace("original", "anim")
+        # pm.system.exportSelectedAnim(camera_anim_file, type="mayaAscii")
+        pm.select(cl=1)
+        return
+
     def publish_camera(self, comment=""):
         camera_top_node = pm.PyNode("render_cam_RIG")
 
@@ -189,14 +204,10 @@ class MyWindow(QtWidgets.QDialog):
             camera_file[1] = str(int(camera_file[1]) + 1).zfill(4)
             camera_file = ppath.path(".".join(camera_file))
 
-            #TODO: EXPORT ANIM/POSITIONAL DATA, ZERO OUT ATTRIBUTES
-
             reference_path.importContents(removeNamespace=0)
-            pm.select(camera_top_node)
-            pm.system.exportAsReference(camera_file, namespace=":")
-            pm.select(cl=1)
-
-            #TODO: APPLY EXPORTED ANIM/POSITIONAL DATA BACK
+            # pm.select(camera_top_node)
+            # pm.system.exportAsReference(camera_file, namespace=":")
+            self.create_reference(output_file=camera_file, top_node=camera_top_node)
 
             self.update_shotgun(camera_file=camera_file, comment=comment)
             self.ui.close()
@@ -211,6 +222,7 @@ class MyWindow(QtWidgets.QDialog):
             pm.warning("place camera in render_cam_RIG")
             return
 
+        # - create camera path based on the scene name 04_Maya/published/03_Cameras/Shot_###
         render_cam = cameras[0].getParent().rename("render_cam")
         workspace = pm.system.Workspace()
         shot = ppath.path(workspace.fileRules["scene"]).basename()
@@ -220,17 +232,22 @@ class MyWindow(QtWidgets.QDialog):
             shot).normpath()
         camera_path.makedirs_p()
 
-        pm.select(camera_top_node)
+        # - take the latest camera file, and create the next camera file path
         camera_files = sorted(camera_path.files("{}_original.*.ma".format(shot)))[::-1]
         camera_file = None
         if camera_files:
             latest_file = camera_files[0].split(".")
             latest_file[1] = str(int(latest_file[1]) + 1).zfill(4)
             camera_file = ppath.path(".".join(latest_file))
-            pm.system.exportAsReference(camera_file, namespace=":")
         else:
+            # NOTES - version 1 can have animation data and be located anywhere, like in tracked cameras. Constraints,
+            # however, should not be connected to a referenced source
             camera_file = camera_path.__div__("{}_original.0001.ma".format(shot))
-            pm.system.exportAsReference(camera_file, namespace=":")
+
+        # - export new camera file path as reference
+        # pm.select(camera_top_node)
+        # pm.system.exportAsReference(camera_file, namespace=":")
+        self.create_reference(output_file=camera_file, top_node=camera_top_node)
 
         try:
             imported = pm.ls("*_IMPORT")[0]
@@ -239,7 +256,7 @@ class MyWindow(QtWidgets.QDialog):
         except:
             pass
 
-        self.update_shotgun(camera_file=camera_file, comment=comment)
+        # self.update_shotgun(camera_file=camera_file, comment=comment)
         self.ui.close()
         return
 
