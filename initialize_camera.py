@@ -177,7 +177,6 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def publish_camera(self, comment=""):
-        #TODO: IMPORTS PROCESSED FILE, EXPORTS PUBLISHED FILE
         camera_top_node = pm.PyNode("render_cam_RIG")
 
         # VERSION UP FROM REFERENCE
