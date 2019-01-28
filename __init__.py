@@ -1,6 +1,10 @@
 """
-TODO: USE THIS FILE TO MAKE POSSIBLE THE SWITCHING BETWEEN DRIVES AND REMOTE WORKSPACES
-
-EXAMPLE:
-project_root = "a"
+Common variables used in all shotgun tools.
 """
+
+from sgtk import platform
+
+root = None
+engine = platform.current_engine()
+sg = engine.shotgun
+project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]])
