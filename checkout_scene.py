@@ -4,7 +4,14 @@ old check out scene tools are used by publish scene and update timeline
 
 import pymel.core as pm
 
-from . import sg, project
+# from . import sg, project  # this line works when __init__.py works, content currently commented out
+from sgtk import platform
+
+root = None
+engine = platform.current_engine()
+sg = engine.shotgun
+project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]])
+
 import pymel.util.path as path
 from pymel.core.system import Workspace, openFile, saveAs, warning
 workspace = Workspace()
