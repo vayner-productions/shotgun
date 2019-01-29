@@ -2,10 +2,12 @@
 old check out scene tools are used by publish scene and update timeline
 """
 
+import pymel.core as pm
 
 from . import sg, project
-import pymel.core as pm
 import pymel.util.path as path
+from pymel.core.system import Workspace, openFile, saveAs, warning
+workspace = Workspace()
 
 
 def get_entity(file_path):
@@ -100,7 +102,7 @@ class Checkout:
         return
 
     def processed_file(self):
-        processed_path = path(pm.workspace.expandName(pm.workspace.fileRules["scene"]))
+        processed_path = path(workspace.expandName(workspace.fileRules["scene"]))
         search_pattern = "{}_processed.*.ma".format(processed_path.basename())
         if search_pattern[0].isdigit():
             search_pattern = search_pattern.split("_", 1)[1]
@@ -109,7 +111,7 @@ class Checkout:
         return processed_file
 
     def published_file(self):
-        scene_directory = pm.workspace.fileRules["scene"]
+        scene_directory = workspace.fileRules["scene"]
 
         key = path(scene_directory).dirname().basename()[3:]
         data = {
@@ -159,25 +161,25 @@ class Checkout:
         """
         if checkout_type == "processed":
             checkout_file = self.processed_file()
-            pm.openFile(self.processed_file(), f=1)
+            openFile(self.processed_file(), f=1)
         elif checkout_type == "published":
             checkout_file = self.processed_file().split(".")
             checkout_file[1] = str(int(checkout_file[1]) + 1).zfill(4)
             checkout_file = ".".join(checkout_file)
-            pm.openFile(self.published_file(), f=1)
-            pm.saveAs(checkout_file)
+            openFile(self.published_file(), f=1)
+            saveAs(checkout_file)
         elif checkout_type == "increment":
             checkout_file = self.processed_file().split(".")
             checkout_file[1] = str(int(checkout_file[1]) + 1).zfill(4)
             checkout_file = ".".join(checkout_file)
-            pm.saveAs(checkout_file)
+            saveAs(checkout_file)
         elif checkout_type == "other" and checkout_file:
-            pm.openFile(checkout_file, f=1)
+            openFile(checkout_file, f=1)
             checkout_file = self.processed_file().split(".")
             checkout_file[1] = str(int(checkout_file[1]) + 1).zfill(4)
             checkout_file = ".".join(checkout_file)
-            pm.saveAs(checkout_file)
+            saveAs(checkout_file)
         else:
-            return pm.warning("Wrong checkout type and/or missing checkout file.")
+            return warning("Wrong checkout type and/or missing checkout file.")
         print ">> Opened {} file: {}".format(checkout_type, checkout_file)
         return checkout_file
