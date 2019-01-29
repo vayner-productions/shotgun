@@ -95,8 +95,8 @@ def checkout_scene():
 
 class Checkout:
     def __init__(self):
-        self.latest_processed_file = self.processed_file()
-        self.latest_published_file = self.published_file()
+        self.processed_file()
+        self.published_file()
         return
 
     def processed_file(self):
@@ -158,22 +158,22 @@ class Checkout:
         :return: [str] working file path
         """
         if checkout_type == "processed":
-            checkout_file = self.latest_processed_file
-            pm.openFile(self.latest_processed_file, f=1)
+            checkout_file = self.processed_file()
+            pm.openFile(self.processed_file(), f=1)
         elif checkout_type == "published":
-            checkout_file = self.latest_processed_file.split(".")
+            checkout_file = self.processed_file().split(".")
             checkout_file[1] = str(int(checkout_file[1]) + 1).zfill(4)
             checkout_file = ".".join(checkout_file)
-            pm.openFile(self.latest_published_file, f=1)
+            pm.openFile(self.published_file(), f=1)
             pm.saveAs(checkout_file)
         elif checkout_type == "increment":
-            checkout_file = self.latest_processed_file.split(".")
+            checkout_file = self.processed_file().split(".")
             checkout_file[1] = str(int(checkout_file[1]) + 1).zfill(4)
             checkout_file = ".".join(checkout_file)
             pm.saveAs(checkout_file)
         elif checkout_type == "other" and checkout_file:
             pm.openFile(checkout_file, f=1)
-            checkout_file = self.latest_processed_file.split(".")
+            checkout_file = self.processed_file().split(".")
             checkout_file[1] = str(int(checkout_file[1]) + 1).zfill(4)
             checkout_file = ".".join(checkout_file)
             pm.saveAs(checkout_file)
