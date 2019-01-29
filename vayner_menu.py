@@ -40,7 +40,7 @@ reload(sg)
 checkout = sg.Checkout()
 checkout.run(checkout_type="published")
 """
-checkout_scene_item = pm.menuItem(label="Checkout Published",
+checkout_scene_item = pm.menuItem(label="Checkout Published Version",
                                   command=checkout_published,
                                   parent=vayner_menu)
 
