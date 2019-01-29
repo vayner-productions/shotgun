@@ -27,7 +27,7 @@ reload(sg)
 checkout = sg.Checkout()
 checkout.run(checkout_type="processed")
 """
-checkout_scene_item = pm.menuItem(label="Checkout Working Version",
+checkout_working_version_item = pm.menuItem(label="Checkout Working Version",
                                   command=checkout_working_version,
                                   parent=vayner_menu)
 
@@ -40,7 +40,7 @@ reload(sg)
 checkout = sg.Checkout()
 checkout.run(checkout_type="published")
 """
-checkout_scene_item = pm.menuItem(label="Checkout Published Version",
+checkout_published_item = pm.menuItem(label="Checkout Published Version",
                                   command=checkout_published,
                                   parent=vayner_menu)
 
@@ -53,7 +53,7 @@ reload(sg)
 checkout = sg.Checkout()
 checkout.run(checkout_type="increment")
 """
-checkout_scene_item = pm.menuItem(label="Increment and Save",
+increment_and_save_item = pm.menuItem(label="Increment and Save",
                                   command=increment_and_save,
                                   parent=vayner_menu)
 
@@ -115,16 +115,3 @@ sg.get_window()
 render_setup_item = pm.menuItem(label="Render Setup",
                                 command=render_setup,
                                 parent=vayner_menu)
-
-"""
-# delete Vayner menu
-import pymel.core as pm
-main_maya_window = pm.language.melGlobals['gMainWindow']
-if pm.menu('Vayner', q=1, exists=1):
-    pm.deleteUI('Vayner')
-
-# load menu from script editor
-import pymel.core as pm
-from shotgun import vayner_menu as sg
-reload(sg)
-"""
