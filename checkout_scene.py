@@ -95,18 +95,23 @@ def checkout_scene():
 
 class Checkout:
     def __init__(self):
+        self.latest_processed_file = self.processed_file()
+        self.latest_published_file = self.published_file()
         return
 
-    def latest_processed_file(self, processed_file=None):
+    def processed_file(self):
         processed_path = path(pm.workspace.expandName(pm.workspace.fileRules["scene"]))
-        processed_file = sorted(processed_path.files("*_processed.*.ma"))[::-1][0].normpath()
-        pm.openFile(processed_file, f=1)
-        print ">> Checked out latest processed file", processed_file
-        return
+        search_pattern = "{}_processed.*.ma".format(processed_path.basename())
+        if search_pattern[0].isdigit():
+            search_pattern = search_pattern.split("_", 1)[1]
+        processed_file = sorted(processed_path.files(search_pattern))[::-1][0].normpath()
+        processed_file = r"{}".format(processed_file)
+        return processed_file
 
-    def latest_published_file(self, published_file=None):
-        #TODO: NEEDS WORK, TAKING LATEST PUBLISH AND INCREMENTING UP FROM LATEST PROCESSED
-        key = path(pm.workspace.fileRules["scene"]).dirname().basename()[3:]
+    def published_file(self):
+        scene_directory = pm.workspace.fileRules["scene"]
+
+        key = path(scene_directory).dirname().basename()[3:]
         data = {
             "Rigs": "sg_file",
             "Assets": "sg_file",
@@ -120,10 +125,59 @@ class Checkout:
         if key in ["Rigs", "Assets"]:
             entity_type = "Asset"
 
+        entity_code = path(scene_directory).basename()
         entity_filters = [
             ["project", "is", project],
-            ["code", "is", ]
+            ["code", "is", entity_code]
         ]
-        sg.find_one(entity_type, entity_filters, entity_field)
-        print ">> Checked out latest published file", published_file
-        return
+
+        published_file = sg.find_one(entity_type, entity_filters, [data[key]])[data[key]]["local_path_windows"]
+        published_file = path(published_file).normpath()
+        published_file = "{}".format(published_file)
+        return published_file
+
+    def run(self, checkout_type="processed", checkout_file=None):
+        """
+        saves any file into working directory and renames it to Vayner's naming convention
+
+        "processed" - opens the latest working file
+        "published" - opens the latest published file, saves and increments as processed file
+        "other" - opens any file, saves and increments as processed file
+        "increment" - versions up the active file to match the naming convention for the set project. This is useful for
+        copy lighting setup from one shot to another. To do so,
+        1. open file with lighting setup
+        2. set project to the shot to copy to
+        3. run(checkout_type="increment")
+        * may need to remove referenced assets of old shot
+        4. build scene to update assets for the new shot
+
+        ** set project to use the correct working directory **
+        ** build scene references/updates assets specific to active shot **
+        :param checkout_type: [str] "processed", "published", "other"
+        :param checkout_file:
+        :return: [str] working file path
+        """
+        if checkout_type == "processed":
+            checkout_file = self.latest_processed_file
+            pm.openFile(self.latest_processed_file, f=1)
+        elif checkout_type == "published":
+            checkout_file = self.latest_processed_file.split(".")
+            checkout_file[1] = str(int(checkout_file[1]) + 1).zfill(4)
+            checkout_file = ".".join(checkout_file)
+            pm.openFile(self.latest_published_file, f=1)
+            pm.saveAs(checkout_file)
+        elif checkout_type == "increment":
+            checkout_file = self.latest_processed_file.split(".")
+            checkout_file[1] = str(int(checkout_file[1]) + 1).zfill(4)
+            checkout_file = ".".join(checkout_file)
+            pm.saveAs(checkout_file)
+        elif checkout_type == "other" and checkout_file:
+            pm.openFile(checkout_file, f=1)
+            checkout_file = self.latest_processed_file.split(".")
+            checkout_file[1] = str(int(checkout_file[1]) + 1).zfill(4)
+            checkout_file = ".".join(checkout_file)
+            pm.saveAs(checkout_file)
+        else:
+            return pm.warning("Wrong checkout type and/or missing checkout file.")
+        print ">> Opened {} file: {}".format(checkout_type, checkout_file)
+        return checkout_file
