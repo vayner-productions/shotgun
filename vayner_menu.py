@@ -19,36 +19,46 @@ set_project_item = pm.menuItem(label="Set Project",
                                parent=vayner_menu)
 
 
-# check out scene - open the latest published scene
-checkout_scene = """
+# check out latest working version given project settings
+checkout_working_version = """
 import shotgun.checkout_scene as sg
 
 reload(sg)
-sg.checkout_scene()
+checkout = sg.Checkout()
+checkout.run(checkout_type="processed")
 """
-checkout_scene_item = pm.menuItem(label="Checkout Scene",
-                                  command=checkout_scene,
+checkout_scene_item = pm.menuItem(label="Checkout Working Version",
+                                  command=checkout_working_version,
                                   parent=vayner_menu)
 
 
-# check out scene - open the latest published scene
-increment_and_save = """
-import pymel.core as pm
+# checkout published scene as working version with naming convention based on set project
+checkout_published = """
 import shotgun.checkout_scene as sg
 
 reload(sg)
-current_file = None
-type="Shot"
-if type not in pm.sceneName().dirname().rsplit("/", 1)[1]:
-    type="Asset"
-sg.increment_and_save(current_file, entity_type=type, publish=0)
+checkout = sg.Checkout()
+checkout.run(checkout_type="published")
+"""
+checkout_scene_item = pm.menuItem(label="Checkout Published",
+                                  command=checkout_published,
+                                  parent=vayner_menu)
+
+
+# increment and save with naming convention based on set project
+increment_and_save = """
+import shotgun.checkout_scene as sg
+
+reload(sg)
+checkout = sg.Checkout()
+checkout.run(checkout_type="increment")
 """
 checkout_scene_item = pm.menuItem(label="Increment and Save",
                                   command=increment_and_save,
                                   parent=vayner_menu)
 
 
-# check out scene - open the latest published scene
+# build scene references all available assets assigned to shot
 build_scene = """
 from shotgun import build_scene as sg
 
@@ -60,7 +70,7 @@ build_scene_item = pm.menuItem(label="Build Scene",
                                parent=vayner_menu)
 
 
-# update timeline - timeline reflects sg_frame_range
+# update timeline based on shotgun site's frame range
 update_timeline = """
 import shotgun.update_timeline as sg
 
@@ -71,7 +81,7 @@ update_timeline_item = pm.menuItem(label="Update Timeline",
                                    command=update_timeline,
                                    parent=vayner_menu)
 
-# publish scene - increment and save this file and update shotgun fields
+# organize textures -- not sure if anyone's using it
 organize_textures = """
 import shotgun.organize_textures as sg
 
