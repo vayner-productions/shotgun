@@ -1,5 +1,4 @@
-from pymel.core.uitypes import Menu, MenuItem, CommandMenuItem
-from textwrap import TextWrapper
+from pymel.core.uitypes import Menu, MenuItem
 
 set_project = """
 import shotgun.set_project as sg; reload(sg)
@@ -72,22 +71,24 @@ class VaynerMenu:
         if not description:
             description = "{} menu item".format(name)
 
+        from textwrap import TextWrapper
         wrapper = TextWrapper(width=width)
         description = "".join(["\n# " + line for line in wrapper.wrap(text=description)])
 
         script = '''
-{d}
 {n} = """
 import shotgun.{m} as sg; reload(sg)
 {c}
 """
 
+{d}
 {n}_item = MenuItem(
     label="{l}", 
     command={n}, 
     parent="Vayner"
 )
 '''.format(n=name, l=label, d=description, c=command, m=module)
+        print script
         return script
 
     def run(self):
@@ -158,4 +159,17 @@ import shotgun.{m} as sg; reload(sg)
             command=render_setup,
             parent="Vayner"
         )
+
+        from pymel.core.general import refresh
+        refresh()
+        return
+
+    def refresh(self):
+        """removes pyc files, not sure if that refreshes the menu..."""
+        from pymel.util.common import path
+
+        shotgun = path(r"A:\Animation\Shotgun\System\Tools\shotgun")
+
+        for pyc in shotgun.files("*.pyc"):
+            pyc.remove_p()
         return
