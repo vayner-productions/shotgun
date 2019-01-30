@@ -1,115 +1,161 @@
-import pymel.core as pm
+from pymel.core.uitypes import Menu, MenuItem, CommandMenuItem
+from textwrap import TextWrapper
 
-# Name of the global variable for the Maya window
-main_maya_window = pm.language.melGlobals['gMainWindow']
-
-# Build a menu and parent underthe Maya Window
-vayner_menu = pm.menu('Vayner', parent=main_maya_window, tearOff=1)
-
-# Build a menu item and parent under the 'Vayner' menu
-# set project - updates workspace and scenes directory
 set_project = """
-import shotgun.set_project as sg
-
-reload(sg)
+import shotgun.set_project as sg; reload(sg)
 sg.get_window()
 """
-set_project_item = pm.menuItem(label="Set Project",
-                               command=set_project,
-                               parent=vayner_menu)
 
-
-# check out scene - open the latest published scene
-checkout_scene = """
-import shotgun.checkout_scene as sg
-
-reload(sg)
-sg.checkout_scene()
+checkout_published_version = """
+import shotgun.checkout_scene as sg; reload(sg)
+checkout = sg.Checkout()
+checkout.run(checkout_type="published")
 """
-checkout_scene_item = pm.menuItem(label="Checkout Scene",
-                                  command=checkout_scene,
-                                  parent=vayner_menu)
 
+checkout_working_version = """
+import shotgun.checkout_scene as sg; reload(sg)
+checkout = sg.Checkout()
+checkout.run(checkout_type="processed")
+"""
 
-# check out scene - open the latest published scene
 increment_and_save = """
-from shotgun import checkout_scene as sg
-
-reload(sg)
-sg.increment_and_save(None)
+import shotgun.checkout_scene as sg; reload(sg)
+checkout = sg.Checkout()
+checkout.run(checkout_type="increment")
 """
-increment_and_save_item = pm.menuItem(label="Increment and Save",
-                                  command=increment_and_save,
-                                  parent=vayner_menu)
 
-
-# check out scene - open the latest published scene
 build_scene = """
-from shotgun import build_scene as sg
-
-reload(sg)
+import shotgun.build_scene as sg; reload(sg)
 sg.get_window()
 """
-build_scene_item = pm.menuItem(label="Build Scene",
-                                  command=build_scene,
-                                  parent=vayner_menu)
 
-
-# update timeline - timeline reflects sg_frame_range
 update_timeline = """
-import shotgun.update_timeline as sg
-
-reload(sg)
+import shotgun.update_timeline as sg; reload(sg)
 sg.update_timeline()
 """
-update_timeline_item = pm.menuItem(label="Update Timeline",
-                                 command=update_timeline,
-                                 parent=vayner_menu)
 
-# publish scene - increment and save this file and update shotgun fields
 organize_textures = """
-import shotgun.organize_textures as sg
-
-reload(sg)
+import shotgun.organize_textures as sg; reload(sg)
 sg.organize_textures()
 """
-organize_textures_item = pm.menuItem(label="Organize Textures",
-                                 command=organize_textures,
-                                 parent=vayner_menu)
 
-# publish scene - increment and save this file and update shotgun fields
 publish_scene = """
-import shotgun.publish_scene as sg
-
-reload(sg)
+import shotgun.publish_scene as sg; reload(sg)
 sg.get_window()
 """
-publish_scene_item = pm.menuItem(label="Publish Scene",
-                                 command=publish_scene,
-                                 parent=vayner_menu)
 
-# add divider for artist specific scripts
-pm.menuItem(divider=1, dividerLabel="Lighting")
-
-# render setup - for lighters to prep there render globals
 render_setup = """
-from shotgun import render_setup as sg
-reload(sg)
+import shotgun.render_setup as sg; reload(sg)
 sg.get_window()
 """
-render_setup_item = pm.menuItem(label="Render Setup",
-                                command=render_setup,
-                                parent=vayner_menu)
 
-"""
-# delete Vayner menu
-import pymel.core as pm
-main_maya_window = pm.language.melGlobals['gMainWindow']
-if pm.menu('Vayner', q=1, exists=1):
-    pm.deleteUI('Vayner')
 
-# load menu from script editor
-import pymel.core as pm
-from shotgun import vayner_menu as sg
-reload(sg)
+class VaynerMenu:
+    def __init__(self):
+        self.vayner_menu = None
+        try:
+            self.vayner_menu = Menu("Vayner")
+        except ValueError:
+            self.vayner_menu = Menu("Vayner", parent="MayaWindow", tearOff=1)
+        return
+
+    def template(self, name=None, command=None, module=None, label=None, description=None, width=120):
+        if not command:
+            command = "sg.get_window()"
+
+        if not module:
+            module = name
+
+        if not label:
+            label = " ".join(name.split("_")).title()
+
+        if not description:
+            description = "{} menu item".format(name)
+
+        wrapper = TextWrapper(width=width)
+        description = "".join(["\n# " + line for line in wrapper.wrap(text=description)])
+
+        script = '''
+{d}
+{n} = """
+import shotgun.{m} as sg; reload(sg)
+{c}
 """
+
+{n}_item = MenuItem(
+    label="{l}", 
+    command={n}, 
+    parent="Vayner"
+)
+'''.format(n=name, l=label, d=description, c=command, m=module)
+        return script
+
+    def run(self):
+        self.vayner_menu.deleteAllItems()
+
+        # updates project directory
+        set_project_item = MenuItem(
+            label="Set Project",
+            command=set_project,
+            parent="Vayner"
+        )
+
+        # creates a working file from latest publish
+        checkout_published_version_item = MenuItem(
+            label="Checkout Published Version",
+            command=checkout_published_version,
+            parent="Vayner"
+        )
+
+        # open latest working file
+        checkout_working_version_item = MenuItem(
+            label="Checkout Working Version",
+            command=checkout_working_version,
+            parent="Vayner"
+        )
+
+        # increment and save current working file
+        increment_and_save_item = MenuItem(
+            label="Increment And Save",
+            command=increment_and_save,
+            parent="Vayner"
+        )
+
+        # references all available assets designated to shot
+        build_scene_item = MenuItem(
+            label="Build Scene",
+            command=build_scene,
+            parent="Vayner"
+        )
+
+        # matches start/end playback to frame range on shotgun site
+        update_timeline_item = MenuItem(
+            label="Update Timeline",
+            command=update_timeline,
+            parent="Vayner"
+        )
+
+        # places textures in /sourceimages under /Assets and /HDRI
+        organize_textures_item = MenuItem(
+            label="Organize Textures",
+            command=organize_textures,
+            parent="Vayner"
+        )
+
+        # registers current maya file and related files to shotgun site
+        publish_scene_item = MenuItem(
+            label="Publish Scene",
+            command=publish_scene,
+            parent="Vayner"
+        )
+
+        # LIGHTING SECTION
+        MenuItem(divider=1, dividerLabel="Lighting", parent="Vayner")
+
+        # templates lighters' files for render farm
+        render_setup_item = MenuItem(
+            label="Render Setup",
+            command=render_setup,
+            parent="Vayner"
+        )
+        return
