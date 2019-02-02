@@ -178,42 +178,9 @@ class MyWindow(QtWidgets.QDialog):
         print ">> published render_cam_RIG to shotgun",
         return
 
-    def create_reference(self, output_file=None, top_node=None):
-        """Creates a reference for a local object in the scene. Requires output file location and top node.
-        Increments and saves file first. It reverts back to this saved file if something goes wrong in the process.
-        """
-        pm.select(top_node)
-        #TODO: EXPORT ANIM/POSITIONAL DATA, ZERO OUT ATTRIBUTES
-        #TODO: APPLY EXPORTED ANIM/POSITIONAL DATA BACK
-        # pm.select(camera_top_node)
-        # camera_anim_file = camera_file.replace("original", "anim")
-        # pm.system.exportSelectedAnim(camera_anim_file, type="mayaAscii")
-        pm.select(cl=1)
-        return
-
     def publish_camera(self, comment=""):
         camera_top_node = pm.PyNode("render_cam_RIG")
 
-        # VERSION UP FROM REFERENCE
-        referenced = pm.referenceQuery(camera_top_node, isNodeReferenced=1)
-        if referenced:
-            reference_node = pm.referenceQuery(camera_top_node, referenceNode=1)
-            reference_path = pm.system.FileReference(pathOrRefNode=reference_node)
-
-            camera_file = "{}".format(reference_path).split(".")
-            camera_file[1] = str(int(camera_file[1]) + 1).zfill(4)
-            camera_file = ppath.path(".".join(camera_file))
-
-            reference_path.importContents(removeNamespace=0)
-            # pm.select(camera_top_node)
-            # pm.system.exportAsReference(camera_file, namespace=":")
-            self.create_reference(output_file=camera_file, top_node=camera_top_node)
-
-            self.update_shotgun(camera_file=camera_file, comment=comment)
-            self.ui.close()
-            return
-
-        # VERSION 1 AND VERSION UP FROM IMPORTS
         cameras = camera_top_node.getChildren(ad=1, typ="camera")
         if len(cameras) > 1:
             pm.warning("too many cameras in render_cam_RIG, choose one")
@@ -240,14 +207,7 @@ class MyWindow(QtWidgets.QDialog):
             latest_file[1] = str(int(latest_file[1]) + 1).zfill(4)
             camera_file = ppath.path(".".join(latest_file))
         else:
-            # NOTES - version 1 can have animation data and be located anywhere, like in tracked cameras. Constraints,
-            # however, should not be connected to a referenced source
             camera_file = camera_path.__div__("{}_original.0001.ma".format(shot))
-
-        # - export new camera file path as reference
-        # pm.select(camera_top_node)
-        # pm.system.exportAsReference(camera_file, namespace=":")
-        self.create_reference(output_file=camera_file, top_node=camera_top_node)
 
         try:
             imported = pm.ls("*_IMPORT")[0]
@@ -256,7 +216,14 @@ class MyWindow(QtWidgets.QDialog):
         except:
             pass
 
-        # self.update_shotgun(camera_file=camera_file, comment=comment)
+        # - increment and save the current working file, and save a copy to the published folder
+        from Kathy.shotgun import checkout_scene  # REMOVE Kathy.
+        reload(checkout_scene)
+        checkout = checkout_scene.Checkout()
+        working_file = checkout.run(checkout_type="increment")
+        ppath.path(working_file).copy2(camera_file)
+
+        self.update_shotgun(camera_file=camera_file, comment=comment)
         self.ui.close()
         return
 
