@@ -57,8 +57,8 @@ class MyWindow(QtWidgets.QDialog):
         scene_dir = self.project_path + "/scenes"
         scene_subfolders = {r"{}".format(sub.basename()) for sub in path(scene_dir).dirs()}
         exclude = {"edits",
-                   "03_Cameras",
-                   "04_Layouts",
+                   # "03_Cameras",
+                   # "04_Layouts",
                    "06_Cache",
                    "None"}
 
