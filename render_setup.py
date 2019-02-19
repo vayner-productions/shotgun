@@ -101,7 +101,7 @@ def render_setup(camera):
     # update default arnold driver
     dad = pm.PyNode("defaultArnoldDriver")
     dad.ai_translator.set("exr")
-    dad.exr_compression.set(3)
+    dad.exr_compression.set(2)
     dad.merge_AOVs.set(1)
 
     # set render camera

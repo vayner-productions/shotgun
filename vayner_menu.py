@@ -48,6 +48,10 @@ import shotgun.render_setup as sg; reload(sg)
 sg.get_window()
 """
 
+publish_camera = """
+import shotgun.initialize_camera as sg; reload(sg)
+sg.get_window()
+"""
 
 class VaynerMenu:
     def __init__(self):
@@ -140,6 +144,13 @@ import shotgun.{m} as sg; reload(sg)
         organize_textures_item = MenuItem(
             label="Organize Textures",
             command=organize_textures,
+            parent="Vayner"
+        )
+
+        # imports and publishes camera
+        publish_camera_item = MenuItem(
+            label="Import and Publish Camera",
+            command=publish_camera,
             parent="Vayner"
         )
 
