@@ -83,7 +83,10 @@ def create_project_directory(sg, logger, event, args):
                     new_folder = r"{}/{}/{}".format(scene_dir, fld, new_shot)
                     folders += [new_folder]
 
+        # /sourceimages contains /Assets, /HDRI, and /000_Unsorted -- everything that isn't HDRI goes into Assets,
+        # including textures from Shots. I know. Confusing.
         source_images_dir = scene_dir.replace("scenes", "sourceimages/Assets/{}".format(new_shot))
+
         cache_dir = "{}/06_Cache/08_Animation/{}".format(scene_dir, new_shot)
 
         folders += [source_images_dir, cache_dir]
@@ -95,6 +98,24 @@ def create_project_directory(sg, logger, event, args):
                 pass
 
         logger.info(">> created shot directory")
+
+        # create and link camera entity to newly created shot
+        camera_entity = sg.find_one(
+            "Shot",
+            [["project", "is", project],
+             ["code", "is", new_shot]],
+            ["sg_camera"]
+        )["sg_camera"]
+
+        if not camera_entity:
+            shot_entity = event["entity"]
+            data = {
+                "project": project,
+                "code": shot_entity["name"] + "_Cam",
+                "shot_sg_camera_shots": [shot_entity],
+            }
+            sg.create("Camera", data)
+            logger.info(">> created and link camera entity to shot")
     elif "Shotgun_Asset_Change" == event_type:
         # omit tests, dynamics, cameras, layouts, cache, lighting, animation
         sg_asset_type = sg.find_one(
@@ -106,19 +127,13 @@ def create_project_directory(sg, logger, event, args):
 
         # create asset paths
         scene_dir = r"{}/Project Directory/02_Production/04_Maya/scenes".format(start)
-        scene_folder = None
-        if "Rig" in sg_asset_type:
-            for fld in os.listdir(scene_dir):
-                if "Rig" in fld:
-                    scene_folder = fld
-                    break
-        elif "Model" in sg_asset_type:
-            for fld in os.listdir(scene_dir):
-                if "Asset" in fld:
-                    scene_folder = fld
-                    break
+        scene_folder = {
+            "CG Model": "01_Assets",
+            "CG Rig": "02_Rigs"
+        }
         asset = event["meta"]["new_value"]
-        asset_folder_path = r"{}/{}/{}".format(scene_dir, scene_folder, asset)
+
+        asset_folder_path = r"{}/{}/{}".format(scene_dir, scene_folder[sg_asset_type], asset)
         source_images_dir = scene_dir.replace("scenes", "sourceimages/Assets/{}".format(asset))
 
         # create asset folders assets, rigs
@@ -127,5 +142,5 @@ def create_project_directory(sg, logger, event, args):
             os.makedirs(source_images_dir)
         except:
             pass
-    logger.info(">> created asset directory")
+        logger.info(">> created asset directory")
     return
