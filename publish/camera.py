@@ -24,7 +24,11 @@ project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]
 root = None
 
 
-def get_window():
+def get_window(method):
+    """
+    :param method: "publish_camera" or "load_camera"
+    :return:
+    """
     global mw
     try:
         mw.ui.close()
@@ -32,7 +36,7 @@ def get_window():
         pass
 
     mw = MyWindow()
-    mw.ui.show()
+    getattr(mw, method)()
 
 
 class CameraTools:
@@ -233,7 +237,6 @@ class CameraTools:
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
         self.ui = self.import_ui()
-        self.init_ui()
         return
 
     def import_ui(self):
@@ -246,12 +249,31 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def camera_tools(self, method):
-        getattr(CameraTools(), method)()
+        comment = self.ui.comment_txt.toPlainText()
+        ct = CameraTools(comment=comment)
+        getattr(ct, method)()
         self.ui.close()
         return
-    
-    def init_ui(self):
+
+    def load_camera(self):
+        self.ui.publish_btn.deleteLater()
+        self.ui.comment_txt.deleteLater()
+        self.ui.setFixedSize(350, 94)
+        self.ui.setWindowTitle("Import Camera")
+
         self.ui.vayner_btn.clicked.connect(lambda x="load_vayner": self.camera_tools(x))
         self.ui.other_btn.clicked.connect(lambda x="load_other": self.camera_tools(x))
+
+        self.ui.show()
+        return
+
+    def publish_camera(self):
+        self.ui.vayner_btn.deleteLater()
+        self.ui.other_btn.deleteLater()
+        self.ui.setFixedSize(350, 185)
+        self.ui.setWindowTitle("Publish Camera")
+
         self.ui.publish_btn.clicked.connect(lambda x="publish_camera": self.camera_tools(x))
+
+        self.ui.show()
         return
