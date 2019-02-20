@@ -53,6 +53,7 @@ import shotgun.initialize_camera as sg; reload(sg)
 sg.get_window()
 """
 
+
 class VaynerMenu:
     def __init__(self):
         self.vayner_menu = None
