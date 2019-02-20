@@ -62,39 +62,6 @@ class VaynerMenu:
             self.vayner_menu = Menu("Vayner", parent="MayaWindow", tearOff=1)
         return
 
-    def template(self, name=None, command=None, module=None, label=None, description=None, width=120):
-        if not command:
-            command = "sg.get_window()"
-
-        if not module:
-            module = name
-
-        if not label:
-            label = " ".join(name.split("_")).title()
-
-        if not description:
-            description = "{} menu item".format(name)
-
-        from textwrap import TextWrapper
-        wrapper = TextWrapper(width=width)
-        description = "".join(["\n# " + line for line in wrapper.wrap(text=description)])
-
-        script = '''
-{n} = """
-import shotgun.{m} as sg; reload(sg)
-{c}
-"""
-
-{d}
-{n}_item = MenuItem(
-    label="{l}", 
-    command={n}, 
-    parent="Vayner"
-)
-'''.format(n=name, l=label, d=description, c=command, m=module)
-        print script
-        return script
-
     def run(self):
         self.vayner_menu.deleteAllItems()
 
@@ -133,19 +100,15 @@ import shotgun.{m} as sg; reload(sg)
             parent="Vayner"
         )
 
-        # matches start/end playback to frame range on shotgun site
-        update_timeline_item = MenuItem(
-            label="Update Timeline",
-            command=update_timeline,
+        # registers current maya file and related files to shotgun site
+        publish_scene_item = MenuItem(
+            label="Publish Scene",
+            command=publish_scene,
             parent="Vayner"
         )
 
-        # places textures in /sourceimages under /Assets and /HDRI
-        organize_textures_item = MenuItem(
-            label="Organize Textures",
-            command=organize_textures,
-            parent="Vayner"
-        )
+        # CAMERA SECTION
+        MenuItem(divider=1, dividerLabel="Camera", parent="Vayner")
 
         # imports and publishes camera
         publish_camera_item = MenuItem(
@@ -154,15 +117,25 @@ import shotgun.{m} as sg; reload(sg)
             parent="Vayner"
         )
 
-        # registers current maya file and related files to shotgun site
-        publish_scene_item = MenuItem(
-            label="Publish Scene",
-            command=publish_scene,
+        # ANIMATION SECTION
+        MenuItem(divider=1, dividerLabel="Animation", parent="Vayner")
+
+        # matches start/end playback to frame range on shotgun site
+        update_timeline_item = MenuItem(
+            label="Update Timeline",
+            command=update_timeline,
             parent="Vayner"
         )
 
         # LIGHTING SECTION
         MenuItem(divider=1, dividerLabel="Lighting", parent="Vayner")
+
+        # places textures in /sourceimages under /Assets and /HDRI
+        organize_textures_item = MenuItem(
+            label="Organize Textures",
+            command=organize_textures,
+            parent="Vayner"
+        )
 
         # templates lighters' files for render farm
         render_setup_item = MenuItem(
@@ -171,14 +144,8 @@ import shotgun.{m} as sg; reload(sg)
             parent="Vayner"
         )
 
-        from pymel.core.general import refresh
-        refresh()
-        return
-
-    def refresh(self):
-        """removes pyc files, not sure if that refreshes the menu..."""
+        # removes pyc files
         from pymel.util.common import path
-
         shotgun = path(r"A:\Animation\Shotgun\System\Tools\shotgun")
 
         for pyc in shotgun.files("*.pyc"):
