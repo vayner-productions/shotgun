@@ -50,18 +50,20 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def load_vayner(self, camera_file=None):
+        """loads in-house camera rig"""
         if camera_file is None:
             camera_path = ppath.path(__file__).dirname().joinpath("render_cam_RIG")
             camera_file = sorted(camera_path.files())[::-1][0]  # ensures latest version
         nodes = pm.system.importFile(camera_file, defaultNamespace=1, returnNewNodes=1)
         top_node = pm.PyNode("render_cam_RIG")  # pm.ls(nodes, assemblies=1)[0]
-        self.ui.close()
+        self.ui.close()  # doesn't seem to matter if no ui is showing, can run in script mode too
         print ">> loaded: {}".format(top_node),
         return top_node
 
     def load_other(self, camera_file=None):
+        """intended to load tracked camera, but can also be used to load animator's own camera"""
+        # open file dialog to 03_Cameras and filter for maya files
         if camera_file is None:
-            # open file dialog to 03_Cameras and filter for maya files
             filters = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
             workspace = pm.system.Workspace()
             shot = ppath.path(workspace.fileRules["scene"]).basename()
@@ -82,11 +84,14 @@ class MyWindow(QtWidgets.QDialog):
             camera_filename = ppath.path(camera_file).basename().stripext()
             imported = pm.group(top_nodes, name=camera_filename+"_IMPORT")
             pm.select(imported, camera_top_node)  # for testing, delete later
-        self.ui.close()
+
+        self.ui.close()  # doesn't seem to matter if no ui is showing, can run in script mode too
         print ">> loaded: {}".format(imported),
         return
 
     def update_shotgun(self, camera_file=None, comment=""):
+        """a new version of the camera entity is created, either local or off-site file is attached; logs any changes to
+        the frame range"""
         # SHOT - update frame range in shot
         workspace = pm.system.Workspace()
         shot_name = ppath.path(workspace.fileRules["scene"]).basename()  # Shot_###
@@ -103,7 +108,7 @@ class MyWindow(QtWidgets.QDialog):
         shot_entity = sg.find_one(
             "Shot",
             shot_filters,
-            shot_fields
+            shot_fields  # used for camera entity updates
         )
         sg_frame_range = "{0:.0f}-{1:.0f}".format(
             pm.playbackOptions(q=1, ast=1),
@@ -121,9 +126,9 @@ class MyWindow(QtWidgets.QDialog):
                 {"sg_frame_range": sg_frame_range}
             )
 
-        # CAMERA - find camera linked to current shot
+        # CAMERA
+        # find camera and its latest version linked to the shot
         camera_entity = shot_entity["sg_camera"][0]  # assumes shots are paired with one camera !!!
-        version_name = camera_entity["name"] + "_v001"
         version_filters = [
             ["project", "is", project],
             ["entity", "is", camera_entity]
@@ -145,6 +150,9 @@ class MyWindow(QtWidgets.QDialog):
             fields=version_fields,
             additional_filter_presets=version_additional_filter_presets
         )
+
+        # create camera entity's next version
+        version_name = camera_entity["name"] + "_v001"
         if version_entity:
             latest_version = version_entity["code"][-3:]
             version_name = version_name[:-3] + str(int(latest_version) + 1).zfill(3)
@@ -179,6 +187,8 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def publish_camera(self, comment=""):
+        """publishing anything parented to render_cam_RIG node--incrememnt and saves current file, and saves a copy to
+        the published folder"""
         camera_top_node = pm.PyNode("render_cam_RIG")
 
         cameras = camera_top_node.getChildren(ad=1, typ="camera")
@@ -199,7 +209,7 @@ class MyWindow(QtWidgets.QDialog):
             shot).normpath()
         camera_path.makedirs_p()
 
-        # - take the latest camera file, and create the next camera file path
+        # - create the next camera file path from the latest
         camera_files = sorted(camera_path.files("{}_original.*.ma".format(shot)))[::-1]
         camera_file = None
         if camera_files:
