@@ -5,14 +5,9 @@ from shotgun import build_scene as sg
 reload(sg)
 sg.get_window()
 """
+from . import *  # imports root, sg, and project
 from PySide2 import QtCore, QtGui, QtWidgets, QtUiTools
 import pymel.core as pm
-import sgtk
-
-eng = sgtk.platform.current_engine()
-sg = eng.shotgun
-project = sg.find_one("Project", [["name", "is", eng.context.project["name"]]])
-root = None
 
 
 def get_window():
@@ -118,10 +113,18 @@ class MyWindow(QtWidgets.QDialog):
         if type == "Shot":
             number = 1
             asset_name = "Render Camera"
+            additional_filter_presets = [
+                {
+                    "preset_name": "LATEST",
+                    "latest_by": "ENTITIES_CREATED_AT"
+                }
+            ]
             publish = sg.find_one(
-                type,
-                [["project", "is", project], ["code", "is", entity]],
-                ["sg_tracked_camera"])["sg_tracked_camera"]
+                "Version",
+                [["project", "is", project], ["code", "contains", entity+"_Cam"]],
+                additional_filter_presets=additional_filter_presets,
+                fields=["sg_maya_camera"]
+            )["sg_maya_camera"]
 
             if publish is not None:
                 publish = publish["local_path_windows"]
