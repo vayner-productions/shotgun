@@ -1,15 +1,11 @@
 """
-initialize camera lets users import the vayner render camera rig located in shotgun/render_cam_RIG
-or another camera. this other camera is intended to import a tracked camera, but can also animator's
-own camera.
-'other camera' also creates top node 'render_cam_RIG' and in case there are multiple cameras in the
-scene, renames only camera child to top node 'render_cam'
+from shotgun.publish import camera as sg
+reload(sg)
+sg.get_window("publish_camera")
 
-lastly, the camera to be published in any shot scene process and updates sg_frame_range. it does
-this by turning the camera rig into a referenced object. in scenes already containing referenced
-camera, ref cam is imported, namespace removed, and turned into a new reference (versioned up)
-
-if there's a new tracked camera to publish, open empty scene, set project to its respective shot, and publish
+from shotgun.publish import camera as sg
+reload(sg)
+sg.get_window("load_camera")
 """
 
 
