@@ -9,3 +9,5 @@ publishes camera..option?
 option to skip playblast
 versioning changes in SG site..
 """
+print ">>", MY_CONSTANT
+from . import *
