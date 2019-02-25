@@ -7,17 +7,10 @@ from shotgun.publish import camera as sg
 reload(sg)
 sg.get_window("load_camera")
 """
-
-
-import sgtk
+from . import *
 from PySide2 import QtCore, QtWidgets, QtUiTools
 from pymel.util import path
 import pymel.core as pm
-
-engine = sgtk.platform.current_engine()
-sg = engine.shotgun
-project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]])
-root = None
 
 
 def get_window(method):
