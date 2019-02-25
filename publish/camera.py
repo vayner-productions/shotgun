@@ -1,9 +1,9 @@
 """
-from shotgun.publish import camera as sg
+from shotgun.Publish import camera as sg
 reload(sg)
 sg.get_window("publish_camera")
 
-from shotgun.publish import camera as sg
+from shotgun.Publish import camera as sg
 reload(sg)
 sg.get_window("load_camera")
 """
