@@ -1,18 +1,18 @@
 from pymel.core.uitypes import Menu, MenuItem
-from PySide2 import QtCore, QtWidgets, QtUiTools
-
 
 set_project = """
 import shotgun.set_project as sg; reload(sg)
 sg.get_window()
 """
+
 checkout_menu = """
-from Cat.shotgun.VaynerMenu import qt_checkout_box as cb; reload(cb)
-cb.get_window()
+from shotgun.VaynerMenu import qt_checkout_box as sg; reload(sg)
+sg.get_window()
 """
+
 checkout_saved_version = """
-from Cat.shotgun.VaynerMenu import qt_checkout_box as cb; reload(cb)
-cb.checkout_saved_option()
+from shotgun.VaynerMenu import qt_checkout_box as sg; reload(sg)
+sg.checkout_saved_option()
 """
 
 checkout_published_version = """
@@ -84,13 +84,10 @@ class VaynerMenu:
         )
 
         # checkout either the published or working file
-        #### CAT FIX THIS SECTION ####
         checkout_item = MenuItem(
             "checkout_item",
             label="Checkout",
             command=checkout_saved_version,
-            # command=checkout_working_version,
-            # command=checkout_published_version,
             parent="Vayner"
         )
         # creates option box for the checkout menu item
