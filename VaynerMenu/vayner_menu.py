@@ -176,5 +176,3 @@ class VaynerMenu:
         for pyc in shotgun.files("*.pyc"):
             pyc.remove_p()
         return
-
-
