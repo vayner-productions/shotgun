@@ -43,14 +43,23 @@ for ref in pm.listReferences():
 
 
 class Publish:
-    def __init__(self):
+    def __init__(self, thumbnail=None, playblast=None, maya_file=None, alembic_directory=None, comment=""):
+        self.thumbnail = thumbnail
+        self.playblast = playblast
+        self.maya_file = maya_file
+        self.alembic_directory = alembic_directory
+        self.comment = comment
+        self.alembic_file = None
         return
+
+    def rich_media(self):
+        return self.thumbnail, self.playblast
 
     def single_frame(self):
-        return
+        return self.alembic_file
 
     def multi_frame(self):
-        return
+        return self.alembic_file
 
     def update_shotgun(self):
         # GET ENTITY
@@ -89,13 +98,18 @@ class Publish:
             latest_version = version_entity["code"][-3:]
             version_name = version_name[:-3] + str(int(latest_version) + 1).zfill(3)
 
-        # data = {
-        #     "project": project,
-        #     "code": version_name,
-        #     "entity": alembic_entity,
-        #     "description": self.comment
-        # }
-        # version = sg.create("Version", data)
+        # TODO: FILE LINKS {link: self.playblast}
+        data = {
+            "project": project,
+            "code": version_name,
+            "entity": alembic_entity,
+            "image": self.thumbnail,
+            "sg_uploaded_movie": self.playblast,
+            "sg_maya_file": self.maya_file,
+            "sg_alembic_directory": self.alembic_directory,
+            "description": self.comment
+        }
+        version = sg.create("Version", data)
         return
 
     def animation(self):
@@ -106,6 +120,7 @@ class Publish:
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
         self.ui = self.import_ui()
+        self.init()
         return
 
     def import_ui(self):
@@ -116,3 +131,12 @@ class MyWindow(QtWidgets.QDialog):
         ui = loader.load(ui_file)
         ui_file.close()
         return ui
+
+    def init(self):
+        # TODO: GET UI WORKING
+        return
+
+    def run(self):
+        publish = Publish()
+        publish.animation()
+        return
