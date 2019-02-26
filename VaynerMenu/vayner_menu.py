@@ -6,13 +6,15 @@ set_project = """
 import shotgun.set_project as sg; reload(sg)
 sg.get_window()
 """
+
 checkout_menu = """
-from Cat.shotgun.VaynerMenu import qt_checkout_box as cb; reload(cb)
-cb.get_window()
+from shotgun.VaynerMenu import qt_checkout_box as sg; reload(sg)
+sg.get_window()
 """
+
 checkout_saved_version = """
-from Cat.shotgun.VaynerMenu import qt_checkout_box as cb; reload(cb)
-cb.checkout_saved_option()
+from shotgun.VaynerMenu import qt_checkout_box as sg; reload(sg)
+sg.checkout_saved_option()
 """
 
 checkout_published_version = """
@@ -179,5 +181,3 @@ class VaynerMenu:
         for pyc in shotgun.files("*.pyc"):
             pyc.remove_p()
         return
-
-
