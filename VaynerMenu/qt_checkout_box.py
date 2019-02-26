@@ -1,4 +1,5 @@
 from PySide2 import QtCore, QtWidgets, QtUiTools
+from pymel.core import optionVar
 
 
 def get_window():
@@ -11,9 +12,15 @@ def get_window():
     mw.ui.show()
 
 
-class YouClass:
-    def __init__(self):
-        return
+def checkout_saved_option():
+    saved_pref = optionVar(q='version_checkout')
+    import shotgun.checkout_scene as sg;
+    reload(sg)
+    checkout = sg.Checkout()
+    if saved_pref == 'pbox':
+        checkout.run(checkout_type="published")
+    else:
+        checkout.run(checkout_type="processed")
 
 
 class MyWindow(QtWidgets.QDialog):
@@ -32,24 +39,32 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def connect_signals(self, ui):
-        saved_pref = pm.optionVar(q='version_checkout')
-        QAbstractButton.toggle(self.ui.wbox)
-
+        saved_pref = optionVar(q='version_checkout')
+        QtWidgets.QAbstractButton.toggle(self.ui.wbox)
 
         if saved_pref == 'pbox':
-            QAbstractButton.toggle(self.ui.pbox)
+            QtWidgets.QAbstractButton.toggle(self.ui.pbox)
         elif saved_pref == 'wbox':
-            QAbstractButton.toggle(self.ui.wbox)
+            QtWidgets.QAbstractButton.toggle(self.ui.wbox)
 
         self.ui.chkt_btn.clicked.connect(self.checkout_button)
 
 
     def checkout_button(self):
+        import shotgun.checkout_scene as sg;
+        reload(sg)
+        checkout = sg.Checkout()
         if self.ui.pbox.isChecked():
             new_pref = 'pbox'
-            pm.optionVar(sv=('version_checkout', 'pbox'))
+            optionVar(sv=('version_checkout', 'pbox'))
+            checkout.run(checkout_type="published")
         if self.ui.wbox.isChecked():
             new_pref = 'wbox'
-            pm.optionVar(sv=('version_checkout', 'wbox'))
+            optionVar(sv=('version_checkout', 'wbox'))
+            checkout.run(checkout_type="processed")
 
         mw.ui.close()
+
+
+
+

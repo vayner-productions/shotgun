@@ -1,8 +1,18 @@
 from pymel.core.uitypes import Menu, MenuItem
+from PySide2 import QtCore, QtWidgets, QtUiTools
+
 
 set_project = """
 import shotgun.set_project as sg; reload(sg)
 sg.get_window()
+"""
+checkout_menu = """
+from Cat.shotgun.VaynerMenu import qt_checkout_box as cb; reload(cb)
+cb.get_window()
+"""
+checkout_saved_version = """
+from Cat.shotgun.VaynerMenu import qt_checkout_box as cb; reload(cb)
+cb.checkout_saved_option()
 """
 
 checkout_published_version = """
@@ -73,17 +83,20 @@ class VaynerMenu:
             parent="Vayner"
         )
 
-        # creates a working file from latest publish
-        checkout_published_version_item = MenuItem(
-            label="Checkout Published Version",
-            command=checkout_published_version,
+        # checkout either the published or working file
+        #### CAT FIX THIS SECTION ####
+        checkout_item = MenuItem(
+            "checkout_item",
+            label="Checkout",
+            command=checkout_saved_version,
+            # command=checkout_working_version,
+            # command=checkout_published_version,
             parent="Vayner"
         )
-
-        # open latest working file
-        checkout_working_version_item = MenuItem(
-            label="Checkout Working Version",
-            command=checkout_working_version,
+        # creates option box for the checkout menu item
+        checkout_box_item = MenuItem(
+            optionBox=True,
+            command=checkout_menu,
             parent="Vayner"
         )
 
@@ -108,41 +121,55 @@ class VaynerMenu:
             parent="Vayner"
         )
 
-        # CAMERA SECTION
-        MenuItem(divider=1, dividerLabel="Camera", parent="Vayner")
-
-        # imports and publishes camera
-        publish_camera_item = MenuItem(
-            label="Import and Publish Camera",
-            command=publish_camera,
+        # CAMERA SUBMENU
+        camera_item = MenuItem(
+            label="Camera",
+            subMenu=True,
             parent="Vayner"
         )
 
-        # ANIMATION SECTION
-        MenuItem(divider=1, dividerLabel="Animation", parent="Vayner")
+        # imports camera
+        import_camera_item = MenuItem(
+            label='Import Camera',
+            command="print 'import camera'",
+        )
+
+        # publishes camera
+        publish_camera_item = MenuItem(
+            label='Publish Camera',
+            command=publish_camera,
+        )
+
+        # ANIMATION SUBMENU
+        animation_item = MenuItem(
+            label="Animation",
+            subMenu=True,
+            parent="Vayner"
+        )
 
         # matches start/end playback to frame range on shotgun site
         update_timeline_item = MenuItem(
             label="Update Timeline",
             command=update_timeline,
-            parent="Vayner"
         )
 
-        # LIGHTING SECTION
-        MenuItem(divider=1, dividerLabel="Lighting", parent="Vayner")
+        # LIGHTING SUBMENU
+        lighting_item = MenuItem(
+            label="Lighting",
+            subMenu=True,
+            parent="Vayner"
+        )
 
         # places textures in /sourceimages under /Assets and /HDRI
         organize_textures_item = MenuItem(
             label="Organize Textures",
             command=organize_textures,
-            parent="Vayner"
         )
 
         # templates lighters' files for render farm
         render_setup_item = MenuItem(
             label="Render Setup",
             command=render_setup,
-            parent="Vayner"
         )
 
         # removes pyc files
@@ -152,3 +179,5 @@ class VaynerMenu:
         for pyc in shotgun.files("*.pyc"):
             pyc.remove_p()
         return
+
+
