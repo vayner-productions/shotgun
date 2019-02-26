@@ -86,13 +86,10 @@ class VaynerMenu:
         )
 
         # checkout either the published or working file
-        #### CAT FIX THIS SECTION ####
         checkout_item = MenuItem(
             "checkout_item",
             label="Checkout",
             command=checkout_saved_version,
-            # command=checkout_working_version,
-            # command=checkout_published_version,
             parent="Vayner"
         )
         # creates option box for the checkout menu item
