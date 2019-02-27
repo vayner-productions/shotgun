@@ -19,6 +19,9 @@ from . import *
 from PySide2 import QtCore, QtWidgets, QtUiTools
 from pymel.core.system import Workspace
 from pymel.util import path
+from imghdr import what
+
+import pymel.core as pm
 
 
 def get_window():
@@ -44,12 +47,14 @@ for ref in pm.listReferences():
 
 class Publish:
     def __init__(self, thumbnail=None, playblast=None, maya_file=None, alembic_directory=None, comment=""):
-        self.thumbnail = thumbnail
-        self.playblast = playblast
-        self.maya_file = maya_file
-        self.alembic_directory = alembic_directory
+        for k, v in vars().iteritems():
+            if k is "self" or k is "comment":
+                continue
+            if v:
+                v = path(v)
+            setattr(self, k, v)
         self.comment = comment
-        self.alembic_file = None
+        self.alembic_file = None  # why do you need the alembic file... cant remember
         return
 
     def rich_media(self):
@@ -62,7 +67,7 @@ class Publish:
         return self.alembic_file
 
     def update_shotgun(self):
-        # GET ENTITY
+        # GET ENTITY - get the latest alembic entity for the shot
         entity_name = path(Workspace.fileRules["scene"]).basename() + "_Anim"
 
         alembic_entity = sg.find_one(
@@ -98,18 +103,68 @@ class Publish:
             latest_version = version_entity["code"][-3:]
             version_name = version_name[:-3] + str(int(latest_version) + 1).zfill(3)
 
-        # TODO: FILE LINKS {link: self.playblast}
         data = {
             "project": project,
             "code": version_name,
             "entity": alembic_entity,
-            "image": self.thumbnail,
-            "sg_uploaded_movie": self.playblast,
-            "sg_maya_file": self.maya_file,
-            "sg_alembic_directory": self.alembic_directory,
             "description": self.comment
         }
         version = sg.create("Version", data)
+        # ATTACHMENTS - local files/directories are updated, whereas remote files/directories are uploaded
+        # updating each attachment to the version individually in case they're being uploaded from different places
+        # remote publishes are wip, and therefore commented out of use, vayner IT deparment needs to check securities!!!
+        if self.maya_file.drive == media_space:
+            sg.update(
+                "Version",
+                version["id"],
+                {
+                    "sg_maya_file": {
+                        "link_type": "local",
+                        "local_path": str(self.maya_file.normpath()),
+                        "name": str(self.maya_file.basename())
+                    }
+                }
+            )
+        else:
+            sg.upload(
+                "Version",
+                version["id"],
+                self.maya_file,
+                field_name="sg_maya_file",
+                display_name=r"{}".format(path(self.maya_file).basename())
+            )
+
+        if self.alembic_directory.drive == media_space:
+            sg.update(
+                "Version",
+                version["id"],
+                {
+                    "sg_alembic_directory": {
+                        "link_type": "local",
+                        "local_path": str(self.alembic_directory.normpath()),
+                        "name": str(self.alembic_directory.basename())
+                    }
+                }
+            )
+        else:
+            sg.upload(
+                "Version",
+                version["id"],
+                self.alembic_directory,
+                field_name="sg_maya_file",
+                display_name=r"{}".format(path(self.alembic_directory).basename())
+            )
+
+        # THUMBNAIL - ensures play icon appears for videos, images appear as thumbnails, and thumbnail from previous
+        # version is reused if user opts out of making a playblast for this version
+        if self.playblast and not what(self.playblast):
+            sg.upload("Version", version["id"], self.playblast, field_name="sg_uploaded_movie")
+            sg.update("Version", version["id"], {"image": None})
+        elif self.thumbnail:
+            sg.upload_thumbnail("Version", version["id"], self.thumbnail)
+        elif not (self.thumbnail or self.playblast):
+            sg.share_thumbnail(entities=[version], source_entity=version_entity)
+        print "\n>> published animation to shotgun"
         return
 
     def animation(self):
@@ -133,10 +188,22 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def init(self):
-        # TODO: GET UI WORKING
+        self.ui.publish_btn.clicked.connect(self.run)
         return
 
     def run(self):
-        publish = Publish()
-        publish.animation()
+        thumbnail = None
+        playblast = None
+        maya_file = pm.sceneName()
+        alembic_directory = None
+        comment = ""
+        publish = Publish(
+            thumbnail=thumbnail,
+            playblast=playblast,
+            maya_file=maya_file,
+            alembic_directory=alembic_directory,
+            comment=comment
+        )
+        publish.update_shotgun()
+        self.ui.close()
         return
