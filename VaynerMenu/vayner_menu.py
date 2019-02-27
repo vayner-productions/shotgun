@@ -58,9 +58,14 @@ import shotgun.render_setup as sg; reload(sg)
 sg.get_window()
 """
 
+import_camera = """
+from shotgun.publish import camera as sg; reload(sg)
+sg.get_window("load_camera")
+"""
+
 publish_camera = """
-import shotgun.initialize_camera as sg; reload(sg)
-sg.get_window()
+from shotgun.publish import camera as sg; reload(sg)
+sg.get_window("publish_camera")
 """
 
 
@@ -127,13 +132,13 @@ class VaynerMenu:
 
         # imports camera
         import_camera_item = MenuItem(
-            label='Import Camera',
-            command="print 'import camera'",
+            label="Import Camera",
+            command=import_camera
         )
 
         # publishes camera
         publish_camera_item = MenuItem(
-            label='Publish Camera',
+            label="Publish Camera",
             command=publish_camera,
         )
 
