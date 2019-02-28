@@ -53,8 +53,18 @@ class Publish:
             if v:
                 v = path(v)
             setattr(self, k, v)
+
+        # written for maya standalone and UI, maya_file needs a file for this class to work
+        # assumes current scene unless specified otherwise
+        if pm.sceneName():
+            if not self.maya_file:
+                self.maya_file = path(pm.sceneName())
+        else:
+            pm.warning("No maya file opened.")
+            return
+
         self.comment = comment
-        self.alembic_file = None  # why do you need the alembic file... cant remember
+        self.alembic_file = None
         return
 
     def rich_media(self):
@@ -192,18 +202,21 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def run(self):
-        thumbnail = None
-        playblast = None
-        maya_file = pm.sceneName()
-        alembic_directory = None
-        comment = ""
-        publish = Publish(
-            thumbnail=thumbnail,
-            playblast=playblast,
-            maya_file=maya_file,
-            alembic_directory=alembic_directory,
-            comment=comment
-        )
-        publish.update_shotgun()
+        # publish = Publish()
+        # thumbnail, playblast = publish.rich_media()
+
+        print ">>", self.ui.skip_cbx.isChecked()
+
+        # alembic_directory = None
+        # comment = self.ui.comment_txt.toPlainText()
+
+
+        # publish = Publish(
+        #     thumbnail=thumbnail,
+        #     playblast=playblast,
+        #     alembic_directory=alembic_directory,
+        #     comment=comment
+        # )
+        # publish.update_shotgun()
         self.ui.close()
         return
