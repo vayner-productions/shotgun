@@ -1,13 +1,8 @@
-import sgtk
+from . import *
 from pymel.core.system import workspace
 from pymel.util.common import path
 import maya.mel as mel
 from PySide2 import QtCore, QtWidgets, QtUiTools
-
-eng = sgtk.platform.current_engine()
-project_name = eng.context.project["name"]
-sg = eng.shotgun
-root = None
 
 
 def get_window():
@@ -45,10 +40,20 @@ class MyWindow(QtWidgets.QDialog):
             return
 
         # used for in-office development
-        client_brand, sub_brand = [
-            sg.find_one("Project", [["name", "is", project_name]], [i, "name"])[i]["name"] for i in
-            ["sg_client", "sg_brand"]]
-        client_brand = client_brand
+        data = sg.find_one(
+            "Project",
+            [
+                ["id", "is", project["id"]]
+            ],
+            [
+                "sg_client",
+                "sg_brand",
+                "name"
+            ]
+        )
+        client_brand = data["sg_client"]["name"]
+        sub_brand = data["sg_brand"]["name"]
+        project_name = data["name"]
         self.project_path = r"A:/Animation/Projects/Client/{}/{}/{}/Project Directory/02_Production/04_Maya".format(
             client_brand, sub_brand, project_name)
         return
