@@ -1,6 +1,14 @@
 """
-from shotgun.Publish import animation as sg
+from shotgun.publish import animation as sg
+reload(sg)
+maya_file = pm.sceneName()  # user input
+anim = sg.Publish(maya_file=maya_file)
+thumbnail, playblast = anim.rich_media()  # may not be necessary, changes self.params
 
+
+
+
+from shotgun.publish import animation as sg
 reload(sg)
 sg.get_window()
 
@@ -210,7 +218,12 @@ class MyWindow(QtWidgets.QDialog):
         # alembic_directory = None
         # comment = self.ui.comment_txt.toPlainText()
 
-
+        # need all parameters to run
+        # thumbnail=None
+        # playblast=None
+        # maya_file=None
+        # alembic_directory=None
+        # comment=""
         # publish = Publish(
         #     thumbnail=thumbnail,
         #     playblast=playblast,
