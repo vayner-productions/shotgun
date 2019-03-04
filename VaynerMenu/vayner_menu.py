@@ -1,5 +1,4 @@
 from pymel.core.uitypes import Menu, MenuItem
-from PySide2 import QtCore, QtWidgets, QtUiTools
 
 
 set_project = """
@@ -182,4 +181,6 @@ class VaynerMenu:
 
         for pyc in shotgun.files("*.pyc"):
             pyc.remove_p()
+
+        print ">> Vayner Menu reloaded",
         return
