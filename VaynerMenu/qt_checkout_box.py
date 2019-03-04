@@ -14,7 +14,7 @@ def get_window():
 
 def checkout_saved_option():
     saved_pref = optionVar(q='version_checkout')
-    import shotgun.checkout_scene as sg;
+    import shotgun.checkout_scene as sg
     reload(sg)
     checkout = sg.Checkout()
     if saved_pref == 'pbox':
@@ -49,7 +49,6 @@ class MyWindow(QtWidgets.QDialog):
 
         self.ui.chkt_btn.clicked.connect(self.checkout_button)
 
-
     def checkout_button(self):
         import shotgun.checkout_scene as sg;
         reload(sg)
@@ -64,7 +63,3 @@ class MyWindow(QtWidgets.QDialog):
             checkout.run(checkout_type="processed")
 
         mw.ui.close()
-
-
-
-
