@@ -3,9 +3,10 @@ from shotgun.publish import animation as sg
 reload(sg)
 maya_file = pm.sceneName()  # user input
 anim = sg.Publish(maya_file=maya_file)
-thumbnail, playblast = anim.rich_media()  # may not be necessary, changes self.params
-
-
+anim.version()
+anim.rich_media()
+anim.animation()
+anim.update_shotgun()
 
 
 from shotgun.publish import animation as sg
@@ -72,8 +73,50 @@ class Publish:
             return
 
         self.comment = comment
+
+        # single_frame and multi_frame creates alembic files for each node
         self.alembic_file = None
+
+        # alembics previously published into /cache/alembic, but will now contain only the latest version
+        # all publishes will be recorded in alembic directory /publish/08_Animation/Shot_###/ver_###
+        self.workspace_alembic = path(Workspace().expandName(Workspace.fileRules["alembicCache"]))
         return
+
+    def version(self, up=1, current=None, next=None):
+        """
+        gets/creates version directory for instance of Publish
+        updates self.alembic_directory
+        creates first/next version or gets current version
+
+        ***not necessary to use version() if alembic_directory contains a value when calling Publish()***
+
+        :param up: (bool) by default versions up, otherwise gets current
+        :param current: latest version in alembic directory
+        :param next: version to be created
+        :return: latest or current alembic version, depending on 'up' param
+        """
+        # get parent directory containing all versions
+        alembic_directory = path(Workspace().expandName(Workspace.fileRules["scene"]).replace("scenes", "published"))
+        
+        # ensure folder exists
+        path.makedirs_p(alembic_directory)
+
+        # get current and next version
+        version = alembic_directory.dirs("ver_*")
+        if version:
+            current = sorted(version)[::-1][0]
+            next = path(current[:-3] + str(int(current[-3:]) + 1).zfill(3))
+        else:
+            current = next = alembic_directory.joinpath("ver_001")
+
+        if up:
+            alembic_directory = next
+        else:
+            alembic_directory = current
+
+        self.alembic_directory = alembic_directory.normpath()
+        path.makedirs_p(self.alembic_directory)
+        return self.alembic_directory
 
     def rich_media(self):
         return self.thumbnail, self.playblast
@@ -186,7 +229,18 @@ class Publish:
         return
 
     def animation(self):
-        self.update_shotgun()
+        """
+        /published/08_Animation/Shot_###/alembic/ver_###/
+        /cache/alembic/
+
+
+        for ref in single_refs:
+            result = single_frame(ref)
+
+        for ref in multi_refs:
+            multi_frame(ref)
+        """
+        self.alembic_directory
         return
 
 
