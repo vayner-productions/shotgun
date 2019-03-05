@@ -31,6 +31,7 @@ from pymel.util import path
 from imghdr import what
 
 import pymel.core as pm
+workspace = Workspace()
 
 
 def get_window():
@@ -79,7 +80,7 @@ class Publish:
 
         # alembics previously published into /cache/alembic, but will now contain only the latest version
         # all publishes will be recorded in alembic directory /publish/08_Animation/Shot_###/ver_###
-        self.workspace_alembic = path(Workspace().expandName(Workspace.fileRules["alembicCache"]))
+        self.workspace_alembic = path(workspace.expandName(workspace.fileRules["alembicCache"]))
         return
 
     def version(self, up=1, current=None, next=None):
@@ -96,7 +97,7 @@ class Publish:
         :return: latest or current alembic version, depending on 'up' param
         """
         # get parent directory containing all versions
-        alembic_directory = path(Workspace().expandName(Workspace.fileRules["scene"]).replace("scenes", "published"))
+        alembic_directory = path(workspace.expandName(workspace.fileRules["scene"]).replace("scenes", "published"))
         
         # ensure folder exists
         path.makedirs_p(alembic_directory)
@@ -118,7 +119,7 @@ class Publish:
         path.makedirs_p(self.alembic_directory)
         return self.alembic_directory
 
-    def rich_media(self, playblast=0, size=(1920, 1080)):
+    def rich_media(self, playblast=0, size=(1920, 1080), range="playback"):
         # KNOWN ISSUE: UP TO A CERTAIN NUMBER OF PLAYBLASTS/THUMBNAILS, HIGH RES NEEDS TO DOWN GRADE RESOLUTION
         # KNOWN ISSUE: DOESN'T PLAYBLAST CORRECTLY IF ACTIVE VIEW IS SCRIPT EDITOR
         # KNOWN ISSUE: PLAYBLAST STALLS THE USER FROM RESUMING WORK
@@ -150,8 +151,22 @@ class Publish:
             return self.thumbnail, self.playblast
 
         # PLAYBLAST
-        # TODO: GET WORKING START AND END, NOT RENDER
-        start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
+        # range is "playback"
+        start_time, end_time = pm.playbackOptions(q=1, min=1), pm.playbackOptions(q=1, max=1)
+        if range is "sg":
+            shot_name = path(workspace.fileRules["scene"]).basename()
+            frame_range = sg.find_one(
+                "Shot",
+                [
+                    ["project", "is", project],
+                    ["code", "is", shot_name]
+                ],
+                ["sg_frame_range"]
+            )["sg_frame_range"]
+            start_time, end_time = [int(t) for t in frame_range.split("-")]
+        elif range is "animation":
+            start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
+
         playblast = path(self.alembic_directory.joinpath("playblast.mov")).normpath()
         self.playblast = pm.playblast(
             startTime=start_time,
@@ -179,7 +194,7 @@ class Publish:
 
     def update_shotgun(self):
         # GET ENTITY - get the latest alembic entity for the shot
-        entity_name = path(Workspace.fileRules["scene"]).basename() + "_Anim"
+        entity_name = path(workspace.fileRules["scene"]).basename() + "_Anim"
 
         alembic_entity = sg.find_one(
             "CustomEntity05",
