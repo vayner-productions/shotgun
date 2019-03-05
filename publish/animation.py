@@ -118,7 +118,57 @@ class Publish:
         path.makedirs_p(self.alembic_directory)
         return self.alembic_directory
 
-    def rich_media(self):
+    def rich_media(self, playblast=0, size=(1920, 1080)):
+        # KNOWN ISSUE: UP TO A CERTAIN NUMBER OF PLAYBLASTS/THUMBNAILS, HIGH RES NEEDS TO DOWN GRADE RESOLUTION
+        # KNOWN ISSUE: DOESN'T PLAYBLAST CORRECTLY IF ACTIVE VIEW IS SCRIPT EDITOR
+        # KNOWN ISSUE: PLAYBLAST STALLS THE USER FROM RESUMING WORK
+        # TODO: CREATING PLAYBLASTS AND THUMBNAILS VIA MAYA STANDALONE SHOULD FIX KNOWN ISSUES
+        active_editor = pm.playblast(ae=1)
+        active_camera = pm.lookThru(active_editor, q=1)
+        pm.lookThru(active_editor, "render_cam")
+
+        # THUMBNAIL
+        current_time = pm.currentTime(q=1)
+        thumbnail = path(self.alembic_directory.joinpath("thumbnail.jpg")).normpath()
+        self.thumbnail = pm.playblast(
+            frame=current_time,
+            format="image",
+            editorPanelName=active_editor,  # perspective view
+            completeFilename=thumbnail,
+            percent=100,
+            compression="jpg",
+            quality=100,
+            widthHeight=size,  # option --> (960, 540)
+            viewer=0,
+            forceOverwrite=1,
+            clearCache=1,
+            offScreen=1
+        )
+
+        if not playblast:
+            pm.lookThru(active_editor, active_camera)  # set persp view back to original camera
+            return self.thumbnail, self.playblast
+
+        # PLAYBLAST
+        # TODO: GET WORKING START AND END, NOT RENDER
+        start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
+        playblast = path(self.alembic_directory.joinpath("playblast.mov")).normpath()
+        self.playblast = pm.playblast(
+            startTime=start_time,
+            endTime=end_time,
+            format="qt",
+            editorPanelName=active_editor,  # perspective view
+            filename=playblast,
+            percent=100,
+            compression="H.264",
+            quality=100,
+            widthHeight=size,  # option --> (960, 540)
+            viewer=0,
+            forceOverwrite=1,
+            clearCache=1,
+            offScreen=1
+        )
+        pm.lookThru(active_editor, active_camera)  # set persp view back to original camera
         return self.thumbnail, self.playblast
 
     def single_frame(self):
