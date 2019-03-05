@@ -4,7 +4,8 @@ reload(sg)
 maya_file = pm.sceneName()  # user input
 anim = sg.Publish(maya_file=maya_file)
 anim.version()
-anim.rich_media()
+anim.rich_media()  # anim.rich_media(playblast=1, range="sg")
+anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
 anim.animation()
 anim.update_shotgun()
 
@@ -56,7 +57,8 @@ for ref in pm.listReferences():
 
 
 class Publish:
-    def __init__(self, thumbnail=None, playblast=None, maya_file=None, alembic_directory=None, comment=""):
+    def __init__(self, thumbnail=None, playblast=None, maya_file=None, alembic_directory=None, comment="",
+                 attributes=None):
         for k, v in vars().iteritems():
             if k is "self" or k is "comment":
                 continue
@@ -186,10 +188,55 @@ class Publish:
         pm.lookThru(active_editor, active_camera)  # set persp view back to original camera
         return self.thumbnail, self.playblast
 
-    def single_frame(self):
+    def single_frame(self, top_node=None):
+        if not self.alembic_directory:
+            pm.warning(">> Set alembic directory.")
+            return
+
+        top_node = pm.PyNode(top_node)
+        self.alembic_file = self.alembic_directory.joinpath(top_node+".abc").normpath()
+
+        job_arg = "-frameRange {0:.0f} {0:.0f} -dataFormat ogawa -root {1} -file '{2}'".format(
+            pm.currentTime(),
+            top_node,
+            self.alembic_file
+        )
+
+        attributes = [job_arg] + self.attributes
+        job_arg = " -".join(attributes)
+
+        pm.AbcExport(j=job_arg)
         return self.alembic_file
 
-    def multi_frame(self):
+    def multi_frame(self, top_node=None):
+        if not self.alembic_directory:
+            pm.warning(">> Set alembic directory.")
+            return
+
+        top_node = pm.PyNode(top_node)
+        self.alembic_file = self.alembic_directory.joinpath(top_node+".abc").normpath()
+        shot_name = path(workspace.fileRules["scene"]).basename()
+        frame_range = sg.find_one(
+            "Shot",
+            [
+                ["project", "is", project],
+                ["code", "is", shot_name]
+            ],
+            ["sg_frame_range"]
+        )["sg_frame_range"]
+        start_time, end_time = [int(t) for t in frame_range.split("-")]
+
+        job_arg = "-frameRange {} {} -dataFormat ogawa -root {} -file '{}'".format(
+            start_time,
+            end_time,
+            top_node,
+            self.alembic_file
+        )
+
+        attributes = [job_arg] + self.attributes
+        job_arg = " -".join(attributes)
+
+        pm.AbcExport(j=job_arg)
         return self.alembic_file
 
     def update_shotgun(self):
@@ -293,7 +340,7 @@ class Publish:
         print "\n>> published animation to shotgun"
         return
 
-    def animation(self):
+    def animation(self, single=[], multi=[]):
         """
         /published/08_Animation/Shot_###/alembic/ver_###/
         /cache/alembic/
