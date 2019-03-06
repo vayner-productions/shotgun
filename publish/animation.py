@@ -415,22 +415,44 @@ class Publish:
                 self.comment += "\n" + abc.basename()
         return alembics
 
-    def proxy(self, mode="add"):
+    def proxy(self, mode="add", remove=[]):
         """
+        Intended to handle 1 proxy file per shot.
+
+        It adds "Shot_###_PXY" to /published and copies to /06_Cache. Reuses animation():
+        reload(sg)
+        anim = sg.Publish(maya_file=pm.sceneName())
+        anim.version(up=1)
+        anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
+        anim.proxy(mode="add")
+
+        It can also remove items without their full name so long as it returns one unique file:
+        reload(sg)
+        anim = sg.Publish(maya_file=pm.sceneName())
+        anim.version(up=0)
+        anim.proxy(mode="remove", remove=["Shot_006"])  # remove=["parent_PXY"]
 
         :param mode: "add" proxy OR "remove" proxy
+        :param remove: (str) removes proxy from /06_Cache
         :return:
         """
         if "add" == mode:
             pass
         elif "remove" == mode:
-            # Queries for top-level referenced proxies
-            proxies = list(set(pm.ls(assemblies=1, referencedNodes=1)).intersection(set(pm.ls("*_PXY", assemblies=1))))
+            cache_directory = path(workspace.expandName(workspace.fileRules["alembicCache"]))
 
-            alembics = []
-            for proxy in proxies:
-                alembics += [path(pm.referenceQuery(proxy, filename=1))]
-                path.remove_p(alembics[-1])
+            alembics, skipped = [], []
+            for abc in remove:
+                abc_edit = abc.replace("PXY", "*")
+                search = cache_directory.files("*{}*PXY*".format(abc_edit))
+                if len(search) == 1:
+                    alembics += search
+                    path.remove_p(alembics[-1])
+                else:
+                    skipped += [abc]
+
+            if skipped:
+                pm.warning(" ".join([">> Skipped:"] + skipped))
 
             # Adding automated comment
             if self.comment:
@@ -446,7 +468,7 @@ class Publish:
             return
 
         # Queries for top-level proxies that aren't referenced nodes
-        proxies = list(set(pm.ls("*_PXY", assemblies=1)))
+        proxies = list(set(pm.ls("*_PXY", assemblies=1)).difference(set(pm.ls(assemblies=1, referencedNodes=1))))
 
         # Creates top-level proxy node for alembic caching
         if not proxies:
