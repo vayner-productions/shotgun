@@ -221,6 +221,7 @@ class Publish:
             attributes = [job_arg] + self.attributes
             job_arg = " -".join(attributes)
         pm.AbcExport(j=job_arg)
+        self.alembic_file = path(self.alembic_file).normpath()
         return self.alembic_file
 
     def multi_frame(self, top_node=None):
@@ -269,6 +270,7 @@ class Publish:
             job_arg = " -".join(attributes)
 
         pm.AbcExport(j=job_arg)
+        self.alembic_file = path(self.alembic_file).normpath()
         return self.alembic_file
 
     def update_shotgun(self):
@@ -372,7 +374,7 @@ class Publish:
         print "\n>> published animation to shotgun"
         return
 
-    def animation(self, single=[], multi=[]):
+    def animation(self, single=[], multi=[], comment="Alembics:"):
         """
         Contains .abc as they're created, path comes from self.version():
         04_Maya/published/08_Animation/Shot_###/alembic/ver_###
@@ -385,26 +387,77 @@ class Publish:
         anim.version(up=0)
         anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
         single = ["model_set_GEO"]
-        multi = ["model_a_RIG", "rig_b_RIG", "render_cam_RIG"]
+        multi = ["hero_RIG"]
         anim.animation(single=single, multi=multi)
         """
-        version_abc = []
+        # Creating single and multi frame alembics
+        alembics = []
         for top_node in single:
-            version_abc += [self.single_frame(top_node)]
+            alembics += [self.single_frame(top_node)]
 
         for top_node in multi:
-            version_abc += [self.multi_frame(top_node)]
+            alembics += [self.multi_frame(top_node)]
 
+        # Copying alembics from /published to /06_Cache
         all_directory = path(workspace.expandName(workspace.fileRules["alembicCache"]))
-        all_abc = all_directory.files("*.abc")
-        return
+        
+        for abc in alembics:
+            dst = all_directory.joinpath(abc.basename())
+            path.copy(abc, dst)
 
-    def proxy(self):
+        # Adding automated comment
+        if self.comment:
+            self.comment += "\n"
+
+        if alembics:
+            self.comment += comment
+            for abc in alembics:
+                self.comment += "\n" + abc.basename()
+        return alembics
+
+    def proxy(self, mode="add"):
         """
-        creates a _PXY null
-        if there's something inside, it'll cache
+
+        :param mode: "add" proxy OR "remove" proxy
+        :return:
         """
-        return
+        if "add" == mode:
+            pass
+        elif "remove" == mode:
+            # Queries for top-level referenced proxies
+            proxies = list(set(pm.ls(assemblies=1, referencedNodes=1)).intersection(set(pm.ls("*_PXY", assemblies=1))))
+
+            alembics = []
+            for proxy in proxies:
+                alembics += [path(pm.referenceQuery(proxy, filename=1))]
+                path.remove_p(alembics[-1])
+
+            # Adding automated comment
+            if self.comment:
+                self.comment += "\n"
+
+            if alembics:
+                self.comment += "Removed:"
+                for abc in alembics:
+                    self.comment += "\n" + abc.basename()
+            return alembics
+        else:
+            pm.warning(">> Mode is either 'add'/'remove'.")
+            return
+
+        # Queries for top-level proxies that aren't referenced nodes
+        proxies = list(set(pm.ls("*_PXY", assemblies=1)))
+
+        # Creates top-level proxy node for alembic caching
+        if not proxies:
+            proxies = [pm.group(path(workspace.fileRules["scene"]).basename() + "_PXY")]  # Shot_###_PXY
+            return
+
+        # Ensure top-level proxy node contains geo for export, this includes mesh and nurbs
+        for proxy in proxies:
+            if proxy.getChildren(ad=1, type="shape"):
+                alembics = self.animation(multi=proxies, comment="Proxies:")
+        return alembics
 
 
 class MyWindow(QtWidgets.QDialog):
