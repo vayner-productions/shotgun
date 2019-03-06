@@ -1,3 +1,6 @@
+"""
+TODO: IN ANIMATION, UPDATE "alembicCache" FILE RULLE cache/alembic --> scenes/06_Cache/08_Animation/Shot_###
+"""
 from . import *
 from pymel.core.system import workspace
 from pymel.util.common import path
