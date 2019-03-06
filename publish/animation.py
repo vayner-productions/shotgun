@@ -498,6 +498,8 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def init(self):
+        # TODO: UI - ADD/REMOVE LIST WIDGET ITEMS FOR EXPORT
+        # TODO: UI DETECTS PROXY
         self.ui.publish_btn.clicked.connect(self.run)
         return
 
@@ -505,27 +507,6 @@ class MyWindow(QtWidgets.QDialog):
         """
         Automated comments contain what is in the alembic directory
         """
-
-        # publish = Publish()
-        # thumbnail, playblast = publish.rich_media()
-
-        print ">>", self.ui.skip_cbx.isChecked()
-
-        # alembic_directory = None
-        # comment = self.ui.comment_txt.toPlainText()
-
-        # need all parameters to run
-        # thumbnail=None
-        # playblast=None
-        # maya_file=None
-        # alembic_directory=None
-        # comment=""
-        # publish = Publish(
-        #     thumbnail=thumbnail,
-        #     playblast=playblast,
-        #     alembic_directory=alembic_directory,
-        #     comment=comment
-        # )
-        # publish.update_shotgun()
+        # TODO: CHECK COMMENTS!
         self.ui.close()
         return
