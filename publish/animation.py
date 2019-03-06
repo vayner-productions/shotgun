@@ -189,32 +189,63 @@ class Publish:
         return self.thumbnail, self.playblast
 
     def single_frame(self, top_node=None):
+        """
+        alembic cache objects with no animation. uses self.attributes to enable alembic attributes. uses
+        self.alembic_directory to store alembic files
+
+        from shotgun.publish import animation as sg
+        reload(sg)
+        maya_file = pm.sceneName()  # user input
+        anim = sg.Publish(maya_file=maya_file)
+        anim.version(up=0)  # use latest alembic directory
+        anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
+        anim.single_frame(top_node="model_set_GEO")
+
+        :param top_node: (str) the name of the node to cache, its children exports too
+        :return: (str) path object of the full path file
+        """
         if not self.alembic_directory:
             pm.warning(">> Set alembic directory.")
             return
 
         top_node = pm.PyNode(top_node)
-        self.alembic_file = self.alembic_directory.joinpath(top_node+".abc").normpath()
+        self.alembic_file = self.alembic_directory.joinpath(top_node+".abc").replace("\\", "/")
 
-        job_arg = "-frameRange {0:.0f} {0:.0f} -dataFormat ogawa -root {1} -file '{2}'".format(
+        job_arg = '-frameRange {0:.0f} {0:.0f} -dataFormat ogawa -root {1} -file "{2}"'.format(
             pm.currentTime(),
             top_node,
             self.alembic_file
         )
 
-        attributes = [job_arg] + self.attributes
-        job_arg = " -".join(attributes)
-
+        if self.attributes:
+            attributes = [job_arg] + self.attributes
+            job_arg = " -".join(attributes)
         pm.AbcExport(j=job_arg)
         return self.alembic_file
 
     def multi_frame(self, top_node=None):
+        """
+        alembic cache objects with animation. uses self.attributes to enable alembic attributes. uses
+        self.alembic_directory to store alembic files
+
+        from shotgun.publish import animation as sg
+        reload(sg)
+        maya_file = "C:\Users\%USERPROFILE%\Documents\shot_000.ma"  # user input
+        anim = sg.Publish(maya_file=maya_file)
+        anim.version(up=1)  # versions up to the next alembic directory
+        anim.attributes = []  # no attributes to enable
+        anim.multi_frame(top_node="hero_RIG")
+
+        :param top_node: (str) the name of the node to cache, its children exports too
+        :return: (str) path object of the full path file
+        """
+
         if not self.alembic_directory:
             pm.warning(">> Set alembic directory.")
             return
 
         top_node = pm.PyNode(top_node)
-        self.alembic_file = self.alembic_directory.joinpath(top_node+".abc").normpath()
+        self.alembic_file = self.alembic_directory.joinpath(top_node+".abc").replace("\\", "/")
         shot_name = path(workspace.fileRules["scene"]).basename()
         frame_range = sg.find_one(
             "Shot",
@@ -226,15 +257,16 @@ class Publish:
         )["sg_frame_range"]
         start_time, end_time = [int(t) for t in frame_range.split("-")]
 
-        job_arg = "-frameRange {} {} -dataFormat ogawa -root {} -file '{}'".format(
+        job_arg = '-frameRange {} {} -dataFormat ogawa -root {} -file "{}"'.format(
             start_time,
             end_time,
             top_node,
             self.alembic_file
         )
 
-        attributes = [job_arg] + self.attributes
-        job_arg = " -".join(attributes)
+        if self.attributes:
+            attributes = [job_arg] + self.attributes
+            job_arg = " -".join(attributes)
 
         pm.AbcExport(j=job_arg)
         return self.alembic_file
@@ -342,17 +374,36 @@ class Publish:
 
     def animation(self, single=[], multi=[]):
         """
-        /published/08_Animation/Shot_###/alembic/ver_###/
-        /cache/alembic/
+        Contains .abc as they're created, path comes from self.version():
+        04_Maya/published/08_Animation/Shot_###/alembic/ver_###
 
+        Contains only the latest of all .abc for the given shot, path comes from set_project():
+        04_Maya/scenes/06_Cache/08_Animation/Shot_###
 
-        for ref in single_refs:
-            result = single_frame(ref)
-
-        for ref in multi_refs:
-            multi_frame(ref)
+        reload(sg)
+        anim = sg.Publish(maya_file=pm.sceneName())
+        anim.version(up=0)
+        anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
+        single = ["model_set_GEO"]
+        multi = ["model_a_RIG", "rig_b_RIG", "render_cam_RIG"]
+        anim.animation(single=single, multi=multi)
         """
-        self.alembic_directory
+        version_abc = []
+        for top_node in single:
+            version_abc += [self.single_frame(top_node)]
+
+        for top_node in multi:
+            version_abc += [self.multi_frame(top_node)]
+
+        all_directory = path(workspace.expandName(workspace.fileRules["alembicCache"]))
+        all_abc = all_directory.files("*.abc")
+        return
+
+    def proxy(self):
+        """
+        creates a _PXY null
+        if there's something inside, it'll cache
+        """
         return
 
 
@@ -376,6 +427,10 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def run(self):
+        """
+        Automated comments contain what is in the alembic directory
+        """
+
         # publish = Publish()
         # thumbnail, playblast = publish.rich_media()
 
