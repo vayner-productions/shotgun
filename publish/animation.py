@@ -448,20 +448,26 @@ class Publish:
         if "add" == mode:
             if not add:
                 name = path(workspace.fileRules["scene"]).basename()
-                if pm.ls("{}_PXY".format(name)):
+                if pm.ls("*{}_PXY".format(name)):
                     pm.warning(">> {} already exists, nothing to create.".format(name))
                     return
                 else:
                     add = [name]  # Shot_###_PXY
 
-            print ">> Created the following proxy groups:"
             proxies = []
             for name in add:
                 if "_PXY" not in name:
                     name += "_PXY"
-                proxies += [pm.group(name=name, em=1)]
-                print name
+                if pm.ls("*{}".format(name)):
+                    continue
+                pm.group(name=name, em=1)
+                proxies += [name]
             pm.select(cl=1)
+
+            if proxies:
+                print "\n".join([">> Created the following proxy groups:"] + proxies)
+            else:
+                pm.warning(">> Already exists, nothing to create.")
         elif "export" == mode:
             # Search for proxies to export - they are not referenced nodes and contain geometry
             results = []
@@ -534,6 +540,9 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def create_proxy(self):
+        name = self.ui.input_lne.text()
+        anim = Publish()
+        anim.proxy(mode="add", add=[name])
         return
 
     def init(self):
