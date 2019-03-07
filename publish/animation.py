@@ -415,30 +415,71 @@ class Publish:
                 self.comment += "\n" + abc.basename()
         return alembics
 
-    def proxy(self, mode="add", remove=[], add=[]):
+    def proxy(self, mode="add", remove=[], add=[], export=[]):
         """
         Intended to handle 1 proxy file per shot.
 
-        It adds "Shot_###_PXY" to /published and copies to /06_Cache. Reuses animation():
+        Add mode creates proxy groups:
         reload(sg)
         anim = sg.Publish(maya_file=pm.sceneName())
         anim.version(up=1)
         anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
         anim.proxy(mode="add")
 
-        It can also remove items without their full name so long as it returns one unique file:
+        Export mode caches proxy groups:
+        reload(sg)
+        anim = sg.Publish(maya_file=pm.sceneName())
+        anim.version(up=1)
+        anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
+        anim.proxy(mode="export", export=["Shot_###"])
+
+        Remove mode removes proxy from fileRule["alembicCache"] (/06_Cache):
         reload(sg)
         anim = sg.Publish(maya_file=pm.sceneName())
         anim.version(up=0)
-        anim.proxy(mode="remove", remove=["Shot_006"])  # remove=["parent_PXY"]
+        anim.proxy(mode="remove", remove=["Shot_006"])
 
-        :param mode: "add" proxy OR "remove" proxy
-        :param remove: (str) removes proxy from /06_Cache
+        :param mode: add, export, remove
+        :param remove: (str) proxy from fileRule["alembicCache"] (/06_Cache)
+        :param add: (str) by default creates Shot_###_PXY, accepts names with or without "_PXY"
+        :param export: (str) exports top-level proxy nodes containing geometry that aren't already referenced
         :return:
         """
         if "add" == mode:
             if not add:
-                add = [str(path(workspace.fileRules["scene"]).basename() + "_PXY")]  # Shot_###_PXY
+                add = [path(workspace.fileRules["scene"]).basename()]  # Shot_###_PXY
+
+            print ">> Created the following proxy groups:"
+            proxies = []
+            for name in add:
+                if "_PXY" not in name:
+                    name += "_PXY"
+                proxies += [pm.group(name=name, em=1)]
+                print name
+            pm.select(cl=1)
+        elif "export" == mode:
+            # Search for proxies to export - they are not referenced nodes and contain geometry
+            results = []
+            for search in export:
+                if "PXY" in search:
+                    results += pm.ls("*{}*".format(search), assemblies=1)
+                else:
+                    results += pm.ls("*{}*PXY".format(search), assemblies=1)
+
+            top_ref = set(pm.ls(assemblies=1, referencedNodes=1))  # top-level reference nodes
+            results = list(set(results).difference(top_ref))
+
+            proxies = []
+            for proxy in results:
+                if proxy.getChildren(ad=1, type="shape"):
+                    proxies += [proxy]
+
+            # Export search results
+            comment = "Proxies:"
+            alembics = self.animation(multi=proxies, comment=comment)
+
+            if alembics:
+                print ">> Exported the following proxies:", self.comment.split(comment)[1],
         elif "remove" == mode:
             cache_directory = path(workspace.expandName(workspace.fileRules["alembicCache"]))
 
@@ -463,35 +504,8 @@ class Publish:
                 self.comment += "Removed:"
                 for abc in alembics:
                     self.comment += "\n" + abc.basename()
-            return alembics
         else:
-            pm.warning(">> Mode is either 'add'/'remove'.")
-            return
-
-        # Queries for top-level proxies that aren't referenced nodes
-        proxies = list(set(pm.ls("*_PXY", assemblies=1)).difference(set(pm.ls(assemblies=1, referencedNodes=1))))
-
-        # Creates top-level proxy node for alembic caching
-        if not proxies:
-            print ">> Created the following proxy groups:"
-            for name in add:
-                proxy_name = name+"_PXY"
-                pm.group(name=proxy_name, em=1)
-                print proxy_name
-            pm.select(cl=1)
-            return
-
-        # Ensure top-level proxy node contains geo for export, this includes mesh and nurbs
-        comment = "Proxies:"
-
-        alembics = []
-        for proxy in proxies:
-            if proxy.getChildren(ad=1, type="shape"):
-                alembics = self.animation(multi=proxies, comment=comment)
-
-        if alembics:
-            print ">> Exported the following proxies:", self.comment.split(comment)[1],
-        return alembics
+            pm.warning(">> Mode is either 'add', 'export', or 'remove'.")
 
 
 class MyWindow(QtWidgets.QDialog):
