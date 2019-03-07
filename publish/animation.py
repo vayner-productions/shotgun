@@ -415,7 +415,7 @@ class Publish:
                 self.comment += "\n" + abc.basename()
         return alembics
 
-    def proxy(self, mode="add", remove=[]):
+    def proxy(self, mode="add", remove=[], add=[]):
         """
         Intended to handle 1 proxy file per shot.
 
@@ -437,7 +437,8 @@ class Publish:
         :return:
         """
         if "add" == mode:
-            pass
+            if not add:
+                add = [str(path(workspace.fileRules["scene"]).basename() + "_PXY")]  # Shot_###_PXY
         elif "remove" == mode:
             cache_directory = path(workspace.expandName(workspace.fileRules["alembicCache"]))
 
@@ -472,13 +473,24 @@ class Publish:
 
         # Creates top-level proxy node for alembic caching
         if not proxies:
-            proxies = [pm.group(path(workspace.fileRules["scene"]).basename() + "_PXY")]  # Shot_###_PXY
+            print ">> Created the following proxy groups:"
+            for name in add:
+                proxy_name = name+"_PXY"
+                pm.group(name=proxy_name, em=1)
+                print proxy_name
+            pm.select(cl=1)
             return
 
         # Ensure top-level proxy node contains geo for export, this includes mesh and nurbs
+        comment = "Proxies:"
+
+        alembics = []
         for proxy in proxies:
             if proxy.getChildren(ad=1, type="shape"):
-                alembics = self.animation(multi=proxies, comment="Proxies:")
+                alembics = self.animation(multi=proxies, comment=comment)
+
+        if alembics:
+            print ">> Exported the following proxies:", self.comment.split(comment)[1],
         return alembics
 
 
@@ -497,9 +509,21 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
+    def change_output(self):
+        output_text = self.ui.input_lne.text() + "_PXY"
+        self.ui.output_lbl.setText(output_text)
+        return
+
+    def create_proxy(self):
+        return
+
     def init(self):
-        # TODO: UI - ADD/REMOVE LIST WIDGET ITEMS FOR EXPORT
-        # TODO: UI DETECTS PROXY
+        # PROXY
+        shot_name = path(workspace.fileRules["scene"]).basename()
+        self.ui.input_lne.textChanged.connect(self.change_output)
+        self.ui.input_lne.setText(shot_name)
+        self.ui.proxy_btn.clicked.connect(self.create_proxy)
+
         self.ui.publish_btn.clicked.connect(self.run)
         return
 
