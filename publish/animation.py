@@ -447,7 +447,12 @@ class Publish:
         """
         if "add" == mode:
             if not add:
-                add = [path(workspace.fileRules["scene"]).basename()]  # Shot_###_PXY
+                name = path(workspace.fileRules["scene"]).basename()
+                if pm.ls("{}_PXY".format(name)):
+                    pm.warning(">> {} already exists, nothing to create.".format(name))
+                    return
+                else:
+                    add = [name]  # Shot_###_PXY
 
             print ">> Created the following proxy groups:"
             proxies = []
