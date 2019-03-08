@@ -545,6 +545,75 @@ class MyWindow(QtWidgets.QDialog):
         anim.proxy(mode="add", add=[name])
         return
 
+    def move(self, side):
+        move = {
+            "right": {
+                "from": self.ui.multi_lsw,
+                "to": self.ui.single_lsw
+            },
+            "left": {
+                "from": self.ui.single_lsw,
+                "to": self.ui.multi_lsw
+            }
+        }
+
+        from_lsw = move[side]["from"]
+        to_lsw = move[side]["to"]
+
+        selected = from_lsw.selectedItems()
+        for item in selected:
+            from_lsw.takeItem(from_lsw.row(item))
+            to_lsw.addItem(item)
+        return
+
+    def plus(self):
+        """
+        Adding selection to multi-frame list view for caching
+        :return:
+        """
+        selected = pm.selected()
+        if not selected:
+            pm.warning(">> Nothing selected to add.")
+            return
+
+        all_items = []
+        for lsw in [self.ui.multi_lsw, self.ui.single_lsw]:
+            for i in range(lsw.count()):
+                text = lsw.item(i).text()
+                all_items += [text]
+
+        adding, skipped = [], []
+        for sel in selected:
+            if sel.root() not in all_items:
+                adding += [str(sel.longName())]  # TODO: TOOLTIP CONTAINS LONG NAME
+            else:
+                skipped += [str(sel)]
+
+        if adding:
+            self.ui.multi_lsw.addItems(adding)
+        else:
+            pm.warning(">> Selection's top-node is listed. Remove top-node and try again.")
+
+        if skipped:
+            pm.warning(">> Did not add selection.")
+            print "\n".join(["Skipped..."] + skipped)
+        return
+
+    def minus(self):
+        for item in self.ui.multi_lsw.selectedItems():
+            self.ui.multi_lsw.takeItem(self.ui.multi_lsw.row(item))
+            
+        for item in self.ui.single_lsw.selectedItems():
+            self.ui.single_lsw.takeItem(self.ui.single_lsw.row(item))
+        return
+
+    def edit(self, sign):
+        if sign == "plus":
+            self.plus()
+        elif sign == "minus":
+            self.minus()
+        return
+
     def init(self):
         # PROXY
         shot_name = path(workspace.fileRules["scene"]).basename()
@@ -552,6 +621,27 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.input_lne.setText(shot_name)
         self.ui.proxy_btn.clicked.connect(self.create_proxy)
 
+        # MULTI FRAME
+        items = set(pm.ls(assemblies=1))
+        items.difference_update(set([cam.root() for cam in pm.ls(type="camera")]))
+
+        for item in items:
+            if "_PXY" in str(item):
+                if item.getChildren(ad=1, type="shape"):
+                    continue
+                else:
+                    items.difference_update(item)
+
+        self.ui.multi_lsw.addItems([str(item) for item in items])
+
+        # CENTER BUTTONS
+        self.ui.right_btn.clicked.connect(lambda x="right": self.move(x))
+        self.ui.left_btn.clicked.connect(lambda x="left": self.move(x))
+
+        self.ui.plus_btn.clicked.connect(lambda x="plus": self.edit(x))
+        self.ui.minus_btn.clicked.connect(lambda x="minus": self.edit(x))
+
+        # PUBLISH
         self.ui.publish_btn.clicked.connect(self.run)
         return
 
