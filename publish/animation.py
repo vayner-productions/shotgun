@@ -579,24 +579,27 @@ class MyWindow(QtWidgets.QDialog):
         all_items = []
         for lsw in [self.ui.multi_lsw, self.ui.single_lsw]:
             for i in range(lsw.count()):
-                text = lsw.item(i).text()
-                all_items += [text]
+                all_items += [lsw.item(i)]
 
-        adding, skipped = [], []
+        skipping, adding = [], []
         for sel in selected:
-            if sel.root() not in all_items:
-                adding += [str(sel.longName())]  # TODO: TOOLTIP CONTAINS LONG NAME
-            else:
-                skipped += [str(sel)]
+            skip = None
+            for item in all_items:
+                if item.toolTip() in sel.longName():
+                    skip = sel
+                    skipping += [str(skip)]
+                    break
+            if not skip:
+                adding += [sel]
 
-        if adding:
-            self.ui.multi_lsw.addItems(adding)
-        else:
-            pm.warning(">> Selection's top-node is listed. Remove top-node and try again.")
+        for i, item in enumerate(adding):
+            lsw_item = QtWidgets.QListWidgetItem(str(item))
+            lsw_item.setToolTip(item.longName())
+            self.ui.multi_lsw.insertItem(i, lsw_item)
 
-        if skipped:
-            pm.warning(">> Did not add selection.")
-            print "\n".join(["Skipped..."] + skipped)
+        if skipping:
+            pm.warning(">> Skipping the following:")
+            print "\n".join(skipping)
         return
 
     def minus(self):
@@ -621,7 +624,8 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.input_lne.setText(shot_name)
         self.ui.proxy_btn.clicked.connect(self.create_proxy)
 
-        # MULTI FRAME
+        # MULTI FRAME - excludes cameras and proxy nulls without geometry
+        # list widget item displays item short name, and its tool tip contains its long name
         items = set(pm.ls(assemblies=1))
         items.difference_update(set([cam.root() for cam in pm.ls(type="camera")]))
 
@@ -632,7 +636,10 @@ class MyWindow(QtWidgets.QDialog):
                 else:
                     items.difference_update(item)
 
-        self.ui.multi_lsw.addItems([str(item) for item in items])
+        for item in items:
+            lsw_item = QtWidgets.QListWidgetItem(str(item))
+            lsw_item.setToolTip(item.longName())
+            self.ui.multi_lsw.addItem(lsw_item)
 
         # CENTER BUTTONS
         self.ui.right_btn.clicked.connect(lambda x="right": self.move(x))
