@@ -16,6 +16,11 @@ def get_window():
     mw.ui.show()
 
 
+class SetProject:
+    def __init__(self, scenes=None):
+        return
+
+
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
         self.ui = self.import_ui()
