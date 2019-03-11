@@ -1,5 +1,9 @@
 from pymel.core.uitypes import Menu, MenuItem
 
+save_warning = """
+from shotgun.VaynerMenu import qt_checkout_box as sg; reload(sg)
+sg.save_startup_warnings()
+"""
 
 set_project = """
 import shotgun.set_project as sg; reload(sg)
@@ -81,6 +85,15 @@ class VaynerMenu:
 
     def run(self):
         self.vayner_menu.deleteAllItems()
+
+        # adds checkbox for startup warning
+        startup_warning_item = MenuItem(
+            "startup_warning_item",
+            label="Turn Off Startup Warnings",
+            checkBox=True,
+            command=save_warning,
+            parent="Vayner"
+        )
 
         # updates project directory
         set_project_item = MenuItem(
