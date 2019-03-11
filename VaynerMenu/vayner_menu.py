@@ -81,6 +81,11 @@ class VaynerMenu:
             self.vayner_menu = Menu("Vayner")
         except ValueError:
             self.vayner_menu = Menu("Vayner", parent="MayaWindow", tearOff=1)
+
+        cvalue = optionVar(q="setup_warnining_display")
+
+
+
         return
 
     def run(self):

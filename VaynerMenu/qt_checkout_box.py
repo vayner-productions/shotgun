@@ -28,10 +28,10 @@ def save_startup_warnings():
     cvalue = optionVar (q ="setup_warnining_display")
     if cvalue == 1:
         optionVar(iv=("setup_warnining_display", 0))
-        print ">>> Warnings turned off"
+        print ">>> Warnings turned on"
     else:
         optionVar(iv=("setup_warnining_display", 1))
-        print ">>> Warnings turned on"
+        print ">>> Warnings turned off"
 
 
 
