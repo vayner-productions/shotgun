@@ -11,7 +11,7 @@ set.run()
 from shotgun import set_project as sg
 reload(sg)
 set = sg.SetProject()
-set.process, set.entity = set.json_preferences
+set.process, set.entity = set.json_preferences()
 set.process_data()
 set.run()
 
@@ -28,7 +28,6 @@ from pymel.util import path
 from pymel.core.system import Workspace, warning
 from sgtk.authentication import ShotgunAuthenticator
 import json
-# import maya.mel as mel
 
 workspace = Workspace()
 auth = ShotgunAuthenticator()
@@ -117,7 +116,7 @@ class SetProject(object):
         )
         return
 
-    def json_preferences(self, process="00_Tests", entity_name="incrementalSave", data=None, update=False):
+    def json_preferences(self, process="00_Tests", entity_name="incrementalSave", data=None):
         """
         pymel.core.language.OptionVarDict records the workstation user's preferences
 
@@ -161,23 +160,17 @@ class SetProject(object):
                 json.dump(data, append_file, indent=4, separators=(',', ': '))
             return process, entity_name
 
-        # json_preferences() without arguments is similar to querying for user preferences, no changes to json file
-        param_default = process is "00_Tests" or entity_name is "incrementalSave"
-        if param_default:
-            user_process = data[user]["process"]
-            user_entity = data[user]["entity"]
-            return user_process, user_entity
+        # update json file
+        user_process = data[user]["process"]
+        user_entity = data[user]["entity"]
 
-        # user preferences changed, update json file for existing users
-        process_changed = process is not data[user]["process"]
-        entity_name_changed = entity_name is not data[user]["entity"]
-        if process_changed or entity_name_changed:
-            data[user]["process"] = process
-            data[user]["entity"] = entity_name
+        data[user]["process"] = process
+        data[user]["entity"] = entity_name
 
-            with set_project_file.open(mode="w") as edit_file:
-                json.dump(data, edit_file, indent=4, separators=(',', ': '))
-        return process, entity_name
+        with set_project_file.open(mode="w") as edit_file:
+            json.dump(data, edit_file, indent=4, separators=(',', ': '))
+
+        return user_process, user_entity
 
     def run(self):
         """
@@ -193,20 +186,26 @@ class SetProject(object):
         directories are made in create_project_directory.py OR it comes from Vayner project template
         :return:
         """
+        process = self.process
+        entity = self.entity
+
+        if self.process is not "00_Tests":
+            process = self.process
+            entity = self.entity["code"]
+
         # create_project_directory.py
         workspace.open(self.project_path)
-        # mel.eval('setProject \"' + self.project_path + '\"')
 
-        workspace.fileRules["scene"] = "/".join(["scenes", self.process, self.entity["code"]])
+        workspace.fileRules["scene"] = "/".join(["scenes", process, entity])
 
         if self.entity_type is "Shot":
-            workspace.fileRules["Alembic"] = "/".join(["scenes", "06_Cache", "08_Animation", self.entity["code"]])
+            workspace.fileRules["Alembic"] = "/".join(["scenes", "06_Cache", "08_Animation", entity])
 
         # Vayner project template
         workspace.fileRules["shaders"] = "/".join(["data", "001_Shaders"])
 
         # Save preferences to script/set_project.json
-        self.json_preferences(process=self.process, entity_name=self.entity["code"])
+        self.json_preferences(process=process, entity_name=entity)
         return
 
 
@@ -234,7 +233,12 @@ class MyWindow(SetProject, QtWidgets.QDialog):
         if process == "01_Assets" or process == "02_Rigs":  # changing is to ==, currentText() returns unicode type
             entity_type = "Asset"
         elif process == "00_Tests":
-            pass
+            asset_items = [str(sub.basename()) for sub in self.project_path.joinpath("scenes", "00_Tests").dirs()]
+            if "[Archive]" in asset_items:
+                asset_items.remove("[Archive]")
+            self.ui.asset_cbx.clear()
+            self.ui.asset_cbx.addItems(asset_items)
+            return
         else:
             entity_type = "Shot"
 
@@ -263,40 +267,59 @@ class MyWindow(SetProject, QtWidgets.QDialog):
         return
 
     def init_ui(self):
-        # json_preferences() and process_data() are methods in SetProject
-        # they are used together to enable access to their class's attributes
-        # it helps the UI display user preferences and elements of entities with a folder
-        self.process, self.entity = self.json_preferences()
-        self.process_data()
-
-        # all asset or shot entities should have a corresponding folder, see create_project_directory.py
-        # create UI elements representing these entities only if their folder exists
-        process_path = path(self.project_path).joinpath("scenes", self.process).normpath()
-        entities = sg.find(
-            self.entity_type,  # Asset / Shot
-            [["project", "is", project]],
-            ["code"]
-        )
-
-        subfolders = {str(sub.basename()) for sub in process_path.dirs()}
-        entity_names = {entity["code"] for entity in entities}
-        asset_items = sorted(entity_names.intersection(subfolders))
-
+        # scene process elements come from vayner project template
+        # process field includes items not from exclude set and contain folders of entities
+        # !!! additional folders in process folders not listed as an sg entity will not be displayed in the UI !!!
         exclude = {
             "04_Layouts",
             "06_Cache"
         }
+        self.template.difference_update(exclude)
+
+        all_entities = sg.find(
+            "Asset",
+            [["project", "is", project]],
+            ["code"]
+        )
+
+        all_entities += sg.find(
+            "Shot",
+            [["project", "is", project]],
+            ["code"]
+        )
+
+        all_entity_names = {entity["code"] for entity in all_entities}
+
+        empty_folder = set()
+        for sub in self.template:
+            if sub is "00_Tests":
+                continue
+            sub_template = {str(fld.basename()) for fld in self.project_path.joinpath("scenes", sub).dirs()}
+            match = sub_template.intersection(all_entity_names)
+            if not match:
+                empty_folder.add(sub)
+        self.template.difference_update(empty_folder)
+
         scene_items = sorted(self.template.difference(exclude))
-
         self.ui.scene_cbx.addItems(scene_items)
-        self.ui.asset_cbx.addItems(asset_items)
 
-        # update the UI to reflect user preferences
+        # changes to the process field will change entity items
+        # which makes setting project workspace possible
+        # SetProject needs both process and entity selections
+        self.ui.scene_cbx.currentTextChanged.connect(self.change_asset_items)
+        self.ui.set_project_btn.clicked.connect(self.set_project)
+
+        # process and entity fields would be different depending whether on the user
+        # determine new or old user
+        self.process, self.entity = self.json_preferences()
+        self.process_data()
+
+        # set the asset field to param defaults for new user
+        if self.process is "00_Tests" or self.entity is "incrementalSave":
+            self.ui.asset_cbx.addItem(self.entity)
+            return
+
+        # update ui with set project preferences for users already registered with json file
         self.ui.scene_cbx.setCurrentText(self.process)
         self.ui.asset_cbx.setCurrentText(self.entity["code"])
-
-        # make UI dynamic - entity items change whenever process is changed
-        self.ui.scene_cbx.currentTextChanged.connect(self.change_asset_items)
-
-        self.ui.set_project_btn.clicked.connect(self.set_project)
         return
