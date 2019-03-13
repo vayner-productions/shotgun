@@ -150,14 +150,14 @@ class SetProject(object):
                 data = json.load(read_file)
                 data[user]  # checks for new user, KeyError is caught below
         except KeyError:
-            data = {
+            data.update({
                 user: {
                     "process": process,
                     "entity": entity_name
                 }
-            }
-            with set_project_file.open(mode="a") as append_file:
-                json.dump(data, append_file, indent=4, separators=(',', ': '))
+            })
+            with set_project_file.open(mode="w") as write_file:
+                json.dump(data, write_file, indent=4, separators=(',', ': '))
             return process, entity_name
 
         # update json file
@@ -182,11 +182,10 @@ class SetProject(object):
             - scenes/01_Assets/001_hero
         data/001_Shaders
         scenes/06_Cache/08_Animation/Shot_###
-
         directories are made in create_project_directory.py OR it comes from Vayner project template
         :return:
         """
-        process = self.process
+        proces = self.process
         entity = self.entity
 
         if self.process is not "00_Tests":
@@ -209,6 +208,9 @@ class SetProject(object):
         return
 
 
+# TODO: INSTALL EVENT FILTER, CLOSE AND REMOVE
+# TODO: RETURN UI SELECTION FOR JSON_PREFERENCES()
+# TODO: CLOSE AND DON'T OVERWRITE FILE
 class MyWindow(SetProject, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(MyWindow, self).__init__(**kwargs)
@@ -309,7 +311,7 @@ class MyWindow(SetProject, QtWidgets.QDialog):
         self.ui.scene_cbx.currentTextChanged.connect(self.change_asset_items)
         self.ui.set_project_btn.clicked.connect(self.set_project)
 
-        # process and entity fields would be different depending whether on the user
+        # process and entity fields would be different depending on the user
         # determine new or old user
         self.process, self.entity = self.json_preferences()
         self.process_data()
