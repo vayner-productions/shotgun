@@ -37,6 +37,17 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def create_row(self, number, asset_name, publish, reference, current, items, index):
+        """
+        each row represents an asset
+        :param number: number of times it has been referenced
+        :param asset_name:
+        :param publish: full file path
+        :param reference: reference node
+        :param current: current referenced version
+        :param items: all the other versions
+        :param index: row number, helps with ui conditional formatting
+        :return:
+        """
         font = QtGui.QFont("Arial", 14)
 
         # widget - horizontal hlayout, (0,3,6,3), 3 spacing
@@ -45,7 +56,7 @@ class MyWindow(QtWidgets.QDialog):
         row.setWhatsThis(publish)
         row.setToolTip(reference)
 
-        # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
+        # label quanty - max width 25, arial 14, align horizontal center, horizontal expanding
         num = QtWidgets.QLabel("{}".format(number))
         num.setFont(font)
         num.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
@@ -144,6 +155,9 @@ class MyWindow(QtWidgets.QDialog):
                 for ref in pm.listReferences():
                     if match in ref.path:
                         reference = ref.refNode.__unicode__()
+
+                if not reference:
+                    current = None
                 references += [[number, asset_name, publish, reference, current, items]]
 
         # add cache to lighting scene process

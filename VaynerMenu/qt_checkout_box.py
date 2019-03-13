@@ -1,6 +1,7 @@
 from PySide2 import QtCore, QtWidgets, QtUiTools
 from pymel.core import optionVar
-
+from pymel.core.uitypes import Menu, MenuItem
+from pymel.core import optionVar
 
 def get_window():
     global mw
@@ -12,7 +13,7 @@ def get_window():
     mw.ui.show()
 
 
-def checkout_saved_option():
+def startup_warning_change():
     saved_pref = optionVar(q='version_checkout')
     import shotgun.checkout_scene as sg
     reload(sg)
@@ -21,6 +22,17 @@ def checkout_saved_option():
         checkout.run(checkout_type="published")
     else:
         checkout.run(checkout_type="processed")
+
+
+def save_startup_warnings():
+    cvalue = optionVar (q ="setup_warnining_display")
+    if cvalue == 1:
+        optionVar(iv=("setup_warnining_display", 0))
+        print ">>> Warnings turned on"
+    else:
+        optionVar(iv=("setup_warnining_display", 1))
+        print ">>> Warnings turned off"
+
 
 
 class MyWindow(QtWidgets.QDialog):
