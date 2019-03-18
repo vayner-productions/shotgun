@@ -47,16 +47,9 @@ def get_window():
     mw.ui.show()
 
 
-"""
-using sg_anim field to log maya alembic entity
-
-# HELPFUL CODE
-import pymel.core as pm
-for ref in pm.listReferences():
-    print ">>", ref.refNode
-"""
-
-
+# TODO: SINGLE AND MULTI FRAME SHOULD NOT EXPORT CURVES, SELECT WHATEVER IS VISIBLE IN THE SCENE
+# TODO: ANIMATION SCENE GOES INTO VERSION FOLDER
+# TODO: PROXY() export = [[], []] SHOULD TAKE SINGLE AND MULTI
 class Publish(object):
     def __init__(self, thumbnail=None, playblast=None, maya_file=None, alembic_directory=None, comment="",
                  attributes=None):
@@ -391,6 +384,14 @@ class Publish(object):
         multi = ["hero_RIG"]
         anim.animation(single=single, multi=multi)
         """
+        # - increment and save the current working file, and save a copy to the published folder
+        # from shotgun import checkout_scene
+        # reload(checkout_scene)
+        # checkout = checkout_scene.Checkout()
+        # working_file = checkout.run(checkout_type="increment")
+        # published_file = working_file.replace("processed", "original").replace("scenes", "published")
+        # path(working_file).copy2(published_file)
+
         # Creating single and multi frame alembics
         alembics = []
         for top_node in single:
@@ -400,7 +401,7 @@ class Publish(object):
             alembics += [self.multi_frame(top_node)]
 
         # Copying alembics from /published to /06_Cache
-        all_directory = path(workspace.expandName(workspace.fileRules["alembicCache"]))
+        all_directory = path(workspace.expandName(workspace.fileRules["Alembic"]))
         
         for abc in alembics:
             dst = all_directory.joinpath(abc.basename())
@@ -662,7 +663,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         """
         Automated comments contain what is in the alembic directory
         """
-        scene_up = False
+        scene_up = True
         if self.ui.camera_cbx.isChecked():
             # cameras built into animation shots should always have a render_cam_RIG, see camera.py
             # render_cam_RIG needs to be imported, it is referenced from the build scene tool
@@ -681,7 +682,6 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
             self.CameraTools.update_shotgun()
             self.comment = "Cameras:\n{}".format(self.CameraTools.version_name)
-            scene_up = False
 
         if self.ui.skip_cbx.isChecked():
             self.version(up=scene_up)
@@ -721,6 +721,6 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.version(up=scene_up)
         self.attributes = abc_attributes
         self.animation(single=single_abc, multi=multi_abc)
-        print self.comment
+        self.update_shotgun()
         self.ui.close()
         return
