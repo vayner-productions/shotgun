@@ -26,8 +26,9 @@ option to skip playblast
 versioning changes in SG site..
 """
 from . import *
+from . import camera; reload(camera)
 from PySide2 import QtCore, QtWidgets, QtUiTools
-from pymel.core.system import Workspace, FileReference
+from pymel.core.system import Workspace, FileReference, referenceQuery, exportAsReference
 from pymel.util import path
 from imghdr import what
 
@@ -56,7 +57,7 @@ for ref in pm.listReferences():
 """
 
 
-class Publish:
+class Publish(object):
     def __init__(self, thumbnail=None, playblast=None, maya_file=None, alembic_directory=None, comment="",
                  attributes=None):
         for k, v in vars().iteritems():
@@ -82,7 +83,7 @@ class Publish:
 
         # alembics previously published into /cache/alembic, but will now contain only the latest version
         # all publishes will be recorded in alembic directory /publish/08_Animation/Shot_###/ver_###
-        self.workspace_alembic = path(workspace.expandName(workspace.fileRules["alembicCache"]))
+        self.workspace_alembic = path(workspace.expandName(workspace.fileRules["Alembic"]))
         return
 
     def version(self, up=1, current=None, next=None):
@@ -519,11 +520,14 @@ class Publish:
             pm.warning(">> Mode is either 'add', 'export', or 'remove'.")
 
 
-class MyWindow(QtWidgets.QDialog):
-    def __init__(self):
+class MyWindow(Publish, QtWidgets.QDialog):
+    def __init__(self, **kwargs):
+        super(MyWindow, self).__init__(**kwargs)
         self.ui = self.import_ui()
-        self.init()
-        return
+        self.init_ui()
+        self.CameraTools = camera.CameraTools(
+            comment="Published from Animation:\n{}".format(path(pm.sceneName()).basename())
+        )
 
     def import_ui(self):
         ui_path = __file__.split(".")[0] + ".ui"
@@ -541,8 +545,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def create_proxy(self):
         name = self.ui.input_lne.text()
-        anim = Publish()
-        anim.proxy(mode="add", add=[name])
+        self.proxy(mode="add", add=[name])
         return
 
     def move(self, side):
@@ -617,7 +620,7 @@ class MyWindow(QtWidgets.QDialog):
             self.minus()
         return
 
-    def init(self):
+    def init_ui(self):
         # PROXY
         shot_name = path(workspace.fileRules["scene"]).basename()
         self.ui.input_lne.textChanged.connect(self.change_output)
@@ -659,56 +662,65 @@ class MyWindow(QtWidgets.QDialog):
         """
         Automated comments contain what is in the alembic directory
         """
-        scene_up = True
+        scene_up = False
         if self.ui.camera_cbx.isChecked():
             # cameras built into animation shots should always have a render_cam_RIG, see camera.py
-            render_camera = FileReference("render_cam_RIG")
-            render_camera.importContents()
-            from . import camera as sg
-            reload(sg)
-            comment = "published from {}".format(path(pm.sceneName()).basename())
-            camera = sg.CameraTools(comment=comment)
-            camera.publish_camera()
+            # render_cam_RIG needs to be imported, it is referenced from the build scene tool
+            # process_data() works with imported nodes only
+            render_camera = pm.PyNode("render_cam_RIG")
+            if referenceQuery("render_cam_RIG", inr=1):
+                render_camera = FileReference("render_cam_RIG")
+                render_camera.importContents()
+
+            self.CameraTools.process_data()
+            try:
+                pm.select(render_camera)
+                exportAsReference(self.CameraTools.camera_file, namespace=":")
+            except RuntimeError:
+                pass
+
+            self.CameraTools.update_shotgun()
+            self.comment = "Cameras:\n{}".format(self.CameraTools.version_name)
             scene_up = False
 
-        # if self.ui.skip_cbx.isChecked():
-        #     self.rich_media(playblast=1, size=(1920, 1080), range="playback")
-        #
-        # multi_abc, multi_pxy = [], []
-        # for i in range(self.ui.multi_lsw.count()):
-        #     maya_obj = self.ui.multi_lsw.item(i).toolTip()
-        #     if "PXY" in maya_obj:
-        #         multi_pxy.add(maya_obj)
-        #     else:
-        #         multi_abc.add(maya_obj)
-        #
-        # single_abc, single_pxy = [], []
-        # for i in range(self.ui.single_lsw.count()):
-        #     maya_obj = self.ui.single_lsw.item(i).toolTip()
-        #     if "PXY" in maya_obj:
-        #         single_pxy.add(maya_obj)
-        #     else:
-        #         single_abc.add(maya_obj)
-        #
-        # abc_attributes = []
-        # if self.ui.world_cbx.isChecked():
-        #     abc_attributes.append("worldSpace")
-        # if self.ui.writevisibility_cbx.isChecked():
-        #     abc_attributes.append("writeVisibility")
-        # if self.ui.eulerfilter_cbx.isChecked():
-        #     abc_attributes.append("eulerFilter")
-        # if self.ui.uvwrite_cbx.isChecked():
-        #     abc_attributes.append("uvWrite")
-        # if self.ui.namespace_cbx.isChecked():
-        #     abc_attributes.append("stripNamespaces")
-        # if self.ui.writeuvsets_cbx.isChecked():
-        #     abc_attributes.append("writeUVSets")
-        #
-        # anim = Publish()
-        # anim.version(up=scene_up)  # anim.version()
-        # anim.attributes = abc_attributes
-        # anim.animation(single=single_abc, multi=multi_abc)
+        if self.ui.skip_cbx.isChecked():
+            self.version(up=scene_up)
+            self.rich_media(playblast=1, size=(1920, 1080), range="playback")
+            scene_up = False
 
-        # TODO: CHECK COMMENTS!
+        multi_abc, multi_pxy = [], []
+        for i in range(self.ui.multi_lsw.count()):
+            maya_obj = self.ui.multi_lsw.item(i).toolTip()
+            if "PXY" in maya_obj:
+                multi_pxy += [maya_obj]
+            else:
+                multi_abc += [maya_obj]
+
+        single_abc, single_pxy = [], []
+        for i in range(self.ui.single_lsw.count()):
+            maya_obj = self.ui.single_lsw.item(i).toolTip()
+            if "PXY" in maya_obj:
+                single_pxy += [maya_obj]
+            else:
+                single_abc += [maya_obj]
+
+        abc_attributes = []
+        if self.ui.world_cbx.isChecked():
+            abc_attributes.append("worldSpace")
+        if self.ui.writevisibility_cbx.isChecked():
+            abc_attributes.append("writeVisibility")
+        if self.ui.eulerfilter_cbx.isChecked():
+            abc_attributes.append("eulerFilter")
+        if self.ui.uvwrite_cbx.isChecked():
+            abc_attributes.append("uvWrite")
+        if self.ui.namespace_cbx.isChecked():
+            abc_attributes.append("stripNamespaces")
+        if self.ui.writeuvsets_cbx.isChecked():
+            abc_attributes.append("writeUVSets")
+
+        self.version(up=scene_up)
+        self.attributes = abc_attributes
+        self.animation(single=single_abc, multi=multi_abc)
+        print self.comment
         self.ui.close()
         return
