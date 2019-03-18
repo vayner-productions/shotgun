@@ -13,7 +13,7 @@ def get_window():
     mw.ui.show()
 
 
-def startup_warning_change():
+def checkout_saved_option():
     saved_pref = optionVar(q='version_checkout')
     import shotgun.checkout_scene as sg
     reload(sg)
