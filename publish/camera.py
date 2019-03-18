@@ -173,9 +173,12 @@ class CameraTools:
         print "\n>> published render_cam_RIG to shotgun",  # checkout_scene.py called in publish_camera() prints
         return
 
-    def publish_camera(self):
-        """publishing anything parented to render_cam_RIG node--incremement and saves current file, and saves a copy to
-        the published folder"""
+    def process_data(self):
+        """
+        determines the next camera file and ensures the directory is made
+        it is used in part with animation.py to export anim's referenced camera as the next camera version
+        :return:
+        """
         camera_top_node = pm.PyNode("render_cam_RIG")
 
         cameras = camera_top_node.getChildren(ad=1, typ="camera")
@@ -204,7 +207,15 @@ class CameraTools:
             self.camera_file = path(".".join(latest_file))
         else:
             self.camera_file = camera_path.__div__("{}_original.0001.ma".format(shot))
+        return
 
+    def publish_camera(self):
+        """publishing anything parented to render_cam_RIG node--incremement and saves current file, and saves a copy to
+        the published folder"""
+        # determines the next camera file
+        self.process_data()
+
+        # cleans up the scene, deletes _IMPORT node
         try:
             imported = pm.ls("*_IMPORT")[0]
             if not imported.getChildren():
