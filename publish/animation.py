@@ -27,7 +27,7 @@ versioning changes in SG site..
 """
 from . import *
 from PySide2 import QtCore, QtWidgets, QtUiTools
-from pymel.core.system import Workspace
+from pymel.core.system import Workspace, FileReference
 from pymel.util import path
 from imghdr import what
 
@@ -659,48 +659,55 @@ class MyWindow(QtWidgets.QDialog):
         """
         Automated comments contain what is in the alembic directory
         """
+        scene_up = True
         if self.ui.camera_cbx.isChecked():
+            # cameras built into animation shots should always have a render_cam_RIG, see camera.py
+            render_camera = FileReference("render_cam_RIG")
+            render_camera.importContents()
             from . import camera as sg
             reload(sg)
-            sg.get_window("publish_camera")
+            comment = "published from {}".format(path(pm.sceneName()).basename())
+            camera = sg.CameraTools(comment=comment)
+            camera.publish_camera()
+            scene_up = False
 
-        if self.ui.skip_cbx.isChecked():
-            self.rich_media(playblast=1, size=(1920, 1080), range="playback")
-
-        multi_abc, multi_pxy = [], []
-        for i in range(self.ui.multi_lsw.count()):
-            maya_obj = self.ui.multi_lsw.item(i).toolTip()
-            if "PXY" in maya_obj:
-                multi_pxy.add(maya_obj)
-            else:
-                multi_abc.add(maya_obj)
-
-        single_abc, single_pxy = [], []
-        for i in range(self.ui.single_lsw.count()):
-            maya_obj = self.ui.single_lsw.item(i).toolTip()
-            if "PXY" in maya_obj:
-                single_pxy.add(maya_obj)
-            else:
-                single_abc.add(maya_obj)
-
-        abc_attributes = []
-        if self.ui.world_cbx.isChecked():
-            abc_attributes.append("worldSpace")
-        if self.ui.writevisibility_cbx.isChecked():
-            abc_attributes.append("writeVisibility")
-        if self.ui.eulerfilter_cbx.isChecked():
-            abc_attributes.append("eulerFilter")
-        if self.ui.uvwrite_cbx.isChecked():
-            abc_attributes.append("uvWrite")
-        if self.ui.namespace_cbx.isChecked():
-            abc_attributes.append("stripNamespaces")
-        if self.ui.writeuvsets_cbx.isChecked():
-            abc_attributes.append("writeUVSets")
-
-        anim = Publish()
-        anim.version(up=1)  # anim.version()
-        anim.attributes = abc_attributes
-        anim.animation(single=single_abc, multi=multi_abc)
+        # if self.ui.skip_cbx.isChecked():
+        #     self.rich_media(playblast=1, size=(1920, 1080), range="playback")
+        #
+        # multi_abc, multi_pxy = [], []
+        # for i in range(self.ui.multi_lsw.count()):
+        #     maya_obj = self.ui.multi_lsw.item(i).toolTip()
+        #     if "PXY" in maya_obj:
+        #         multi_pxy.add(maya_obj)
+        #     else:
+        #         multi_abc.add(maya_obj)
+        #
+        # single_abc, single_pxy = [], []
+        # for i in range(self.ui.single_lsw.count()):
+        #     maya_obj = self.ui.single_lsw.item(i).toolTip()
+        #     if "PXY" in maya_obj:
+        #         single_pxy.add(maya_obj)
+        #     else:
+        #         single_abc.add(maya_obj)
+        #
+        # abc_attributes = []
+        # if self.ui.world_cbx.isChecked():
+        #     abc_attributes.append("worldSpace")
+        # if self.ui.writevisibility_cbx.isChecked():
+        #     abc_attributes.append("writeVisibility")
+        # if self.ui.eulerfilter_cbx.isChecked():
+        #     abc_attributes.append("eulerFilter")
+        # if self.ui.uvwrite_cbx.isChecked():
+        #     abc_attributes.append("uvWrite")
+        # if self.ui.namespace_cbx.isChecked():
+        #     abc_attributes.append("stripNamespaces")
+        # if self.ui.writeuvsets_cbx.isChecked():
+        #     abc_attributes.append("writeUVSets")
+        #
+        # anim = Publish()
+        # anim.version(up=scene_up)  # anim.version()
+        # anim.attributes = abc_attributes
+        # anim.animation(single=single_abc, multi=multi_abc)
 
         # TODO: CHECK COMMENTS!
         self.ui.close()
