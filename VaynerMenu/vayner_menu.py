@@ -68,6 +68,11 @@ from shotgun.publish import camera as sg; reload(sg)
 sg.get_window("publish_camera")
 """
 
+publish_animation = """
+from shotgun.publish import animation as sg; reload(sg)
+sg.get_window()
+"""
+
 
 class VaynerMenu:
     def __init__(self):
@@ -153,6 +158,12 @@ class VaynerMenu:
         update_timeline_item = MenuItem(
             label="Update Timeline",
             command=update_timeline,
+        )
+
+        # publishes animation
+        update_timeline_item = MenuItem(
+            label="Publish Animation",
+            command=publish_animation,
         )
 
         # LIGHTING SUBMENU
