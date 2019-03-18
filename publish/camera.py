@@ -28,10 +28,11 @@ def get_window(method):
     getattr(mw, method)()
 
 
-class CameraTools:
+class CameraTools(object):
     def __init__(self, camera_file=None, comment=""):
         self.camera_file = camera_file
         self.comment = comment
+        self.version_name = None
         return
 
     def load_vayner(self):
@@ -139,14 +140,14 @@ class CameraTools:
         )
 
         # create camera entity's next version
-        version_name = camera_entity["name"] + "_v001"
+        self.version_name = camera_entity["name"] + "_v001"
         if version_entity:
             latest_version = version_entity["code"][-3:]
-            version_name = version_name[:-3] + str(int(latest_version) + 1).zfill(3)
+            self.version_name = self.version_name[:-3] + str(int(latest_version) + 1).zfill(3)
 
         data = {
             "project": project,
-            "code": version_name,  # Version Name - Shot_004_v001
+            "code": self.version_name,  # Version Name - Shot_004_v001
             "entity": camera_entity,  # Link - Shot_001_Cam entity
             "description": self.comment,  # Description - comment
         }
