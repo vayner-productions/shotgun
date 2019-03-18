@@ -203,7 +203,6 @@ class Checkout:
                 search_pattern = "{}_processed.*.ma".format(processed_path.basename())
                 checkout_file = path(processed_path + "/" + search_pattern.replace("*", "0001")).normpath()
                 checkout_file = r"{}".format(checkout_file)  # converts from path object to string
-
             else:
                 checkout_file = checkout_file.split(".")
                 checkout_file[1] = str(int(checkout_file[1]) + 1).zfill(4)
