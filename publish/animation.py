@@ -487,7 +487,7 @@ class Publish:
 
             # Export search results
             comment = "Proxies:"
-            alembics = self.animation(multi=proxies, comment=comment)
+            alembics = self.animation(multi=proxies, comment=comment)  # TODO: export=[[single],[multi]]
 
             if alembics:
                 print ">> Exported the following proxies:", self.comment.split(comment)[1],
@@ -629,12 +629,15 @@ class MyWindow(QtWidgets.QDialog):
         items = set(pm.ls(assemblies=1))
         items.difference_update(set([cam.root() for cam in pm.ls(type="camera")]))
 
+        remove = set()
         for item in items:
             if "_PXY" in str(item):
                 if item.getChildren(ad=1, type="shape"):
                     continue
                 else:
-                    items.difference_update(item)
+                    remove.add(item)
+
+        items.difference_update(remove)
 
         for item in items:
             lsw_item = QtWidgets.QListWidgetItem(str(item))
@@ -656,6 +659,49 @@ class MyWindow(QtWidgets.QDialog):
         """
         Automated comments contain what is in the alembic directory
         """
+        if self.ui.camera_cbx.isChecked():
+            from . import camera as sg
+            reload(sg)
+            sg.get_window("publish_camera")
+
+        if self.ui.skip_cbx.isChecked():
+            self.rich_media(playblast=1, size=(1920, 1080), range="playback")
+
+        multi_abc, multi_pxy = [], []
+        for i in range(self.ui.multi_lsw.count()):
+            maya_obj = self.ui.multi_lsw.item(i).toolTip()
+            if "PXY" in maya_obj:
+                multi_pxy.add(maya_obj)
+            else:
+                multi_abc.add(maya_obj)
+
+        single_abc, single_pxy = [], []
+        for i in range(self.ui.single_lsw.count()):
+            maya_obj = self.ui.single_lsw.item(i).toolTip()
+            if "PXY" in maya_obj:
+                single_pxy.add(maya_obj)
+            else:
+                single_abc.add(maya_obj)
+
+        abc_attributes = []
+        if self.ui.world_cbx.isChecked():
+            abc_attributes.append("worldSpace")
+        if self.ui.writevisibility_cbx.isChecked():
+            abc_attributes.append("writeVisibility")
+        if self.ui.eulerfilter_cbx.isChecked():
+            abc_attributes.append("eulerFilter")
+        if self.ui.uvwrite_cbx.isChecked():
+            abc_attributes.append("uvWrite")
+        if self.ui.namespace_cbx.isChecked():
+            abc_attributes.append("stripNamespaces")
+        if self.ui.writeuvsets_cbx.isChecked():
+            abc_attributes.append("writeUVSets")
+
+        anim = Publish()
+        anim.version(up=1)  # anim.version()
+        anim.attributes = abc_attributes
+        anim.animation(single=single_abc, multi=multi_abc)
+
         # TODO: CHECK COMMENTS!
         self.ui.close()
         return
