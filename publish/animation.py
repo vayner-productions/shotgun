@@ -384,14 +384,6 @@ class Publish(object):
         multi = ["hero_RIG"]
         anim.animation(single=single, multi=multi)
         """
-        # - increment and save the current working file, and save a copy to the published folder
-        # from shotgun import checkout_scene
-        # reload(checkout_scene)
-        # checkout = checkout_scene.Checkout()
-        # working_file = checkout.run(checkout_type="increment")
-        # published_file = working_file.replace("processed", "original").replace("scenes", "published")
-        # path(working_file).copy2(published_file)
-
         # Creating single and multi frame alembics
         alembics = []
         for top_node in single:
@@ -409,7 +401,7 @@ class Publish(object):
 
         # Adding automated comment
         if self.comment:
-            self.comment += "\n"
+            self.comment += "\n\n"
 
         if alembics:
             self.comment += comment
@@ -444,7 +436,7 @@ class Publish(object):
         :param mode: add, export, remove
         :param remove: (str) proxy from fileRule["alembicCache"] (/06_Cache)
         :param add: (str) by default creates Shot_###_PXY, accepts names with or without "_PXY"
-        :param export: (str) exports top-level proxy nodes containing geometry that aren't already referenced
+        :param export: ([[single][multi]])
         :return:
         """
         if "add" == mode:
@@ -471,28 +463,27 @@ class Publish(object):
             else:
                 pm.warning(">> Already exists, nothing to create.")
         elif "export" == mode:
-            # Search for proxies to export - they are not referenced nodes and contain geometry
-            results = []
-            for search in export:
-                if "PXY" in search:
-                    results += pm.ls("*{}*".format(search), assemblies=1)
-                else:
-                    results += pm.ls("*{}*PXY".format(search), assemblies=1)
-
-            top_ref = set(pm.ls(assemblies=1, referencedNodes=1))  # top-level reference nodes
-            results = list(set(results).difference(top_ref))
-
-            proxies = []
-            for proxy in results:
-                if proxy.getChildren(ad=1, type="shape"):
-                    proxies += [proxy]
-
-            # Export search results
+            # exports proxies as single or multi frame alembics
+            # they are first imported if they are already referenced
+            single_proxies = set()
+            for single in export[0]:
+                if referenceQuery(single, inr=1):
+                    single_ref = FileReference(single)
+                    single_ref.importContents()
+                single_proxies.add(single)
+            
+            multi_proxies = set()
+            for multi in export[1]:
+                if referenceQuery(multi, inr=1):
+                    multi_ref = FileReference(multi)
+                    multi_ref.importContents()
+                multi_proxies.add(multi)
+            
             comment = "Proxies:"
-            alembics = self.animation(multi=proxies, comment=comment)  # TODO: export=[[single],[multi]]
+            alembics = self.animation(single=single_proxies, multi=multi_proxies, comment=comment)
 
             if alembics:
-                print ">> Exported the following proxies:", self.comment.split(comment)[1],
+                print "\n>> Exported the following proxies:", self.comment.split(comment)[1],
         elif "remove" == mode:
             cache_directory = path(workspace.expandName(workspace.fileRules["alembicCache"]))
 
@@ -526,9 +517,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         super(MyWindow, self).__init__(**kwargs)
         self.ui = self.import_ui()
         self.init_ui()
-        self.CameraTools = camera.CameraTools(
-            comment="Published from Animation:\n{}".format(path(pm.sceneName()).basename())
-        )
+        self.CameraTools = camera.CameraTools()
 
     def import_ui(self):
         ui_path = __file__.split(".")[0] + ".ui"
@@ -663,30 +652,24 @@ class MyWindow(Publish, QtWidgets.QDialog):
         """
         Automated comments contain what is in the alembic directory
         """
-        scene_up = True
-        if self.ui.camera_cbx.isChecked():
-            # cameras built into animation shots should always have a render_cam_RIG, see camera.py
-            # render_cam_RIG needs to be imported, it is referenced from the build scene tool
-            # process_data() works with imported nodes only
-            render_camera = pm.PyNode("render_cam_RIG")
-            if referenceQuery("render_cam_RIG", inr=1):
-                render_camera = FileReference("render_cam_RIG")
-                render_camera.importContents()
+        # - increment and save the current working file, and save a copy to the published version folder
+        self.version()
+        from shotgun import checkout_scene
+        reload(checkout_scene)
+        checkout = checkout_scene.Checkout()
+        working_file = checkout.run(checkout_type="increment")
+        published_file = self.alembic_directory.joinpath(
+            "{}_original.{}.ma".format(
+                path(workspace.fileRules["scene"]).basename(),
+                str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
+            )
+        )
+        path(working_file).copy2(published_file)
 
-            self.CameraTools.process_data()
-            try:
-                pm.select(render_camera)
-                exportAsReference(self.CameraTools.camera_file, namespace=":")
-            except RuntimeError:
-                pass
-
-            self.CameraTools.update_shotgun()
-            self.comment = "Cameras:\n{}".format(self.CameraTools.version_name)
-
-        if self.ui.skip_cbx.isChecked():
-            self.version(up=scene_up)
-            self.rich_media(playblast=1, size=(1920, 1080), range="playback")
-            scene_up = False
+        # go through the UI and run everything
+        # comment will be a mix of user and automated messages
+        # start with user comment
+        self.comment += "{}".format(self.ui.comment_txt.toPlainText())
 
         multi_abc, multi_pxy = [], []
         for i in range(self.ui.multi_lsw.count()):
@@ -718,9 +701,32 @@ class MyWindow(Publish, QtWidgets.QDialog):
         if self.ui.writeuvsets_cbx.isChecked():
             abc_attributes.append("writeUVSets")
 
-        self.version(up=scene_up)
+        self.maya_file = published_file
         self.attributes = abc_attributes
         self.animation(single=single_abc, multi=multi_abc)
+        self.proxy(mode="export", export=[single_pxy, multi_pxy])
+
+        if self.ui.camera_cbx.isChecked():
+            # cameras built into animation shots should always have a render_cam_RIG, see camera.py
+            # render_cam_RIG needs to be imported, it is referenced from the build scene tool
+            # process_data() works with imported nodes only
+            if referenceQuery("render_cam_RIG", inr=1):
+                render_camera = FileReference("render_cam_RIG")
+                render_camera.importContents()
+
+            # export selection as reference
+            self.CameraTools.comment += "Published from Animation:\n{}".format(path(pm.sceneName()).basename())
+            self.CameraTools.process_data()
+            pm.select("render_cam_RIG")
+            exportAsReference(self.CameraTools.camera_file, namespace=":")
+
+            # publish camera and append comment to animation
+            self.CameraTools.update_shotgun()
+            self.comment += "\n\nCameras:\n{}".format(self.CameraTools.version_name)
+
+        if self.ui.skip_cbx.isChecked():
+            self.rich_media(playblast=1, size=(1920, 1080), range="playback")
+
         self.update_shotgun()
         self.ui.close()
         return
