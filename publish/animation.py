@@ -6,7 +6,6 @@ anim = sg.Publish(maya_file=maya_file)
 anim.version()  # versions up by default, but not the maya file!
 anim.rich_media()  # anim.rich_media(playblast=1, range="sg")
 anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
-anim.get_in_view()  # helps select the geo in top node that are visible in camera
 anim.animation()
 anim.update_shotgun()
 
@@ -259,6 +258,7 @@ class Publish(object):
         :param top_node: (str) the name of the node to cache, its children exports too
         :return: (str) path object of the full path file
         """
+        self.get_in_view()
         if not self.alembic_directory:
             pm.warning(">> Set alembic directory.")
             return
@@ -306,11 +306,11 @@ class Publish(object):
             pm.delete(self.alembic_file.namebase)
 
         nodes = set(importFile(self.alembic_file, rnn=1))
+
         outliner = set(pm.ls(assemblies=1))
         children = nodes.intersection(outliner)
         top_node = pm.group(em=1, n=self.alembic_file.namebase)
         pm.parent(children, top_node)
-
         for at in "trs":
             for ax in "xyz":
                 top_node.setAttr(at + ax, lock=1, keyable=0, cb=0)
@@ -324,17 +324,22 @@ class Publish(object):
 
         temp_alembic_file = self.alembic_file.replace(".abc", "_.abc").replace("\\", "/")
 
-        job_arg = '-frameRange {} {} -dataFormat ogawa -root "{}" -file "{}"'.format(
-            alembic_node.getAttr("startFrame"),
-            alembic_node.getAttr("endFrame"),
+        job_arg = '-frameRange {0:.0f} {0:.0f} -dataFormat ogawa -root "{1}" -file "{2}"'.format(
+            pm.currentTime(),
             top_node,
             temp_alembic_file
         )
 
+        if alembic_node:
+            job_arg = '-frameRange {} {} -dataFormat ogawa -root "{}" -file "{}"'.format(
+                alembic_node.getAttr("startFrame"),
+                alembic_node.getAttr("endFrame"),
+                top_node,
+                temp_alembic_file
+            )
         pm.select(top_node)
         pm.AbcExport(j=job_arg)
         openFile(pm.sceneName(), f=1)
-        # pm.delete(top_node)
         self.alembic_file.remove_p()
         self.alembic_file = path(temp_alembic_file)
         self.alembic_file = self.alembic_file.rename(self.alembic_file.replace("_.abc", ".abc"))
@@ -455,7 +460,6 @@ class Publish(object):
         anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
         single = ["model_set_GEO"]
         multi = ["hero_RIG"]
-        anim.get_in_view()
         anim.animation(single=single, multi=multi)
         """
         # Creating single and multi frame alembics
@@ -499,7 +503,6 @@ class Publish(object):
         anim = sg.Publish(maya_file=pm.sceneName())
         anim.version(up=1)
         anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
-        anim.get_in_view()
         anim.proxy(mode="export", export=["Shot_###"])
 
         Remove mode removes proxy from fileRule["alembicCache"] (/06_Cache):
@@ -793,7 +796,6 @@ class MyWindow(Publish, QtWidgets.QDialog):
         # create alembics
         self.maya_file = published_file
         self.attributes = abc_attributes
-        self.get_in_view()
         self.animation(single=single_abc, multi=multi_abc)
         self.proxy(mode="export", export=[single_pxy, multi_pxy])
 
