@@ -29,7 +29,7 @@ versioning changes in SG site..
 from . import *
 from . import camera; reload(camera)
 from PySide2 import QtCore, QtWidgets, QtUiTools
-from pymel.core.system import Workspace, FileReference, referenceQuery, exportAsReference, importFile
+from pymel.core.system import Workspace, FileReference, referenceQuery, exportAsReference, importFile, openFile
 from pymel.util import path
 from imghdr import what
 
@@ -295,9 +295,16 @@ class Publish(object):
         pm.select(nodes)
         pm.AbcExport(j=job_arg)
         self.alembic_file = path(self.alembic_file).normpath()
+        self.clean_alembic()
         return self.alembic_file
 
     def clean_alembic(self):
+        if referenceQuery(self.alembic_file.namebase, inr=1):
+            top_ref = FileReference(self.alembic_file.namebase)
+            top_ref.remove()
+        else:
+            pm.delete(self.alembic_file.namebase)
+
         nodes = set(importFile(self.alembic_file, rnn=1, namespace="IMPORT"))
         outliner = set(pm.ls(assemblies=1))
         children = nodes.intersection(outliner)
@@ -730,7 +737,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
                 str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
             )
         )
-        path(working_file).copy2(published_file)
+        # path(working_file).copy2(published_file)
 
         # # - increment and save the current working file, and save a copy to the published version folder
         # self.version()
@@ -788,7 +795,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.maya_file = published_file
         self.attributes = abc_attributes
         self.get_in_view()
-        self.animation(single=single_abc, multi=multi_abc)
+        # self.animation(single=single_abc, multi=multi_abc)
         self.proxy(mode="export", export=[single_pxy, multi_pxy])
 
         # CAMERAS
