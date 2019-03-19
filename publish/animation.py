@@ -3,9 +3,10 @@ from shotgun.publish import animation as sg
 reload(sg)
 maya_file = pm.sceneName()  # user input
 anim = sg.Publish(maya_file=maya_file)
-anim.version()
+anim.version()  # versions up by default, but not the maya file!
 anim.rich_media()  # anim.rich_media(playblast=1, range="sg")
 anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
+anim.get_in_view()  # helps select the geo in top node that are visible in camera
 anim.animation()
 anim.update_shotgun()
 
@@ -28,7 +29,7 @@ versioning changes in SG site..
 from . import *
 from . import camera; reload(camera)
 from PySide2 import QtCore, QtWidgets, QtUiTools
-from pymel.core.system import Workspace, FileReference, referenceQuery, exportAsReference
+from pymel.core.system import Workspace, FileReference, referenceQuery, exportAsReference, importFile
 from pymel.util import path
 from imghdr import what
 
@@ -47,12 +48,9 @@ def get_window():
     mw.ui.show()
 
 
-# TODO: SINGLE AND MULTI FRAME SHOULD NOT EXPORT CURVES, SELECT WHATEVER IS VISIBLE IN THE SCENE
-# TODO: ANIMATION SCENE GOES INTO VERSION FOLDER
-# TODO: PROXY() export = [[], []] SHOULD TAKE SINGLE AND MULTI
 class Publish(object):
     def __init__(self, thumbnail=None, playblast=None, maya_file=None, alembic_directory=None, comment="",
-                 attributes=None):
+                 attributes=None, active_geometry=None):
         for k, v in vars().iteritems():
             if k is "self" or k is "comment":
                 continue
@@ -182,6 +180,27 @@ class Publish(object):
         pm.lookThru(active_editor, active_camera)  # set persp view back to original camera
         return self.thumbnail, self.playblast
 
+    def get_in_view(self):
+        temp_camera = pm.camera()[0].rename("temp_CAM")
+        window = pm.window(title="temp_WIN")
+        pm.frameLayout(lv=0)
+        panel = pm.modelPanel(label="Persp View")
+        pm.showWindow()
+        pm.modelEditor(panel, e=1, camera=temp_camera, av=1, alo=0)
+        pm.viewFit(temp_camera, all=1)
+        pm.modelEditor(panel, e=1, ns=1, pm=1)
+
+        import maya.OpenMaya as om
+        import maya.OpenMayaUI as omUI
+        view = omUI.M3dView.active3dView()
+        om.MGlobal.selectFromScreen(0, 0, view.portWidth(), view.portHeight(), om.MGlobal.kReplaceList)
+
+        pm.deleteUI(window)
+        pm.delete(temp_camera)
+        self.active_geometry = set(pm.ls(sl=1))
+        pm.select(cl=1)
+        return
+
     def single_frame(self, top_node=None):
         """
         alembic cache objects with no animation. uses self.attributes to enable alembic attributes. uses
@@ -204,16 +223,22 @@ class Publish(object):
 
         top_node = pm.PyNode(top_node)
         self.alembic_file = self.alembic_directory.joinpath(top_node+".abc").replace("\\", "/")
+        nodes = set(top_node.getChildren(ad=1)).intersection(self.active_geometry)
+        export = ""
+        for node in nodes:
+            export += '-root "{}" '.format(node.longName())
 
-        job_arg = '-frameRange {0:.0f} {0:.0f} -dataFormat ogawa -root {1} -file "{2}"'.format(
+        job_arg = '-frameRange {0:.0f} {0:.0f} -dataFormat ogawa {1}-file "{2}"'.format(
             pm.currentTime(),
-            top_node,
+            export,
             self.alembic_file
         )
 
         if self.attributes:
             attributes = [job_arg] + self.attributes
             job_arg = " -".join(attributes)
+
+        pm.select(nodes)
         pm.AbcExport(j=job_arg)
         self.alembic_file = path(self.alembic_file).normpath()
         return self.alembic_file
@@ -234,7 +259,6 @@ class Publish(object):
         :param top_node: (str) the name of the node to cache, its children exports too
         :return: (str) path object of the full path file
         """
-
         if not self.alembic_directory:
             pm.warning(">> Set alembic directory.")
             return
@@ -252,10 +276,15 @@ class Publish(object):
         )["sg_frame_range"]
         start_time, end_time = [int(t) for t in frame_range.split("-")]
 
-        job_arg = '-frameRange {} {} -dataFormat ogawa -root {} -file "{}"'.format(
+        nodes = set(top_node.getChildren(ad=1)).intersection(self.active_geometry)
+        export = ""
+        for node in nodes:
+            export += '-root "{}" '.format(node.longName())
+
+        job_arg = '-frameRange {} {} -dataFormat ogawa {}-file "{}"'.format(
             start_time,
             end_time,
-            top_node,
+            export,
             self.alembic_file
         )
 
@@ -263,9 +292,47 @@ class Publish(object):
             attributes = [job_arg] + self.attributes
             job_arg = " -".join(attributes)
 
+        pm.select(nodes)
         pm.AbcExport(j=job_arg)
         self.alembic_file = path(self.alembic_file).normpath()
         return self.alembic_file
+
+    def clean_alembic(self):
+        nodes = set(importFile(self.alembic_file, rnn=1, namespace="IMPORT"))
+        outliner = set(pm.ls(assemblies=1))
+        children = nodes.intersection(outliner)
+        top_node = pm.group(em=1)
+        pm.parent(children, top_node)
+        pm.namespace(rm="IMPORT", mnr=1)
+        top_node.rename(self.alembic_file.namebase)
+
+        for at in "trs":
+            for ax in "xyz":
+                top_node.setAttr(at + ax, lock=1, keyable=0, cb=0)
+        top_node.setAttr("v", lock=1, keyable=0, cb=0)
+
+        alembic_node = None
+        for node in nodes:
+            if pm.nodeType(node) == "AlembicNode":
+                alembic_node = node
+                break
+
+        temp_alembic_file = self.alembic_file.replace(".abc", "_.abc").replace("\\", "/")
+
+        job_arg = '-frameRange {} {} -dataFormat ogawa -root "{}" -file "{}"'.format(
+            alembic_node.getAttr("startFrame"),
+            alembic_node.getAttr("endFrame"),
+            top_node,
+            temp_alembic_file
+        )
+
+        pm.select(top_node)
+        pm.AbcExport(j=job_arg)
+        pm.delete(top_node)
+        self.alembic_file.remove_p()
+        self.alembic_file = path(temp_alembic_file)
+        self.alembic_file.rename(self.alembic_file.replace("_.abc", ".abc"))
+        return
 
     def update_shotgun(self):
         # GET ENTITY - get the latest alembic entity for the shot
@@ -382,6 +449,7 @@ class Publish(object):
         anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
         single = ["model_set_GEO"]
         multi = ["hero_RIG"]
+        anim.get_in_view()
         anim.animation(single=single, multi=multi)
         """
         # Creating single and multi frame alembics
@@ -425,6 +493,7 @@ class Publish(object):
         anim = sg.Publish(maya_file=pm.sceneName())
         anim.version(up=1)
         anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
+        anim.get_in_view()
         anim.proxy(mode="export", export=["Shot_###"])
 
         Remove mode removes proxy from fileRule["alembicCache"] (/06_Cache):
@@ -652,12 +721,9 @@ class MyWindow(Publish, QtWidgets.QDialog):
         """
         Automated comments contain what is in the alembic directory
         """
-        # - increment and save the current working file, and save a copy to the published version folder
-        self.version()
-        from shotgun import checkout_scene
-        reload(checkout_scene)
-        checkout = checkout_scene.Checkout()
-        working_file = checkout.run(checkout_type="increment")
+        # TESTING - uses the same maya scene file and version folder
+        self.version(up=0)
+        working_file = pm.sceneName()
         published_file = self.alembic_directory.joinpath(
             "{}_original.{}.ma".format(
                 path(workspace.fileRules["scene"]).basename(),
@@ -666,11 +732,26 @@ class MyWindow(Publish, QtWidgets.QDialog):
         )
         path(working_file).copy2(published_file)
 
-        # go through the UI and run everything
-        # comment will be a mix of user and automated messages
+        # # - increment and save the current working file, and save a copy to the published version folder
+        # self.version()
+        # from shotgun import checkout_scene
+        # reload(checkout_scene)
+        # checkout = checkout_scene.Checkout()
+        # working_file = checkout.run(checkout_type="increment")
+        # published_file = self.alembic_directory.joinpath(
+        #     "{}_original.{}.ma".format(
+        #         path(workspace.fileRules["scene"]).basename(),
+        #         str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
+        #     )
+        # )
+        # path(working_file).copy2(published_file)
+
+        # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
+
         # start with user comment
         self.comment += "{}".format(self.ui.comment_txt.toPlainText())
 
+        # separate proxies from the list view, proxies run their own command from Publish()
         multi_abc, multi_pxy = [], []
         for i in range(self.ui.multi_lsw.count()):
             maya_obj = self.ui.multi_lsw.item(i).toolTip()
@@ -687,6 +768,8 @@ class MyWindow(Publish, QtWidgets.QDialog):
             else:
                 single_abc += [maya_obj]
 
+        # all alembic attributes in the UI are checked by default
+        # collect them and use them to create single and multi alembics
         abc_attributes = []
         if self.ui.world_cbx.isChecked():
             abc_attributes.append("worldSpace")
@@ -701,15 +784,18 @@ class MyWindow(Publish, QtWidgets.QDialog):
         if self.ui.writeuvsets_cbx.isChecked():
             abc_attributes.append("writeUVSets")
 
+        # create alembics
         self.maya_file = published_file
         self.attributes = abc_attributes
+        self.get_in_view()
         self.animation(single=single_abc, multi=multi_abc)
         self.proxy(mode="export", export=[single_pxy, multi_pxy])
 
+        # CAMERAS
+        # cameras built into animation shots should always have a render_cam_RIG, see camera.py
+        # process_data() works with imported nodes only
+        # render_cam_RIG needs to be imported, it is referenced from the build scene tool
         if self.ui.camera_cbx.isChecked():
-            # cameras built into animation shots should always have a render_cam_RIG, see camera.py
-            # render_cam_RIG needs to be imported, it is referenced from the build scene tool
-            # process_data() works with imported nodes only
             if referenceQuery("render_cam_RIG", inr=1):
                 render_camera = FileReference("render_cam_RIG")
                 render_camera.importContents()
@@ -724,9 +810,11 @@ class MyWindow(Publish, QtWidgets.QDialog):
             self.CameraTools.update_shotgun()
             self.comment += "\n\nCameras:\n{}".format(self.CameraTools.version_name)
 
+        # PLAYBLAST - creates playblast and updates shotgun with video, otherwise a thumbnail is used
         if self.ui.skip_cbx.isChecked():
             self.rich_media(playblast=1, size=(1920, 1080), range="playback")
 
-        self.update_shotgun()
+        # updates shotgun at the end to get all the comments
+        # self.update_shotgun()
         self.ui.close()
         return
