@@ -305,13 +305,11 @@ class Publish(object):
         else:
             pm.delete(self.alembic_file.namebase)
 
-        nodes = set(importFile(self.alembic_file, rnn=1, namespace="IMPORT"))
+        nodes = set(importFile(self.alembic_file, rnn=1))
         outliner = set(pm.ls(assemblies=1))
         children = nodes.intersection(outliner)
-        top_node = pm.group(em=1)
+        top_node = pm.group(em=1, n=self.alembic_file.namebase)
         pm.parent(children, top_node)
-        pm.namespace(rm="IMPORT", mnr=1)
-        top_node.rename(self.alembic_file.namebase)
 
         for at in "trs":
             for ax in "xyz":
@@ -335,10 +333,11 @@ class Publish(object):
 
         pm.select(top_node)
         pm.AbcExport(j=job_arg)
-        pm.delete(top_node)
+        openFile(pm.sceneName(), f=1)
+        # pm.delete(top_node)
         self.alembic_file.remove_p()
         self.alembic_file = path(temp_alembic_file)
-        self.alembic_file.rename(self.alembic_file.replace("_.abc", ".abc"))
+        self.alembic_file = self.alembic_file.rename(self.alembic_file.replace("_.abc", ".abc"))
         return
 
     def update_shotgun(self):
@@ -795,7 +794,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.maya_file = published_file
         self.attributes = abc_attributes
         self.get_in_view()
-        # self.animation(single=single_abc, multi=multi_abc)
+        self.animation(single=single_abc, multi=multi_abc)
         self.proxy(mode="export", export=[single_pxy, multi_pxy])
 
         # CAMERAS
