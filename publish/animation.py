@@ -225,6 +225,7 @@ class Publish(object):
         top_node = pm.PyNode(top_node)
         self.alembic_file = self.alembic_directory.joinpath(top_node+".abc").replace("\\", "/")
         nodes = set(top_node.getChildren(ad=1)).intersection(self.active_geometry)
+
         export = ""
         for node in nodes:
             export += '-root "{}" '.format(node.longName())
@@ -242,6 +243,7 @@ class Publish(object):
         pm.select(nodes)
         pm.AbcExport(j=job_arg)
         self.alembic_file = path(self.alembic_file).normpath()
+        self.clean_alembic()
         return self.alembic_file
 
     def multi_frame(self, top_node=None):
@@ -464,6 +466,7 @@ class Publish(object):
         anim.animation(single=single, multi=multi)
         """
         # Creating single and multi frame alembics
+        self.get_in_view()
         alembics = []
         for top_node in single:
             alembics += [self.single_frame(top_node)]
