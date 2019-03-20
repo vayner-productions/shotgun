@@ -807,7 +807,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.proxy(mode="export", export=[single_pxy, multi_pxy])
         end = datetime.datetime.now()
         duration = end - start
-        print ">>>>> TIME:", duration.seconds/60.0
+        print ">>>>> {:.00f} seconds to export alembics".format(duration.seconds/60.0)
 
         # CAMERAS
         # cameras built into animation shots should always have a render_cam_RIG, see camera.py
