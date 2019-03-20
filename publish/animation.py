@@ -801,8 +801,13 @@ class MyWindow(Publish, QtWidgets.QDialog):
         # create alembics
         self.maya_file = published_file
         self.attributes = abc_attributes
+        import datetime
+        start = datetime.datetime.now()
         self.animation(single=single_abc, multi=multi_abc)
         self.proxy(mode="export", export=[single_pxy, multi_pxy])
+        end = datetime.datetime.now()
+        duration = end - start
+        print ">>>>> TIME:", duration.seconds/60.0
 
         # CAMERAS
         # cameras built into animation shots should always have a render_cam_RIG, see camera.py
