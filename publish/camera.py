@@ -250,8 +250,9 @@ class MyWindow(QtWidgets.QDialog):
         return ui
 
     def camera_tools(self, method):
-        comment = self.ui.comment_txt.toPlainText()
-        ct = CameraTools(comment=comment)
+        ct = CameraTools()
+        if method == "publish_camera":
+            ct.comment = self.ui.comment_txt.toPlainText()
         getattr(ct, method)()
         self.ui.close()
         return
