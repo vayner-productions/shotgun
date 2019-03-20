@@ -702,15 +702,16 @@ class MyWindow(Publish, QtWidgets.QDialog):
         # MULTI FRAME - excludes cameras and proxy nulls without geometry
         # list widget item displays item short name, and its tool tip contains its long name
         items = set(pm.ls(assemblies=1))
-        items.difference_update(set([cam.root() for cam in pm.ls(type="camera")]))
-
         remove = set()
         for item in items:
-            if "_PXY" in str(item):
-                if item.getChildren(ad=1, type="shape"):
-                    continue
-                else:
-                    remove.add(item)
+            has_mesh = item.getChildren(ad=1, type="mesh")
+            has_nurbs = item.getChildren(ad=1, type="nurbsSurface")
+            is_grouped = item.getChildren(type="transform")
+
+            if has_mesh or has_nurbs and is_grouped:
+                continue
+            else:
+                remove.add(item)
 
         items.difference_update(remove)
 
