@@ -180,6 +180,10 @@ class Publish(object):
         return self.thumbnail, self.playblast
 
     def get_in_view(self):
+        #TODO: USE **KWARGS FOR ATTRIBUTES TO MAKE VISIBLE IN MODEL EDITOR
+        #TODO: get_in_view(ns=1, pm=1)
+        #TODO: pm.modelEditor(panel, e=1, *KWARGS)
+        #TODO: GET EVERYTHING IN RENDERCAM, GET EVERYTHING IN TEMP CAM (ONLY NS/PM), SET DIFFERENCE --> IN CASE CERTAIN THINGS ARE ALREADY HIDDEN IN THE RENDER CAM
         temp_camera = pm.camera()[0].rename("temp_CAM")
         window = pm.window(title="temp_WIN")
         pm.frameLayout(lv=0)
@@ -187,7 +191,7 @@ class Publish(object):
         pm.showWindow()
         pm.modelEditor(panel, e=1, camera=temp_camera, av=1, alo=0)
         pm.viewFit(temp_camera, all=1)
-        pm.modelEditor(panel, e=1, ns=1, pm=1)
+        pm.modelEditor(panel, e=1, ns=1, pm=1)  # attributes to make visible
 
         import maya.OpenMaya as om
         import maya.OpenMayaUI as omUI
