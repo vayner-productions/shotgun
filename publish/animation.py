@@ -308,7 +308,7 @@ class Publish(object):
 
     def clean_alembic(self):
         working_file = pm.sceneName()
-        newFile()
+        newFile(f=1)
 
         nodes = set(importFile(self.alembic_file, rnn=1))
 
