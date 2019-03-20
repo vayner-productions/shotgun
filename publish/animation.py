@@ -28,7 +28,7 @@ versioning changes in SG site..
 from . import *
 from . import camera; reload(camera)
 from PySide2 import QtCore, QtWidgets, QtUiTools
-from pymel.core.system import Workspace, FileReference, referenceQuery, exportAsReference, importFile, openFile
+from pymel.core.system import Workspace, FileReference, referenceQuery, exportAsReference, importFile, openFile, newFile
 from pymel.util import path
 from imghdr import what
 
@@ -279,6 +279,12 @@ class Publish(object):
         start_time, end_time = [int(t) for t in frame_range.split("-")]
 
         nodes = set(top_node.getChildren(ad=1)).intersection(self.active_geometry)
+
+        abc_hide = pm.createDisplayLayer(self.active_geometry, n="abc_hide", e=0, nr=0)
+        for attr in ["playback", "texturing", "shading", "visibility"]:
+            abc_hide.setAttr(attr, 0)
+        abc_show = pm.createDisplayLayer(nodes, n="abc_show", e=0, nr=0)
+
         export = ""
         for node in nodes:
             export += '-root "{}" '.format(node.longName())
@@ -301,11 +307,8 @@ class Publish(object):
         return self.alembic_file
 
     def clean_alembic(self):
-        if referenceQuery(self.alembic_file.namebase, inr=1):
-            top_ref = FileReference(self.alembic_file.namebase)
-            top_ref.remove()
-        else:
-            pm.delete(self.alembic_file.namebase)
+        working_file = pm.sceneName()
+        newFile()
 
         nodes = set(importFile(self.alembic_file, rnn=1))
 
@@ -318,12 +321,6 @@ class Publish(object):
                 top_node.setAttr(at + ax, lock=1, keyable=0, cb=0)
         top_node.setAttr("v", lock=1, keyable=0, cb=0)
 
-        alembic_node = None
-        for node in nodes:
-            if pm.nodeType(node) == "AlembicNode":
-                alembic_node = node
-                break
-
         temp_alembic_file = self.alembic_file.replace(".abc", "_.abc").replace("\\", "/")
 
         job_arg = '-frameRange {0:.0f} {0:.0f} -dataFormat ogawa -root "{1}" -file "{2}"'.format(
@@ -332,16 +329,18 @@ class Publish(object):
             temp_alembic_file
         )
 
+        alembic_node = pm.ls(type="AlembicNode")
+
         if alembic_node:
             job_arg = '-frameRange {} {} -dataFormat ogawa -root "{}" -file "{}"'.format(
-                alembic_node.getAttr("startFrame"),
-                alembic_node.getAttr("endFrame"),
+                alembic_node[0].getAttr("startFrame"),
+                alembic_node[0].getAttr("endFrame"),
                 top_node,
                 temp_alembic_file
             )
         pm.select(top_node)
         pm.AbcExport(j=job_arg)
-        openFile(pm.sceneName(), f=1)
+        openFile(working_file, f=1)
         self.alembic_file.remove_p()
         self.alembic_file = path(temp_alembic_file)
         self.alembic_file = self.alembic_file.rename(self.alembic_file.replace("_.abc", ".abc"))
