@@ -151,11 +151,10 @@ class MyWindow(QtWidgets.QDialog):
                 items = sorted([f.split(".")[1] for f in files])[::-1]
 
                 reference = None
-                match = publish.replace("\\", "/").split(".")[0]
+                match = publish.basename()
                 for ref in pm.listReferences():
                     if match in ref.path:
                         reference = ref.refNode.__unicode__()
-
                 if not reference:
                     current = None
                 references += [[number, asset_name, publish, reference, current, items]]
