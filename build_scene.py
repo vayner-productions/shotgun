@@ -75,10 +75,11 @@ class MyWindow(QtWidgets.QDialog):
         frame.setFrameShape(QtWidgets.QFrame.Box)
         frame.setFrameShadow(QtWidgets.QFrame.Plain)
         frame.setLineWidth(3)
-        if current is None:
-            frame.setStyleSheet("color:rgb(255,255,102)")  # first publish available, add to scene
-        elif items.index(current) != 0:
-            frame.setStyleSheet("color:rgb(255,165,0)")  # new publish available
+        frame.setStyleSheet("color:None")
+        # if current is None:
+        #     frame.setStyleSheet("color:rgb(255,255,102)")  # first publish available, add to scene
+        # elif items.index(current) != 0:
+        #     frame.setStyleSheet("color:rgb(255,165,0)")  # new publish available
 
         # combobox - horizontal expanding, arial 14, style color none,
         combo = QtWidgets.QComboBox()
@@ -139,7 +140,7 @@ class MyWindow(QtWidgets.QDialog):
 
             if publish is not None:
                 publish = publish["local_path_windows"]
-                current = publish.split(".")[1]
+                current = publish.split(".")[1]  # current version 0008
 
                 # root switching
                 if root:
@@ -151,12 +152,12 @@ class MyWindow(QtWidgets.QDialog):
                 items = sorted([f.split(".")[1] for f in files])[::-1]
 
                 reference = None
-                match = publish.basename()
+                match = publish.dirname().replace("\\", "/")
+
                 for ref in pm.listReferences():
                     if match in ref.path:
                         reference = ref.refNode.__unicode__()
-                if not reference:
-                    current = None
+                        break
                 references += [[number, asset_name, publish, reference, current, items]]
 
         # add cache to lighting scene process
@@ -273,7 +274,6 @@ class MyWindow(QtWidgets.QDialog):
             search = "*{}{}".format(version, asset_file.ext)
             reference_file = asset_file.dirname().files(search)[0]
             reference_node = child.toolTip()
-            print ">>", reference_node
             if reference_node:  # asset already referenced in scene
                 pm.FileReference(refnode=reference_node).replaceWith(reference_file)
             else:
@@ -283,6 +283,10 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def init_ui(self):
+        self.ui.circle_first.hide()
+        self.ui.circle_new.hide()
+        self.ui.label_first.hide()
+        self.ui.label_new.hide()
         self.init_rows()
         self.ui.latest_btn.clicked.connect(self.set_latest)
         self.ui.update_btn.clicked.connect(self.update_scene)
