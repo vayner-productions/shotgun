@@ -731,108 +731,170 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.ui.publish_btn.clicked.connect(self.run)
         return
 
+    # def run(self):
+    #     """
+    #     Automated comments contain what is in the alembic directory
+    #     """
+    #     # TESTING - uses the same maya scene file and version folder
+    #     self.version(up=0)
+    #     working_file = pm.sceneName()
+    #     published_file = self.alembic_directory.joinpath(
+    #         "{}_original.{}.ma".format(
+    #             path(workspace.fileRules["scene"]).basename(),
+    #             str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
+    #         )
+    #     )
+    #     # path(working_file).copy2(published_file)
+    #
+    #     # # - increment and save the current working file, and save a copy to the published version folder
+    #     # self.version()
+    #     # from shotgun import checkout_scene
+    #     # reload(checkout_scene)
+    #     # checkout = checkout_scene.Checkout()
+    #     # working_file = checkout.run(checkout_type="increment")
+    #     # published_file = self.alembic_directory.joinpath(
+    #     #     "{}_original.{}.ma".format(
+    #     #         path(workspace.fileRules["scene"]).basename(),
+    #     #         str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
+    #     #     )
+    #     # )
+    #     # path(working_file).copy2(published_file)
+    #
+    #     # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
+    #
+    #     # start with user comment
+    #     self.comment += "{}".format(self.ui.comment_txt.toPlainText())
+    #
+    #     # separate proxies from the list view, proxies run their own command from Publish()
+    #     multi_abc, multi_pxy = [], []
+    #     for i in range(self.ui.multi_lsw.count()):
+    #         maya_obj = self.ui.multi_lsw.item(i).toolTip()
+    #         if "PXY" in maya_obj:
+    #             multi_pxy += [maya_obj]
+    #         else:
+    #             multi_abc += [maya_obj]
+    #
+    #     single_abc, single_pxy = [], []
+    #     for i in range(self.ui.single_lsw.count()):
+    #         maya_obj = self.ui.single_lsw.item(i).toolTip()
+    #         if "PXY" in maya_obj:
+    #             single_pxy += [maya_obj]
+    #         else:
+    #             single_abc += [maya_obj]
+    #
+    #     # all alembic attributes in the UI are checked by default
+    #     # collect them and use them to create single and multi alembics
+    #     abc_attributes = []
+    #     if self.ui.world_cbx.isChecked():
+    #         abc_attributes.append("worldSpace")
+    #     if self.ui.writevisibility_cbx.isChecked():
+    #         abc_attributes.append("writeVisibility")
+    #     if self.ui.eulerfilter_cbx.isChecked():
+    #         abc_attributes.append("eulerFilter")
+    #     if self.ui.uvwrite_cbx.isChecked():
+    #         abc_attributes.append("uvWrite")
+    #     if self.ui.namespace_cbx.isChecked():
+    #         abc_attributes.append("stripNamespaces")
+    #     if self.ui.writeuvsets_cbx.isChecked():
+    #         abc_attributes.append("writeUVSets")
+    #
+    #     # create alembics
+    #     self.maya_file = published_file
+    #     self.attributes = abc_attributes
+    #     import datetime
+    #     start = datetime.datetime.now()
+    #     self.animation(single=single_abc, multi=multi_abc)
+    #     self.proxy(mode="export", export=[single_pxy, multi_pxy])
+    #     end = datetime.datetime.now()
+    #     duration = end - start
+    #     print ">>>>> {:.00f} seconds to export alembics".format(duration.seconds/60.0)
+    #
+    #     # CAMERAS
+    #     # cameras built into animation shots should always have a render_cam_RIG, see camera.py
+    #     # process_data() works with imported nodes only
+    #     # render_cam_RIG needs to be imported, it is referenced from the build scene tool
+    #     if self.ui.camera_cbx.isChecked():
+    #         if referenceQuery("render_cam_RIG", inr=1):
+    #             render_camera = FileReference("render_cam_RIG")
+    #             render_camera.importContents()
+    #
+    #         # export selection as reference
+    #         self.CameraTools.comment += "Published from Animation:\n{}".format(path(pm.sceneName()).basename())
+    #         self.CameraTools.process_data()
+    #         pm.select("render_cam_RIG")
+    #         exportAsReference(self.CameraTools.camera_file, namespace=":")
+    #
+    #         # publish camera and append comment to animation
+    #         self.CameraTools.update_shotgun()
+    #         self.comment += "\n\nCameras:\n{}".format(self.CameraTools.version_name)
+    #
+    #     # PLAYBLAST - creates playblast and updates shotgun with video, otherwise a thumbnail is used
+    #     if self.ui.skip_cbx.isChecked():
+    #         self.rich_media(playblast=1, size=(1920, 1080), range="playback")
+    #
+    #     # updates shotgun at the end to get all the comments
+    #     # self.update_shotgun()
+    #     self.ui.close()
+    #     return
+
     def run(self):
-        """
-        Automated comments contain what is in the alembic directory
-        """
-        # TESTING - uses the same maya scene file and version folder
-        self.version(up=0)
-        working_file = pm.sceneName()
-        published_file = self.alembic_directory.joinpath(
-            "{}_original.{}.ma".format(
-                path(workspace.fileRules["scene"]).basename(),
-                str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
-            )
-        )
-        # path(working_file).copy2(published_file)
-
-        # # - increment and save the current working file, and save a copy to the published version folder
-        # self.version()
-        # from shotgun import checkout_scene
-        # reload(checkout_scene)
-        # checkout = checkout_scene.Checkout()
-        # working_file = checkout.run(checkout_type="increment")
-        # published_file = self.alembic_directory.joinpath(
-        #     "{}_original.{}.ma".format(
-        #         path(workspace.fileRules["scene"]).basename(),
-        #         str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
-        #     )
-        # )
-        # path(working_file).copy2(published_file)
-
-        # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
-
-        # start with user comment
-        self.comment += "{}".format(self.ui.comment_txt.toPlainText())
-
-        # separate proxies from the list view, proxies run their own command from Publish()
-        multi_abc, multi_pxy = [], []
-        for i in range(self.ui.multi_lsw.count()):
-            maya_obj = self.ui.multi_lsw.item(i).toolTip()
-            if "PXY" in maya_obj:
-                multi_pxy += [maya_obj]
-            else:
-                multi_abc += [maya_obj]
-
-        single_abc, single_pxy = [], []
-        for i in range(self.ui.single_lsw.count()):
-            maya_obj = self.ui.single_lsw.item(i).toolTip()
-            if "PXY" in maya_obj:
-                single_pxy += [maya_obj]
-            else:
-                single_abc += [maya_obj]
-
-        # all alembic attributes in the UI are checked by default
-        # collect them and use them to create single and multi alembics
-        abc_attributes = []
-        if self.ui.world_cbx.isChecked():
-            abc_attributes.append("worldSpace")
-        if self.ui.writevisibility_cbx.isChecked():
-            abc_attributes.append("writeVisibility")
-        if self.ui.eulerfilter_cbx.isChecked():
-            abc_attributes.append("eulerFilter")
-        if self.ui.uvwrite_cbx.isChecked():
-            abc_attributes.append("uvWrite")
-        if self.ui.namespace_cbx.isChecked():
-            abc_attributes.append("stripNamespaces")
-        if self.ui.writeuvsets_cbx.isChecked():
-            abc_attributes.append("writeUVSets")
-
-        # create alembics
-        self.maya_file = published_file
-        self.attributes = abc_attributes
+        import pymel.core as pm
+        from pymel.core.system import newFile, importFile, openFile, saveAs
         import datetime
         start = datetime.datetime.now()
-        self.animation(single=single_abc, multi=multi_abc)
-        self.proxy(mode="export", export=[single_pxy, multi_pxy])
+
+        working_file = "A:/Animation/Projects/Client/Kraft Heinz/Planters/0002_Planters Wingnut/Project Directory/02_Production/04_Maya/scenes/08_Animation/Shot_014/Shot_014_processed.0010.ma"
+        openFile(working_file, f=1)
+
+        #######
+        nodes = ["Mr_Peanut", "grp_nutMobile_Rig"]
+        nodes = [pm.PyNode(node) for node in nodes]
+
+        root_section = " ".join(['-root "{}"'.format(name.longName()) for name in nodes])
+        all_abc_file = "A:/Animation/Projects/Client/Kraft Heinz/Planters/0002_Planters Wingnut/Project Directory/02_Production/04_Maya/published/08_Animation/Shot_014/ver_010/all_alembic.abc"
+
+        job_arg = '-frameRange 125 172 -dataFormat ogawa {} -file "{}" -stripNamespaces -uvWrite -worldSpace -writeVisibility -eulerFilter -writeUVSets'.format(
+            root_section,
+            all_abc_file
+        )
+        pm.select(nodes)
+        pm.AbcExport(j=job_arg)
+
+        #######
+        newFile(f=1)
+        importFile(all_abc_file, rnn=1)
+        first_pass = "A:/Animation/Projects/Client/Kraft Heinz/Planters/0002_Planters Wingnut/Project Directory/02_Production/04_Maya/published/08_Animation/Shot_014/ver_010/first_pass.ma"
+
+        saveAs(first_pass, f=1)
+
+        #######
+        # openFile(first_pass, f=1)
+        #
+        nodes = ["grp_nutMobile_Rig", "Mr_Peanut"]
+        nodes = [pm.PyNode(node) for node in nodes]
+
+        for node in nodes:
+            to_delete = set(nodes).difference(set([node]))
+            pm.delete(to_delete)  # deleted vhcl
+            descendents = node.getChildren(ad=1)
+            pm.parent(descendents, w=1)
+
+            self.get_in_view()
+            pm.select(self.active_geometry)
+            pm.select(node, add=1)
+            pm.parent()
+            to_delete = set(descendents).difference(set(node.getChildren(ad=1)))
+            pm.delete(to_delete)
+
+            job_arg = '-frameRange 125 172 -dataFormat ogawa -root {} -file "{}" -stripNamespaces -uvWrite -worldSpace -writeVisibility -eulerFilter -writeUVSets'.format(
+                node.longName(),
+                "A:/Animation/Projects/Client/Kraft Heinz/Planters/0002_Planters Wingnut/Project Directory/02_Production/04_Maya/published/08_Animation/Shot_014/ver_010/" + node + ".abc"
+            )
+            pm.select(node)
+            pm.AbcExport(j=job_arg)
+            openFile(first_pass, f=1)
+
         end = datetime.datetime.now()
         duration = end - start
         print ">>>>> {:.00f} seconds to export alembics".format(duration.seconds/60.0)
-
-        # CAMERAS
-        # cameras built into animation shots should always have a render_cam_RIG, see camera.py
-        # process_data() works with imported nodes only
-        # render_cam_RIG needs to be imported, it is referenced from the build scene tool
-        if self.ui.camera_cbx.isChecked():
-            if referenceQuery("render_cam_RIG", inr=1):
-                render_camera = FileReference("render_cam_RIG")
-                render_camera.importContents()
-
-            # export selection as reference
-            self.CameraTools.comment += "Published from Animation:\n{}".format(path(pm.sceneName()).basename())
-            self.CameraTools.process_data()
-            pm.select("render_cam_RIG")
-            exportAsReference(self.CameraTools.camera_file, namespace=":")
-
-            # publish camera and append comment to animation
-            self.CameraTools.update_shotgun()
-            self.comment += "\n\nCameras:\n{}".format(self.CameraTools.version_name)
-
-        # PLAYBLAST - creates playblast and updates shotgun with video, otherwise a thumbnail is used
-        if self.ui.skip_cbx.isChecked():
-            self.rich_media(playblast=1, size=(1920, 1080), range="playback")
-
-        # updates shotgun at the end to get all the comments
-        # self.update_shotgun()
-        self.ui.close()
         return
