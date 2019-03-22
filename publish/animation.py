@@ -249,6 +249,69 @@ class Publish(object):
         self.clean_alembic()
         return self.alembic_file
 
+    def multi_frame___(self, nodes=[]):
+        nodes = [pm.PyNode(node) for node in nodes]
+
+        shot_name = path(workspace.fileRules["scene"]).basename()
+        frame_range = sg.find_one(
+            "Shot",
+            [
+                ["project", "is", project],
+                ["code", "is", shot_name]
+            ],
+            ["sg_frame_range"]
+        )["sg_frame_range"]
+
+        start_time, end_time = [int(t) for t in frame_range.split("-")]
+        root_section = " ".join(['-root "{}"'.format(name.longName()) for name in nodes])
+        all_abc_file = self.alembic_directory.joinpath("all_alembic.abc")
+        self.attributes = " -".join(self.attributes)[1:]
+
+        job_arg = '-frameRange {} {} * -dataFormat ogawa {} -file "{}"'.format(
+            start_time,
+            end_time,
+            root_section,
+            all_abc_file
+        ).replace("*", self.attributes)
+
+        pm.select(nodes)
+        pm.AbcExport(j=job_arg)
+
+        #######
+        newFile(f=1)
+        importFile(all_abc_file, rnn=1)
+        first_pass = self.alembic_directory.joinpath("first_pass.ma")
+
+        saveAs(first_pass, f=1)
+
+        # #######
+        # nodes = ["Mr_Peanut", "grp_geo_nutMobile"]
+        # nodes = [pm.PyNode(node) for node in nodes]
+
+        abc_files = []
+        for node in nodes:
+            to_delete = set(nodes).difference({node})
+            pm.delete(to_delete)
+            descendants = node.getChildren(ad=1)
+            pm.parent(descendants, w=1)
+
+            self.get_in_view()
+            pm.select(self.active_geometry)
+            pm.select(node, add=1)
+            pm.parent()
+
+            abc_files += [self.alembic_directory.joinpath(node+".abc")]
+            job_arg = '-frameRange {} {} * -dataFormat ogawa -root {} -file "{}"'.format(
+                start_time,
+                end_time,
+                node.longName(),
+                abc_files[-1]
+            ).replace("*", self.attributes)
+            pm.select(node)
+            pm.AbcExport(j=job_arg)
+            openFile(first_pass, f=1)
+        return
+
     def multi_frame(self, top_node=None):
         """
         alembic cache objects with animation. uses self.attributes to enable alembic attributes. uses
@@ -837,61 +900,5 @@ class MyWindow(Publish, QtWidgets.QDialog):
     #
     #     # updates shotgun at the end to get all the comments
     #     # self.update_shotgun()
-    #     self.ui.close()
-    #     return
-
-    def run(self):
-        self.version()
-        working_file = pm.sceneName()
-        openFile(working_file, f=1)
-
-        #######
-        nodes = ["Mr_Peanut", "grp_geo_nutMobile"]
-        nodes = [pm.PyNode(node) for node in nodes]
-
-        root_section = " ".join(['-root "{}"'.format(name.longName()) for name in nodes])
-        all_abc_file = self.alembic_directory.joinpath("all_alembic.abc")
-
-        job_arg = '-frameRange 125 175  -stripNamespaces -uvWrite -worldSpace -writeVisibility -eulerFilter -writeUVSets -dataFormat ogawa {} -file "{}"'.format(
-            root_section,
-            all_abc_file
-        )
-        pm.select(nodes)
-        start = datetime.datetime.now()
-        pm.AbcExport(j=job_arg)
-
-        #######
-        newFile(f=1)
-        importFile(all_abc_file, rnn=1)
-        first_pass = self.alembic_directory.joinpath("first_pass.ma")
-
-        saveAs(first_pass, f=1)
-
-        #######
-        nodes = ["Mr_Peanut", "grp_geo_nutMobile"]
-        nodes = [pm.PyNode(node) for node in nodes]
-
-        abc_files = []
-        for node in nodes:
-            to_delete = set(nodes).difference(set([node]))
-            pm.delete(to_delete)
-            descendents = node.getChildren(ad=1)
-            pm.parent(descendents, w=1)
-
-            self.get_in_view()
-            pm.select(self.active_geometry)
-            pm.select(node, add=1)
-            pm.parent()
-            abc_files += [self.alembic_directory.joinpath(node+".abc")]
-            job_arg = '-frameRange 125 175 -dataFormat ogawa -root {} -file "{}" -stripNamespaces -uvWrite -worldSpace -writeVisibility -eulerFilter -writeUVSets'.format(
-                node.longName(),
-                abc_files[-1]
-            )
-            pm.select(node)
-            pm.AbcExport(j=job_arg)
-            openFile(first_pass, f=1)
-
-        end = datetime.datetime.now()
-        duration = end - start
-        print ">>>>> {:.2f} seconds to export alembics".format(duration.seconds/60.0)
+        self.ui.close()
         return
