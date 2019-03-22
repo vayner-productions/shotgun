@@ -249,7 +249,7 @@ class Publish(object):
         self.clean_alembic()
         return self.alembic_file
 
-    def multi_frame___(self, nodes=[]):
+    def multi_frame___(self, nodes):
         nodes = [pm.PyNode(node) for node in nodes]
 
         shot_name = path(workspace.fileRules["scene"]).basename()
@@ -310,7 +310,7 @@ class Publish(object):
             pm.select(node)
             pm.AbcExport(j=job_arg)
             openFile(first_pass, f=1)
-        return
+        return abc_files
 
     def multi_frame(self, top_node=None):
         """
@@ -537,8 +537,9 @@ class Publish(object):
         for top_node in single:
             alembics += [self.single_frame(top_node)]
 
-        for top_node in multi:
-            alembics += [self.multi_frame(top_node)]
+        # for top_node in multi:
+        #     alembics += [self.multi_frame(top_node)]
+        alembics += self.multi_frame___(multi)
 
         # Copying alembics from /published to /06_Cache
         all_directory = path(workspace.expandName(workspace.fileRules["Alembic"]))
@@ -797,21 +798,21 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.ui.publish_btn.clicked.connect(self.run)
         return
 
-    # def run(self):
-    #     """
-    #     Automated comments contain what is in the alembic directory
-    #     """
-    #     # TESTING - uses the same maya scene file and version folder
-    #     self.version(up=0)
-    #     working_file = pm.sceneName()
-    #     published_file = self.alembic_directory.joinpath(
-    #         "{}_original.{}.ma".format(
-    #             path(workspace.fileRules["scene"]).basename(),
-    #             str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
-    #         )
-    #     )
-    #     # path(working_file).copy2(published_file)
-    #
+    def run(self):
+        """
+        Automated comments contain what is in the alembic directory
+        """
+        # TESTING - uses the same maya scene file and version folder
+        self.version(up=0)
+        working_file = pm.sceneName()
+        published_file = self.alembic_directory.joinpath(
+            "{}_original.{}.ma".format(
+                path(workspace.fileRules["scene"]).basename(),
+                str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
+            )
+        )
+        # path(working_file).copy2(published_file)
+
     #     # # - increment and save the current working file, and save a copy to the published version folder
     #     # self.version()
     #     # from shotgun import checkout_scene
@@ -826,55 +827,56 @@ class MyWindow(Publish, QtWidgets.QDialog):
     #     # )
     #     # path(working_file).copy2(published_file)
     #
-    #     # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
+        # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
     #
     #     # start with user comment
     #     self.comment += "{}".format(self.ui.comment_txt.toPlainText())
     #
-    #     # separate proxies from the list view, proxies run their own command from Publish()
-    #     multi_abc, multi_pxy = [], []
-    #     for i in range(self.ui.multi_lsw.count()):
-    #         maya_obj = self.ui.multi_lsw.item(i).toolTip()
-    #         if "PXY" in maya_obj:
-    #             multi_pxy += [maya_obj]
-    #         else:
-    #             multi_abc += [maya_obj]
-    #
-    #     single_abc, single_pxy = [], []
-    #     for i in range(self.ui.single_lsw.count()):
-    #         maya_obj = self.ui.single_lsw.item(i).toolTip()
-    #         if "PXY" in maya_obj:
-    #             single_pxy += [maya_obj]
-    #         else:
-    #             single_abc += [maya_obj]
-    #
-    #     # all alembic attributes in the UI are checked by default
-    #     # collect them and use them to create single and multi alembics
-    #     abc_attributes = []
-    #     if self.ui.world_cbx.isChecked():
-    #         abc_attributes.append("worldSpace")
-    #     if self.ui.writevisibility_cbx.isChecked():
-    #         abc_attributes.append("writeVisibility")
-    #     if self.ui.eulerfilter_cbx.isChecked():
-    #         abc_attributes.append("eulerFilter")
-    #     if self.ui.uvwrite_cbx.isChecked():
-    #         abc_attributes.append("uvWrite")
-    #     if self.ui.namespace_cbx.isChecked():
-    #         abc_attributes.append("stripNamespaces")
-    #     if self.ui.writeuvsets_cbx.isChecked():
-    #         abc_attributes.append("writeUVSets")
-    #
-    #     # create alembics
-    #     self.maya_file = published_file
-    #     self.attributes = abc_attributes
-    #     import datetime
-    #     start = datetime.datetime.now()
-    #     self.animation(single=single_abc, multi=multi_abc)
-    #     self.proxy(mode="export", export=[single_pxy, multi_pxy])
-    #     end = datetime.datetime.now()
-    #     duration = end - start
-    #     print ">>>>> {:.00f} seconds to export alembics".format(duration.seconds/60.0)
-    #
+        # separate proxies from the list view, proxies run their own command from Publish()
+        multi_abc, multi_pxy = [], []
+        for i in range(self.ui.multi_lsw.count()):
+            maya_obj = self.ui.multi_lsw.item(i).toolTip()
+            if "PXY" in maya_obj:
+                multi_pxy += [maya_obj]
+            else:
+                multi_abc += [maya_obj]
+
+        single_abc, single_pxy = [], []
+        for i in range(self.ui.single_lsw.count()):
+            maya_obj = self.ui.single_lsw.item(i).toolTip()
+            if "PXY" in maya_obj:
+                single_pxy += [maya_obj]
+            else:
+                single_abc += [maya_obj]
+
+        # all alembic attributes in the UI are checked by default
+        # collect them and use them to create single and multi alembics
+        abc_attributes = []
+        if self.ui.world_cbx.isChecked():
+            abc_attributes.append("worldSpace")
+        if self.ui.writevisibility_cbx.isChecked():
+            abc_attributes.append("writeVisibility")
+        if self.ui.eulerfilter_cbx.isChecked():
+            abc_attributes.append("eulerFilter")
+        if self.ui.uvwrite_cbx.isChecked():
+            abc_attributes.append("uvWrite")
+        if self.ui.namespace_cbx.isChecked():
+            abc_attributes.append("stripNamespaces")
+        if self.ui.writeuvsets_cbx.isChecked():
+            abc_attributes.append("writeUVSets")
+
+        # create alembics
+        self.maya_file = published_file
+        self.attributes = abc_attributes
+        import datetime
+        start = datetime.datetime.now()
+        self.multi_frame___(multi_abc)
+        # self.animation(single=single_abc, multi=multi_abc)
+        # self.proxy(mode="export", export=[single_pxy, multi_pxy])
+        end = datetime.datetime.now()
+        duration = end - start
+        print ">>>>> {:.00f} seconds to export alembics".format(duration.seconds/60.0)
+
     #     # CAMERAS
     #     # cameras built into animation shots should always have a render_cam_RIG, see camera.py
     #     # process_data() works with imported nodes only
