@@ -28,9 +28,12 @@ versioning changes in SG site..
 from . import *
 from . import camera; reload(camera)
 from PySide2 import QtCore, QtWidgets, QtUiTools
-from pymel.core.system import Workspace, FileReference, referenceQuery, exportAsReference, importFile, openFile, newFile
+from pymel.core.system import Workspace, FileReference, referenceQuery, exportAsReference, importFile, openFile, \
+    newFile, saveAs
 from pymel.util import path
 from imghdr import what
+import datetime
+
 
 import pymel.core as pm
 workspace = Workspace()
@@ -838,12 +841,8 @@ class MyWindow(Publish, QtWidgets.QDialog):
     #     return
 
     def run(self):
-        import pymel.core as pm
-        from pymel.core.system import newFile, importFile, openFile, saveAs
-        import datetime
-        start = datetime.datetime.now()
-
-        working_file = "A:/Animation/Projects/Client/Kraft Heinz/Planters/0002_Planters Wingnut/Project Directory/02_Production/04_Maya/scenes/08_Animation/Shot_014/Shot_014_processed.0010.ma"
+        self.version()
+        working_file = pm.sceneName()
         openFile(working_file, f=1)
 
         #######
@@ -851,32 +850,31 @@ class MyWindow(Publish, QtWidgets.QDialog):
         nodes = [pm.PyNode(node) for node in nodes]
 
         root_section = " ".join(['-root "{}"'.format(name.longName()) for name in nodes])
-        all_abc_file = "A:/Animation/Projects/Client/Kraft Heinz/Planters/0002_Planters Wingnut/Project Directory/02_Production/04_Maya/published/08_Animation/Shot_014/ver_010/all_alembic.abc"
+        all_abc_file = self.alembic_directory.joinpath("all_alembic.abc")
 
         job_arg = '-frameRange 125 175  -stripNamespaces -uvWrite -worldSpace -writeVisibility -eulerFilter -writeUVSets -dataFormat ogawa {} -file "{}"'.format(
             root_section,
             all_abc_file
         )
         pm.select(nodes)
+        start = datetime.datetime.now()
         pm.AbcExport(j=job_arg)
 
         #######
         newFile(f=1)
         importFile(all_abc_file, rnn=1)
-        first_pass = "A:/Animation/Projects/Client/Kraft Heinz/Planters/0002_Planters Wingnut/Project Directory/02_Production/04_Maya/published/08_Animation/Shot_014/ver_010/first_pass.ma"
+        first_pass = self.alembic_directory.joinpath("first_pass.ma")
 
         saveAs(first_pass, f=1)
 
         #######
-        # openFile(first_pass, f=1)
-        #
         nodes = ["Mr_Peanut", "grp_geo_nutMobile"]
         nodes = [pm.PyNode(node) for node in nodes]
 
         abc_files = []
         for node in nodes:
             to_delete = set(nodes).difference(set([node]))
-            pm.delete(to_delete)  # deleted vhcl
+            pm.delete(to_delete)
             descendents = node.getChildren(ad=1)
             pm.parent(descendents, w=1)
 
@@ -884,9 +882,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
             pm.select(self.active_geometry)
             pm.select(node, add=1)
             pm.parent()
-            # to_delete = set(descendents).difference(set(node.getChildren(ad=1)))
-            # pm.delete(to_delete)
-            abc_files += ["A:/Animation/Projects/Client/Kraft Heinz/Planters/0002_Planters Wingnut/Project Directory/02_Production/04_Maya/published/08_Animation/Shot_014/ver_010/" + node + ".abc"]
+            abc_files += [self.alembic_directory.joinpath(node+".abc")]
             job_arg = '-frameRange 125 175 -dataFormat ogawa -root {} -file "{}" -stripNamespaces -uvWrite -worldSpace -writeVisibility -eulerFilter -writeUVSets'.format(
                 node.longName(),
                 abc_files[-1]
@@ -897,7 +893,5 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
         end = datetime.datetime.now()
         duration = end - start
-        print ">>>>> {:.00f} seconds to export alembics".format(duration.seconds/60.0)
-        newFile(f=1)
-        [importFile(f) for f in abc_files]
+        print ">>>>> {:.2f} seconds to export alembics".format(duration.seconds/60.0)
         return
