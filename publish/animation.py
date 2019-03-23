@@ -249,7 +249,7 @@ class Publish(object):
         self.clean_alembic()
         return self.alembic_file
 
-    def multi_frame___(self, nodes):
+    def multi_frame(self, nodes):
         nodes = [pm.PyNode(node) for node in nodes]
 
         shot_name = path(workspace.fileRules["scene"]).basename()
@@ -312,108 +312,6 @@ class Publish(object):
             abc_files += [path(abc_file).normpath()]
             openFile(first_pass, f=1)
         return abc_files
-
-    def multi_frame(self, top_node=None):
-        """
-        alembic cache objects with animation. uses self.attributes to enable alembic attributes. uses
-        self.alembic_directory to store alembic files
-
-        from shotgun.publish import animation as sg
-        reload(sg)
-        maya_file = "C:\Users\%USERPROFILE%\Documents\shot_000.ma"  # user input
-        anim = sg.Publish(maya_file=maya_file)
-        anim.version(up=1)  # versions up to the next alembic directory
-        anim.attributes = []  # no attributes to enable
-        anim.multi_frame(top_node="hero_RIG")
-
-        :param top_node: (str) the name of the node to cache, its children exports too
-        :return: (str) path object of the full path file
-        """
-        self.get_in_view()
-        if not self.alembic_directory:
-            pm.warning(">> Set alembic directory.")
-            return
-
-        top_node = pm.PyNode(top_node)
-        self.alembic_file = self.alembic_directory.joinpath(top_node+".abc").replace("\\", "/")
-        shot_name = path(workspace.fileRules["scene"]).basename()
-        frame_range = sg.find_one(
-            "Shot",
-            [
-                ["project", "is", project],
-                ["code", "is", shot_name]
-            ],
-            ["sg_frame_range"]
-        )["sg_frame_range"]
-        start_time, end_time = [int(t) for t in frame_range.split("-")]
-
-        nodes = set(top_node.getChildren(ad=1)).intersection(self.active_geometry)
-
-        abc_hide = pm.createDisplayLayer(self.active_geometry, n="abc_hide", e=0, nr=0)
-        for attr in ["playback", "texturing", "shading", "visibility"]:
-            abc_hide.setAttr(attr, 0)
-        abc_show = pm.createDisplayLayer(nodes, n="abc_show", e=0, nr=0)
-
-        export = ""
-        for node in nodes:
-            export += '-root "{}" '.format(node.longName())
-
-        job_arg = '-frameRange {} {} -dataFormat ogawa {}-file "{}"'.format(
-            start_time,
-            end_time,
-            export,
-            self.alembic_file
-        )
-
-        if self.attributes:
-            attributes = [job_arg] + self.attributes
-            job_arg = " -".join(attributes)
-
-        pm.select(nodes)
-        pm.AbcExport(j=job_arg)
-        self.alembic_file = path(self.alembic_file).normpath()
-        self.clean_alembic()
-        return self.alembic_file
-
-    def clean_alembic(self):
-        working_file = pm.sceneName()
-        newFile(f=1)
-
-        nodes = set(importFile(self.alembic_file, rnn=1))
-
-        outliner = set(pm.ls(assemblies=1))
-        children = nodes.intersection(outliner)
-        top_node = pm.group(em=1, n=self.alembic_file.namebase)
-        pm.parent(children, top_node)
-        for at in "trs":
-            for ax in "xyz":
-                top_node.setAttr(at + ax, lock=1, keyable=0, cb=0)
-        top_node.setAttr("v", lock=1, keyable=0, cb=0)
-
-        temp_alembic_file = self.alembic_file.replace(".abc", "_.abc").replace("\\", "/")
-
-        job_arg = '-frameRange {0:.0f} {0:.0f} -dataFormat ogawa -root "{1}" -file "{2}"'.format(
-            pm.currentTime(),
-            top_node,
-            temp_alembic_file
-        )
-
-        alembic_node = pm.ls(type="AlembicNode")
-
-        if alembic_node:
-            job_arg = '-frameRange {} {} -dataFormat ogawa -root "{}" -file "{}"'.format(
-                alembic_node[0].getAttr("startFrame"),
-                alembic_node[0].getAttr("endFrame"),
-                top_node,
-                temp_alembic_file
-            )
-        pm.select(top_node)
-        pm.AbcExport(j=job_arg)
-        openFile(working_file, f=1)
-        self.alembic_file.remove_p()
-        self.alembic_file = path(temp_alembic_file)
-        self.alembic_file = self.alembic_file.rename(self.alembic_file.replace("_.abc", ".abc"))
-        return
 
     def update_shotgun(self):
         # GET ENTITY - get the latest alembic entity for the shot
@@ -541,7 +439,6 @@ class Publish(object):
         # for top_node in multi:
         #     alembics += [self.multi_frame(top_node)]
         alembics += self.multi_frame___(multi)
-        print ">>>>", alembics
 
         # Copying alembics from /published to /06_Cache
         all_directory = path(workspace.expandName(workspace.fileRules["Alembic"]))
@@ -615,24 +512,26 @@ class Publish(object):
             else:
                 pm.warning(">> Already exists, nothing to create.")
         elif "export" == mode:
-            # exports proxies as single or multi frame alembics
-            # they are first imported if they are already referenced
-            single_proxies = set()
-            for single in export[0]:
-                if referenceQuery(single, inr=1):
-                    single_ref = FileReference(single)
-                    single_ref.importContents()
-                single_proxies.add(single)
-            
-            multi_proxies = set()
-            for multi in export[1]:
-                if referenceQuery(multi, inr=1):
-                    multi_ref = FileReference(multi)
-                    multi_ref.importContents()
-                multi_proxies.add(multi)
+            # alembics can be made regardless if referenced
+            # # exports proxies as single or multi frame alembics
+            # # they are first imported if they are already referenced
+            # single_proxies = set()
+            # for single in export[0]:
+            #     if referenceQuery(single, inr=1):
+            #         single_ref = FileReference(single)
+            #         single_ref.importContents()
+            #     single_proxies.add(single)
+            #
+            # multi_proxies = set()
+            # for multi in export[1]:
+            #     if referenceQuery(multi, inr=1):
+            #         multi_ref = FileReference(multi)
+            #         multi_ref.importContents()
+            #     multi_proxies.add(multi)
             
             comment = "Proxies:"
-            alembics = self.animation(single=single_proxies, multi=multi_proxies, comment=comment)
+            # alembics = self.animation(single=single_proxies, multi=multi_proxies, comment=comment)
+            alembics = self.animation(single=export[0], multi=export[1], comment=comment)
 
             if alembics:
                 print "\n>> Exported the following proxies:", self.comment.split(comment)[1],
