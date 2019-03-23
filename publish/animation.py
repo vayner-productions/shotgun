@@ -264,8 +264,9 @@ class Publish(object):
 
         start_time, end_time = [int(t) for t in frame_range.split("-")]
         root_section = " ".join(['-root "{}"'.format(name.longName()) for name in nodes])
-        all_abc_file = self.alembic_directory.joinpath("all_alembic.abc")
-        self.attributes = " -".join(self.attributes)[1:]
+        all_abc_file = self.alembic_directory.joinpath("all_alembic.abc").replace("\\", "/")
+        if self.attributes:
+            self.attributes = "-" + " -".join(self.attributes)
 
         job_arg = '-frameRange {} {} * -dataFormat ogawa {} -file "{}"'.format(
             start_time,
@@ -273,21 +274,19 @@ class Publish(object):
             root_section,
             all_abc_file
         ).replace("*", self.attributes)
-
         pm.select(nodes)
         pm.AbcExport(j=job_arg)
 
         #######
         newFile(f=1)
+        outliner = set(pm.ls(assemblies=1))
         importFile(all_abc_file, rnn=1)
+        nodes = set(pm.ls(assemblies=1)).difference(outliner)
         first_pass = self.alembic_directory.joinpath("first_pass.ma")
 
         saveAs(first_pass, f=1)
 
-        # #######
-        # nodes = ["Mr_Peanut", "grp_geo_nutMobile"]
-        # nodes = [pm.PyNode(node) for node in nodes]
-
+        #######
         abc_files = []
         for node in nodes:
             to_delete = set(nodes).difference({node})
@@ -300,15 +299,17 @@ class Publish(object):
             pm.select(node, add=1)
             pm.parent()
 
-            abc_files += [self.alembic_directory.joinpath(node+".abc")]
+            abc_file = self.alembic_directory.joinpath(node+".abc").replace("\\", "/")
             job_arg = '-frameRange {} {} * -dataFormat ogawa -root {} -file "{}"'.format(
                 start_time,
                 end_time,
                 node.longName(),
-                abc_files[-1]
+                abc_file
             ).replace("*", self.attributes)
             pm.select(node)
             pm.AbcExport(j=job_arg)
+
+            abc_files += [path(abc_file).normpath()]
             openFile(first_pass, f=1)
         return abc_files
 
@@ -540,10 +541,11 @@ class Publish(object):
         # for top_node in multi:
         #     alembics += [self.multi_frame(top_node)]
         alembics += self.multi_frame___(multi)
+        print ">>>>", alembics
 
         # Copying alembics from /published to /06_Cache
         all_directory = path(workspace.expandName(workspace.fileRules["Alembic"]))
-        
+
         for abc in alembics:
             dst = all_directory.joinpath(abc.basename())
             path.copy(abc, dst)
@@ -556,6 +558,7 @@ class Publish(object):
             self.comment += comment
             for abc in alembics:
                 self.comment += "\n" + abc.basename()
+        print "\n>>>>", self.comment
         return alembics
 
     def proxy(self, mode="add", remove=[], add=[], export=[]):
@@ -866,12 +869,11 @@ class MyWindow(Publish, QtWidgets.QDialog):
             abc_attributes.append("writeUVSets")
 
         # create alembics
-        self.maya_file = published_file
+        # self.maya_file = published_file
         self.attributes = abc_attributes
         import datetime
         start = datetime.datetime.now()
-        self.multi_frame___(multi_abc)
-        # self.animation(single=single_abc, multi=multi_abc)
+        self.animation(single=single_abc, multi=multi_abc)
         # self.proxy(mode="export", export=[single_pxy, multi_pxy])
         end = datetime.datetime.now()
         duration = end - start
