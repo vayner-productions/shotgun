@@ -125,7 +125,7 @@ class Publish(object):
         pm.lookThru(active_editor, "render_cam")
 
         # THUMBNAIL
-        current_time = pm.currentTime(q=1)
+        current_time = pm.currentTime()
         thumbnail = path(self.alembic_directory.joinpath("thumbnail.jpg")).normpath()
         self.thumbnail = pm.playblast(
             frame=current_time,
@@ -144,7 +144,7 @@ class Publish(object):
 
         if not playblast:
             pm.lookThru(active_editor, active_camera)  # set persp view back to original camera
-            return self.thumbnail, self.playblast
+            return self.thumbnail
 
         # PLAYBLAST
         # range is "playback"
@@ -205,37 +205,82 @@ class Publish(object):
         pm.select(cl=1)
         return
 
-    def single_frame(self, nodes, abc_files=None):
+    def single_frame(self, nodes):
+        if not nodes:
+            return
+
         if not self.alembic_directory:
             pm.warning(">> Set alembic directory.")
             return
 
-        # create an all_alembic file
+        working_file = pm.sceneName()
+
+        # create all_alembic.abc
         root_section = ""
         for node in nodes:
             node = pm.PyNode(node)
 
             root_section += '-root "{}" '.format(node.longName())
 
+        attributes = ""
         if self.attributes:
-            self.attributes = "-" + " -".join(self.attributes)
+            attributes = "-" + " -".join(self.attributes)
 
         all_abc_file = self.alembic_directory.joinpath("all_alembic.abc").replace("\\", "/")
 
-        job_arg = '-frameRange {0:.0f}, {0:.0f} * -dataFormat ogawa {1} -file "{2}"'.format(
-            pm.currentTime,
+        job_arg = '-frameRange {0:.0f} {0:.0f} * -dataFormat ogawa {1} -file "{2}"'.format(
+            pm.currentTime(),
             root_section[:-1],
             all_abc_file
-        ).replace("*", self.attributes)
+        ).replace("*", attributes)
         pm.select(nodes)
         pm.AbcExport(j=job_arg)
-        return abc_files
+
+        # export alembics for each node in a new file containing only all_alembic.abc
+        newFile(f=1)
+        new_nodes = importFile(all_abc_file, rnn=1)
+        nodes = pm.ls(new_nodes, assemblies=1)
+
+        skip_export = pm.group(em=1, n="skip_ABC")
+        temp = pm.group(em=1, n="temp")
+        for node in nodes:
+            pm.hide(nodes)
+            node.show()
+            self.get_in_view()
+            pm.showHidden()
+
+            pm.parent(self.active_geometry, temp)
+            try:
+                pm.select(cl=1)
+                pm.parent(node.getChildren(ad=1), skip_export)
+            except RuntimeError:
+                pass
+            pm.parent(self.active_geometry, node)
+
+            abc_file = self.alembic_directory.joinpath(str(node)+".abc").replace("\\", "/")
+
+            job_arg = '{}-root "{}" -file "{}"'.format(
+                job_arg[:job_arg.index("-root")],
+                node.longName(),
+                abc_file
+            )
+
+            pm.select(node)
+            pm.AbcExport(j=job_arg)
+        openFile(working_file, f=1)
+        path(all_abc_file).remove_p()
+        return
 
     def multi_frame(self, nodes):
+        if not nodes:
+            return
+
         # all files will be placed in a versioned folder in the published directory
         if not self.alembic_directory:
             pm.warning(">> Set alembic directory.")
             return
+
+        working_file = pm.sceneName()
 
         # creating an all_alembic file from the working maya scene file of all the chosen top nodes
         # frame range derived from shotgun
@@ -254,15 +299,16 @@ class Publish(object):
         start_time, end_time = [int(t) for t in frame_range.split("-")]
         root_section = " ".join(['-root "{}"'.format(name.longName()) for name in nodes])
         all_abc_file = self.alembic_directory.joinpath("all_alembic.abc").replace("\\", "/")
+        attributes = ""
         if self.attributes:
-            self.attributes = "-" + " -".join(self.attributes)
+            attributes = "-" + " -".join(self.attributes)
 
         job_arg = '-frameRange {} {} * -dataFormat ogawa {} -file "{}"'.format(
             start_time,
             end_time,
             root_section,
             all_abc_file
-        ).replace("*", self.attributes)
+        ).replace("*", attributes)
         pm.select(nodes)
         pm.AbcExport(j=job_arg)
 
@@ -270,16 +316,14 @@ class Publish(object):
         # it contains one alembic file (one alembic node) with all the top nodes from the processed file
         # this file will be opened multiple times to export alembics for each individual node
         newFile(f=1)
-        outliner = set(pm.ls(assemblies=1))
-        importFile(all_abc_file, rnn=1)
-        nodes = set(pm.ls(assemblies=1)).difference(outliner)
+        new_nodes = importFile(all_abc_file, rnn=1)
+        nodes = pm.ls(new_nodes, assemblies=1)
         first_pass = self.alembic_directory.joinpath("first_pass.ma")
 
         saveAs(first_pass, f=1)
 
         # returns a list of alembic files for each node
         # the alembic file contains the top node and all its children visible in the scene
-        abc_files = []
         for node in nodes:
             # delete the nodes not being exported for faster evaluation
             to_delete = set(nodes).difference({node})
@@ -301,15 +345,17 @@ class Publish(object):
                 end_time,
                 node.longName(),
                 abc_file
-            ).replace("*", self.attributes)
+            ).replace("*", attributes)
             pm.select(node)
             pm.AbcExport(j=job_arg)
 
-            # this alembic file is an item in a list of items to be returned by this method
             # this file is opened again without saving to redo the process for other nodes
-            abc_files += [path(abc_file).normpath()]
             openFile(first_pass, f=1)
-        return abc_files
+
+        openFile(working_file, f=1)
+        first_pass.remove_p()
+        path(all_abc_file).remove_p()
+        return
 
     def update_shotgun(self):
         # GET ENTITY - get the latest alembic entity for the shot
@@ -412,7 +458,7 @@ class Publish(object):
         print "\n>> published animation to shotgun"
         return
 
-    def animation(self, single=[], multi=[], comment="Alembics:"):
+    def animation(self, single=[], multi=[], alembics=[], comment="Alembics:"):
         """
         Contains .abc as they're created, path comes from self.version():
         04_Maya/published/08_Animation/Shot_###/alembic/ver_###
@@ -429,17 +475,14 @@ class Publish(object):
         anim.animation(single=single, multi=multi)
         """
         # Creating single and multi frame alembics
-        self.get_in_view()
-        alembics = []
-        for top_node in single:
-            alembics += [self.single_frame(top_node)]
-
-        # for top_node in multi:
-        #     alembics += [self.multi_frame(top_node)]
-        alembics += self.multi_frame(multi)
+        self.single_frame(single)
+        self.multi_frame(multi)
 
         # Copying alembics from /published to /06_Cache
         all_directory = path(workspace.expandName(workspace.fileRules["Alembic"]))
+        alembics = self.alembic_directory.files("*.abc")
+        if comment == "Proxies:":
+            alembics = self.alembic_directory.files("*_PXY.abc")
 
         for abc in alembics:
             dst = all_directory.joinpath(abc.basename())
@@ -453,7 +496,6 @@ class Publish(object):
             self.comment += comment
             for abc in alembics:
                 self.comment += "\n" + abc.basename()
-        print "\n>>>>", self.comment
         return alembics
 
     def proxy(self, mode="add", remove=[], add=[], export=[]):
@@ -510,25 +552,7 @@ class Publish(object):
             else:
                 pm.warning(">> Already exists, nothing to create.")
         elif "export" == mode:
-            # alembics can be made regardless if referenced
-            # # exports proxies as single or multi frame alembics
-            # # they are first imported if they are already referenced
-            # single_proxies = set()
-            # for single in export[0]:
-            #     if referenceQuery(single, inr=1):
-            #         single_ref = FileReference(single)
-            #         single_ref.importContents()
-            #     single_proxies.add(single)
-            #
-            # multi_proxies = set()
-            # for multi in export[1]:
-            #     if referenceQuery(multi, inr=1):
-            #         multi_ref = FileReference(multi)
-            #         multi_ref.importContents()
-            #     multi_proxies.add(multi)
-            
             comment = "Proxies:"
-            # alembics = self.animation(single=single_proxies, multi=multi_proxies, comment=comment)
             alembics = self.animation(single=export[0], multi=export[1], comment=comment)
 
             if alembics:
@@ -712,7 +736,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         Automated comments contain what is in the alembic directory
         """
         # TESTING - uses the same maya scene file and version folder
-        self.version(up=0)
+        self.version(up=1)
         working_file = pm.sceneName()
         published_file = self.alembic_directory.joinpath(
             "{}_original.{}.ma".format(
@@ -720,27 +744,25 @@ class MyWindow(Publish, QtWidgets.QDialog):
                 str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
             )
         )
+
+        # - increment and save the current working file, and save a copy to the published version folder
+        # self.version()
+        # from shotgun import checkout_scene
+        # reload(checkout_scene)
+        # checkout = checkout_scene.Checkout()
+        # working_file = checkout.run(checkout_type="increment")
+        # published_file = self.alembic_directory.joinpath(
+        #     "{}_original.{}.ma".format(
+        #         path(workspace.fileRules["scene"]).basename(),
+        #         str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
+        #     )
+        # )
         # path(working_file).copy2(published_file)
 
-    #     # # - increment and save the current working file, and save a copy to the published version folder
-    #     # self.version()
-    #     # from shotgun import checkout_scene
-    #     # reload(checkout_scene)
-    #     # checkout = checkout_scene.Checkout()
-    #     # working_file = checkout.run(checkout_type="increment")
-    #     # published_file = self.alembic_directory.joinpath(
-    #     #     "{}_original.{}.ma".format(
-    #     #         path(workspace.fileRules["scene"]).basename(),
-    #     #         str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
-    #     #     )
-    #     # )
-    #     # path(working_file).copy2(published_file)
-    #
         # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
-    #
-    #     # start with user comment
-    #     self.comment += "{}".format(self.ui.comment_txt.toPlainText())
-    #
+        # start with user comment
+        self.comment += "{}".format(self.ui.comment_txt.toPlainText())
+
         # separate proxies from the list view, proxies run their own command from Publish()
         multi_abc, multi_pxy = [], []
         for i in range(self.ui.multi_lsw.count()):
@@ -775,41 +797,46 @@ class MyWindow(Publish, QtWidgets.QDialog):
             abc_attributes.append("writeUVSets")
 
         # create alembics
-        # self.maya_file = published_file
+        self.maya_file = published_file
         self.attributes = abc_attributes
+
         import datetime
         start = datetime.datetime.now()
-        self.single_frame(single_abc)
-        # self.animation(single=single_abc, multi=multi_abc)
-        # self.proxy(mode="export", export=[single_pxy, multi_pxy])
+
+        self.animation(single=single_abc, multi=multi_abc)
+        self.proxy(mode="export", export=[single_pxy, multi_pxy])
+
         end = datetime.datetime.now()
         duration = end - start
-        print ">>>>> {:.00f} seconds to export alembics".format(duration.seconds/60.0)
+        print "\n# Exported alembics in {:.2f} seconds. #".format(duration.seconds/60.0)
 
-    #     # CAMERAS
-    #     # cameras built into animation shots should always have a render_cam_RIG, see camera.py
-    #     # process_data() works with imported nodes only
-    #     # render_cam_RIG needs to be imported, it is referenced from the build scene tool
-    #     if self.ui.camera_cbx.isChecked():
-    #         if referenceQuery("render_cam_RIG", inr=1):
-    #             render_camera = FileReference("render_cam_RIG")
-    #             render_camera.importContents()
-    #
-    #         # export selection as reference
-    #         self.CameraTools.comment += "Published from Animation:\n{}".format(path(pm.sceneName()).basename())
-    #         self.CameraTools.process_data()
-    #         pm.select("render_cam_RIG")
-    #         exportAsReference(self.CameraTools.camera_file, namespace=":")
-    #
-    #         # publish camera and append comment to animation
-    #         self.CameraTools.update_shotgun()
-    #         self.comment += "\n\nCameras:\n{}".format(self.CameraTools.version_name)
-    #
-    #     # PLAYBLAST - creates playblast and updates shotgun with video, otherwise a thumbnail is used
-    #     if self.ui.skip_cbx.isChecked():
-    #         self.rich_media(playblast=1, size=(1920, 1080), range="playback")
-    #
-    #     # updates shotgun at the end to get all the comments
-    #     # self.update_shotgun()
+
+        # CAMERAS
+        # cameras built into animation shots should always have a render_cam_RIG, see camera.py
+        # process_data() works with imported nodes only
+        # render_cam_RIG needs to be imported, it is referenced from the build scene tool
+        if self.ui.camera_cbx.isChecked():
+            if referenceQuery("render_cam_RIG", inr=1):
+                render_camera = FileReference("render_cam_RIG")
+                render_camera.importContents()
+
+            # export selection as reference
+            self.CameraTools.comment += "Published from Animation:\n{}".format(path(pm.sceneName()).basename())
+            self.CameraTools.process_data()
+            pm.select("render_cam_RIG")
+            exportAsReference(self.CameraTools.camera_file, namespace=":")
+
+            # publish camera and append comment to animation
+            self.CameraTools.update_shotgun()
+            self.comment += "\n\nCameras:\n{}".format(self.CameraTools.version_name)
+
+        # PLAYBLAST - creates playblast and updates shotgun with video, otherwise a thumbnail is used
+        if self.ui.skip_cbx.isChecked():
+            self.rich_media(playblast=1, size=(1920, 1080), range="playback")
+        else:
+            self.rich_media(playblast=0)
+
+        # updates shotgun at the end to get all the comments
+        self.update_shotgun()
         self.ui.close()
         return
