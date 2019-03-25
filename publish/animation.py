@@ -205,49 +205,31 @@ class Publish(object):
         pm.select(cl=1)
         return
 
-    def single_frame(self, top_node=None):
-        """
-        alembic cache objects with no animation. uses self.attributes to enable alembic attributes. uses
-        self.alembic_directory to store alembic files
-
-        from shotgun.publish import animation as sg
-        reload(sg)
-        maya_file = pm.sceneName()  # user input
-        anim = sg.Publish(maya_file=maya_file)
-        anim.version(up=0)  # use latest alembic directory
-        anim.attributes = ["stripNamespaces", "uvWrite", "worldSpace", "writeVisibility", "eulerFilter", "writeUVSets"]
-        anim.single_frame(top_node="model_set_GEO")
-
-        :param top_node: (str) the name of the node to cache, its children exports too
-        :return: (str) path object of the full path file
-        """
+    def single_frame(self, nodes, abc_files=None):
         if not self.alembic_directory:
             pm.warning(">> Set alembic directory.")
             return
 
-        top_node = pm.PyNode(top_node)
-        self.alembic_file = self.alembic_directory.joinpath(top_node+".abc").replace("\\", "/")
-        nodes = set(top_node.getChildren(ad=1)).intersection(self.active_geometry)
-
-        export = ""
+        # create an all_alembic file
+        root_section = ""
         for node in nodes:
-            export += '-root "{}" '.format(node.longName())
+            node = pm.PyNode(node)
 
-        job_arg = '-frameRange {0:.0f} {0:.0f} -dataFormat ogawa {1}-file "{2}"'.format(
-            pm.currentTime(),
-            export,
-            self.alembic_file
-        )
+            root_section += '-root "{}" '.format(node.longName())
 
         if self.attributes:
-            attributes = [job_arg] + self.attributes
-            job_arg = " -".join(attributes)
+            self.attributes = "-" + " -".join(self.attributes)
 
+        all_abc_file = self.alembic_directory.joinpath("all_alembic.abc").replace("\\", "/")
+
+        job_arg = '-frameRange {0:.0f}, {0:.0f} * -dataFormat ogawa {1} -file "{2}"'.format(
+            pm.currentTime,
+            root_section[:-1],
+            all_abc_file
+        ).replace("*", self.attributes)
         pm.select(nodes)
         pm.AbcExport(j=job_arg)
-        self.alembic_file = path(self.alembic_file).normpath()
-        self.clean_alembic()
-        return self.alembic_file
+        return abc_files
 
     def multi_frame(self, nodes):
         # all files will be placed in a versioned folder in the published directory
@@ -624,6 +606,15 @@ class MyWindow(Publish, QtWidgets.QDialog):
         for item in selected:
             from_lsw.takeItem(from_lsw.row(item))
             to_lsw.addItem(item)
+
+        items = []
+        if not selected:
+            for i in range(from_lsw.count()):
+                items += [from_lsw.item(i)]
+
+            for item in items:
+                from_lsw.takeItem(from_lsw.row(item))
+                to_lsw.addItem(item)
         return
 
     def plus(self):
@@ -788,7 +779,8 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.attributes = abc_attributes
         import datetime
         start = datetime.datetime.now()
-        self.animation(single=single_abc, multi=multi_abc)
+        self.single_frame(single_abc)
+        # self.animation(single=single_abc, multi=multi_abc)
         # self.proxy(mode="export", export=[single_pxy, multi_pxy])
         end = datetime.datetime.now()
         duration = end - start
