@@ -735,29 +735,29 @@ class MyWindow(Publish, QtWidgets.QDialog):
         """
         Automated comments contain what is in the alembic directory
         """
-        # TESTING - uses the same maya scene file and version folder
-        self.version(up=1)
-        working_file = pm.sceneName()
-        published_file = self.alembic_directory.joinpath(
-            "{}_original.{}.ma".format(
-                path(workspace.fileRules["scene"]).basename(),
-                str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
-            )
-        )
-
-        # - increment and save the current working file, and save a copy to the published version folder
-        # self.version()
-        # from shotgun import checkout_scene
-        # reload(checkout_scene)
-        # checkout = checkout_scene.Checkout()
-        # working_file = checkout.run(checkout_type="increment")
+        # # TESTING - uses the same maya scene file and version folder
+        # self.version(up=1)
+        # working_file = pm.sceneName()
         # published_file = self.alembic_directory.joinpath(
         #     "{}_original.{}.ma".format(
         #         path(workspace.fileRules["scene"]).basename(),
         #         str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
         #     )
         # )
-        # path(working_file).copy2(published_file)
+
+        # - increment and save the current working file, and save a copy to the published version folder
+        self.version()
+        from shotgun import checkout_scene
+        reload(checkout_scene)
+        checkout = checkout_scene.Checkout()
+        working_file = checkout.run(checkout_type="increment")
+        published_file = self.alembic_directory.joinpath(
+            "{}_original.{}.ma".format(
+                path(workspace.fileRules["scene"]).basename(),
+                str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
+            )
+        )
+        path(working_file).copy2(published_file)
 
         # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
         # start with user comment
