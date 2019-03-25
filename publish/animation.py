@@ -250,6 +250,13 @@ class Publish(object):
         return self.alembic_file
 
     def multi_frame(self, nodes):
+        # all files will be placed in a versioned folder in the published directory
+        if not self.alembic_directory:
+            pm.warning(">> Set alembic directory.")
+            return
+
+        # creating an all_alembic file from the working maya scene file of all the chosen top nodes
+        # frame range derived from shotgun
         nodes = [pm.PyNode(node) for node in nodes]
 
         shot_name = path(workspace.fileRules["scene"]).basename()
@@ -277,7 +284,9 @@ class Publish(object):
         pm.select(nodes)
         pm.AbcExport(j=job_arg)
 
-        #######
+        # a new file maya file called first pass is created
+        # it contains one alembic file (one alembic node) with all the top nodes from the processed file
+        # this file will be opened multiple times to export alembics for each individual node
         newFile(f=1)
         outliner = set(pm.ls(assemblies=1))
         importFile(all_abc_file, rnn=1)
@@ -286,19 +295,24 @@ class Publish(object):
 
         saveAs(first_pass, f=1)
 
-        #######
+        # returns a list of alembic files for each node
+        # the alembic file contains the top node and all its children visible in the scene
         abc_files = []
         for node in nodes:
+            # delete the nodes not being exported for faster evaluation
             to_delete = set(nodes).difference({node})
             pm.delete(to_delete)
             descendants = node.getChildren(ad=1)
             pm.parent(descendants, w=1)
 
+            # parents what is in the view to top node
+            # the rest is in the outliner and remains there to pass on alembic data
             self.get_in_view()
             pm.select(self.active_geometry)
             pm.select(node, add=1)
             pm.parent()
 
+            # alembic exports just the top node and its children
             abc_file = self.alembic_directory.joinpath(node+".abc").replace("\\", "/")
             job_arg = '-frameRange {} {} * -dataFormat ogawa -root {} -file "{}"'.format(
                 start_time,
@@ -309,6 +323,8 @@ class Publish(object):
             pm.select(node)
             pm.AbcExport(j=job_arg)
 
+            # this alembic file is an item in a list of items to be returned by this method
+            # this file is opened again without saving to redo the process for other nodes
             abc_files += [path(abc_file).normpath()]
             openFile(first_pass, f=1)
         return abc_files
@@ -438,7 +454,7 @@ class Publish(object):
 
         # for top_node in multi:
         #     alembics += [self.multi_frame(top_node)]
-        alembics += self.multi_frame___(multi)
+        alembics += self.multi_frame(multi)
 
         # Copying alembics from /published to /06_Cache
         all_directory = path(workspace.expandName(workspace.fileRules["Alembic"]))
