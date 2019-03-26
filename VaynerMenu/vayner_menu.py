@@ -128,6 +128,31 @@ class VaynerMenu:
             parent="Vayner"
         )
 
+        # MODELING SUBMENU
+        camera_item = MenuItem(
+            label="Modeling",
+            subMenu=True,
+            parent="Vayner"
+        )
+
+        # publishes modeling scene
+        import_camera_item = MenuItem(
+            label="Publish Modeling",
+            command=publish_scene
+        )
+
+        # RIGGING SUBMENU
+        camera_item = MenuItem(
+            label="Rigging",
+            subMenu=True,
+            parent="Vayner"
+        )
+
+        # publishes rigging scene
+        import_camera_item = MenuItem(
+            label="Publish Rigging",
+            command=publish_scene
+        )
         # CAMERA SUBMENU
         camera_item = MenuItem(
             label="Camera",
