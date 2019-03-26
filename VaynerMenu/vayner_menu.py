@@ -121,13 +121,6 @@ class VaynerMenu:
             parent="Vayner"
         )
 
-        # registers current maya file and related files to shotgun site
-        publish_scene_item = MenuItem(
-            label="Publish Scene",
-            command=publish_scene,
-            parent="Vayner"
-        )
-
         # MODELING SUBMENU
         camera_item = MenuItem(
             label="Modeling",
