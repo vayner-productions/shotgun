@@ -122,20 +122,20 @@ class VaynerMenu:
         )
 
         # MODELING SUBMENU
-        camera_item = MenuItem(
+        modeling_item = MenuItem(
             label="Modeling",
             subMenu=True,
             parent="Vayner"
         )
 
         # publishes modeling scene
-        import_camera_item = MenuItem(
+        publish_modeling = MenuItem(
             label="Publish Modeling",
             command=publish_scene
         )
 
         # RIGGING SUBMENU
-        camera_item = MenuItem(
+        rigging_item = MenuItem(
             label="Rigging",
             subMenu=True,
             parent="Vayner"
@@ -146,6 +146,7 @@ class VaynerMenu:
             label="Publish Rigging",
             command=publish_scene
         )
+
         # CAMERA SUBMENU
         camera_item = MenuItem(
             label="Camera",
@@ -201,6 +202,12 @@ class VaynerMenu:
         render_setup_item = MenuItem(
             label="Render Setup",
             command=render_setup,
+        )
+
+        # publishes lighting
+        publish_lighting_item = MenuItem(
+            label="Publish Lighting",
+            command=publish_scene,
         )
 
         # removes pyc files
