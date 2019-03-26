@@ -162,29 +162,6 @@ def publish_scene(addressed_tasks=[], comments=None):
                 "local_path": local_path
             }
         }
-    elif scene_process in ["Cameras"]:
-        sg_frame_range = "{0:.0f}-{1:.0f}".format(pm.playbackOptions(q=1, ast=1),
-                                                  pm.playbackOptions(q=1, aet=1))
-        data = {
-            "sg_frame_range": sg_frame_range,
-            "sg_tracked_camera": {
-                "link_type": "local",
-                "local_path": local_path
-            }
-        }
-        playblast_image = 0
-    elif scene_process in ["Animation"]:
-        data = {
-            "sg_maya_anim": {
-                "link_type": "local",
-                "local_path": local_path
-            },
-            "sg_alembic_cache": {
-                "link_type": "local",
-                "local_path": get_alembic_file(original_file).replace("/", "\\")
-            }
-        }
-        playblast_image = 0
     elif scene_process in ["Lighting"]:
         render_root = pm.workspace.expandName(pm.workspace.fileRules["images"])
         filename = pm.rendering.renderSettings(firstImageName=1)[0]
