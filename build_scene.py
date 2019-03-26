@@ -283,10 +283,6 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def init_ui(self):
-        self.ui.circle_first.hide()
-        self.ui.circle_new.hide()
-        self.ui.label_first.hide()
-        self.ui.label_new.hide()
         self.init_rows()
         self.ui.latest_btn.clicked.connect(self.set_latest)
         self.ui.update_btn.clicked.connect(self.update_scene)
