@@ -129,13 +129,12 @@ class Checkout:
             "Assets": "sg_file",
             "Cameras": "sg_maya_camera",
             "Layouts": "sg_maya_layout",
-            "Animation": "sg_maya_anim",
+            "Animation": "sg_maya_file",
             "Lighting": "sg_maya_light"
         }
         entity_type = "Shot"
         if key in ["Rigs", "Assets"]:
             entity_type = "Asset"
-
         entity_code = path(scene_directory).basename()
 
         published_file = None
@@ -149,6 +148,19 @@ class Checkout:
             published_file = sg.find_one(
                 "Version",
                 [["project", "is", project], ["code", "contains", entity_code+"_Cam"]],
+                fields=[data[key]],
+                additional_filter_presets=version_additional_filter_presets
+            )[data[key]]["local_path_windows"]
+        elif key == "Animation":
+            version_additional_filter_presets = [
+                {
+                    "preset_name": "LATEST",
+                    "latest_by": "ENTITIES_CREATED_AT"
+                }
+            ]
+            published_file = sg.find_one(
+                "Version",
+                [["project", "is", project], ["code", "contains", "Anim"]],
                 fields=[data[key]],
                 additional_filter_presets=version_additional_filter_presets
             )[data[key]]["local_path_windows"]
