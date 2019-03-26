@@ -127,9 +127,9 @@ class Checkout:
         data = {
             "Rigs": "sg_file",
             "Assets": "sg_file",
-            "Cameras": "sg_maya_camera",
+            "Cameras": "_Cam",
             "Layouts": "sg_maya_layout",
-            "Animation": "sg_maya_file",
+            "Animation": "_Anim",
             "Lighting": "sg_maya_light"
         }
         entity_type = "Shot"
@@ -138,7 +138,7 @@ class Checkout:
         entity_code = path(scene_directory).basename()
 
         published_file = None
-        if key == "Cameras":
+        if key == "Cameras" or key == "Animation":
             version_additional_filter_presets = [
                 {
                     "preset_name": "LATEST",
@@ -147,23 +147,10 @@ class Checkout:
             ]
             published_file = sg.find_one(
                 "Version",
-                [["project", "is", project], ["code", "contains", entity_code+"_Cam"]],
-                fields=[data[key]],
+                [["project", "is", project], ["code", "contains", entity_code+data[key]]],
+                fields=["sg_maya_file"],
                 additional_filter_presets=version_additional_filter_presets
-            )[data[key]]["local_path_windows"]
-        elif key == "Animation":
-            version_additional_filter_presets = [
-                {
-                    "preset_name": "LATEST",
-                    "latest_by": "ENTITIES_CREATED_AT"
-                }
-            ]
-            published_file = sg.find_one(
-                "Version",
-                [["project", "is", project], ["code", "contains", "Anim"]],
-                fields=[data[key]],
-                additional_filter_presets=version_additional_filter_presets
-            )[data[key]]["local_path_windows"]
+            )["sg_maya_file"]["local_path_windows"]
         else:
             entity_filters = [
                 ["project", "is", project],
