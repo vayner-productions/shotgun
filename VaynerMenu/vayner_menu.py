@@ -130,7 +130,7 @@ class VaynerMenu:
 
         # publishes modeling scene
         publish_modeling = MenuItem(
-            label="Publish Modeling",
+            label="Publish Model",
             command=publish_scene
         )
 
@@ -143,7 +143,7 @@ class VaynerMenu:
 
         # publishes rigging scene
         import_camera_item = MenuItem(
-            label="Publish Rigging",
+            label="Publish Rig",
             command=publish_scene
         )
 
