@@ -12,41 +12,22 @@ project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]
 entity = checkout_scene.get_entity(pm.workspace.fileRules["scene"])
 
 
-def set_playblast(image=True):
-    media_file = None
-    if image:
-        current_time = pm.currentTime(q=1)
-        file_name = pm.sceneName().replace(".ma", ".jpg").replace("scenes", "published").replace("processed", "original")
-        media_file = pm.playblast(
-            frame=current_time,
-            format="image",
-            completeFilename=file_name,
-            percent=100,
-            compression="jpg",
-            quality=100,
-            widthHeight=(960, 540),
-            viewer=0,
-            forceOverwrite=1,
-            clearCache=1,
-            offScreen=1
-        )
-    else:
-        start_time, end_time = pm.playbackOptions(q=1, ast=1), pm.playbackOptions(q=1, aet=1)
-        file_name = pm.sceneName().replace(".ma", ".mov").replace("scenes", "published").replace("processed", "original")
-        media_file = pm.playblast(
-            startTime=start_time,
-            endTime=end_time,
-            format="qt",
-            filename=file_name,
-            percent=100,
-            compression="H.264",
-            quality=100,
-            widthHeight=(960, 540),  # station 17 cannot playblast (1920, 1080)
-            viewer=0,
-            forceOverwrite=1,
-            clearCache=1,
-            offScreen=1
-        )
+def create_thumbnail():
+    current_time = pm.currentTime(q=1)
+    file_name = pm.sceneName().replace(".ma", ".jpg").replace("scenes", "published").replace("processed", "original")
+    media_file = pm.playblast(
+        frame=current_time,
+        format="image",
+        completeFilename=file_name,
+        percent=100,
+        compression="jpg",
+        quality=100,
+        widthHeight=(960, 540),
+        viewer=0,
+        forceOverwrite=1,
+        clearCache=1,
+        offScreen=1
+    )
     return media_file
 
 
@@ -147,7 +128,6 @@ def publish_scene(addressed_tasks=[], comments=None):
     scene_process = pm.workspace.fileRules["scene"].rsplit("/", 2)[1][3:]
     data, local_path = {}, original_file.replace("/", "\\")
 
-    playblast_image = 1
     if scene_process == "Assets":
         data = {
             "sg_file": {
@@ -162,7 +142,7 @@ def publish_scene(addressed_tasks=[], comments=None):
                 "local_path": local_path
             }
         }
-    elif scene_process in ["Lighting"]:
+    elif scene_process in "Lighting":
         render_root = pm.workspace.expandName(pm.workspace.fileRules["images"])
         filename = pm.rendering.renderSettings(firstImageName=1)[0]
         output_path = ut.path("/".join([render_root, filename])).dirname().dirname().normpath()
@@ -177,7 +157,6 @@ def publish_scene(addressed_tasks=[], comments=None):
                 "local_path": r"{}".format(output_path)
             }
         }
-        playblast_image = 0
     data.update({
         "sg_status_list": "cmpt"
     })
@@ -210,8 +189,8 @@ def publish_scene(addressed_tasks=[], comments=None):
         "description": comments
     }
     version = sg.create("Version", version_data)
-    if scene_process not in ["Lighting"]:
-        media_file = set_playblast(image=playblast_image)
+    if scene_process != "Lighting":
+        media_file = create_thumbnail()
         sg.upload("Version", version["id"], media_file, field_name="sg_uploaded_movie")
     print ">> published all files to shotgun",
     return
