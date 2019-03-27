@@ -126,9 +126,14 @@ def check_top_node(top_node=None, suffix=""):
     sg_name = scene.dirname().basename()
     attr_exists = pm.attributeQuery("sg_name", node=top_node, ex=1)
 
-    if not attr_exists:
-        pm.addAttr(top_node, ln="sg_name", nn="Shotgun Name", dt="string", w=0)
-        top_node.sg_name.set(sg_name)
+    # although it makes sense to append shotgun name only once, it is done every time to ensure any name changes in
+    # shotgun are accounted for
+    if attr_exists:
+        top_node.sg_name.unlock()
+    else:
+        pm.addAttr(top_node, ln="sg_name", nn="Shotgun Name", dt="string")
+    top_node.sg_name.set(sg_name)
+    top_node.sg_name.lock()
 
     for at in "trs":
         for ax in "xyz":
@@ -152,9 +157,10 @@ def check_cameras():
 
 
 def error():
-    if not check_cameras():
+    if check_cameras() == False:
+        print check_cameras()
         return True
-    if not check_top_node():
+    if check_top_node() == False:
         return True
     return False
 
