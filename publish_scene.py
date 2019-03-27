@@ -92,18 +92,71 @@ def get_tasks():
     return tasks
 
 
-def fail_safe():
-    scene_process = pm.workspace.fileRules["scene"].rsplit("/", 2)[1][3:]
-    fail = 1
-    if "Assets" in scene_process:
-        extra_cameras = []
-        for cam in pm.ls(type="camera"):
-            if cam not in ["frontShape", "perspShape", "sideShape", "topShape"]:
-                extra_cameras += [str(cam)]
-        if extra_cameras:
-            pm.warning("Remove extra cameras: " + ", ".join(extra_cameras))
-            fail = 0
-    return fail
+def check_top_node(top_node=None, suffix=""):
+    scene = pm.sceneName()
+    if suffix:
+        if "_" not in suffix:
+            suffix = "_" + suffix
+    else:
+        if "01_Assets" in scene:
+            suffix = "_GRP"
+        elif "02_Rigs" in scene:
+            suffix = "_RIG"
+
+    name = "{}{}".format(scene.basename().split("_processed.")[0], suffix)
+    incomplete = 0
+    try:
+        top_node = pm.PyNode(name)
+
+        children = pm.ls(assemblies=1)
+        for view in ["persp", "top", "front", "side", top_node]:
+            if view in children:
+                children.remove(view)
+
+        if children:
+            incomplete = 1
+    except:
+        top_node = pm.group(em=1, n=name)
+        incomplete = 1
+
+    if incomplete:
+        pm.warning(">> Publish failed, there are objects outside the top node.")
+        return False
+
+    sg_name = scene.dirname().basename()
+    attr_exists = pm.attributeQuery("sg_name", node=top_node, ex=1)
+
+    if not attr_exists:
+        pm.addAttr(top_node, ln="sg_name", nn="Shotgun Name", dt="string", w=0)
+        top_node.sg_name.set(sg_name)
+
+    for at in "trs":
+        for ax in "xyz":
+            top_node.setAttr(at+ax, k=0, l=1)
+    top_node.setAttr("v", k=0, l=1)
+    return top_node
+
+
+def check_cameras():
+    if "01_Assets" not in pm.workspace.fileRules["scene"]:
+        return
+
+    extra_cameras = [str(cam.getParent()) for cam in pm.ls(ca=1)]
+    for view in ["persp", "top", "front", "back", "side", "right", "left", "bottom"]:
+        if view in extra_cameras:
+            extra_cameras.remove(view)
+    if extra_cameras:
+        pm.warning("Remove extra cameras: {}".format(", ".join(extra_cameras)))
+        return False
+    return
+
+
+def error():
+    if not check_cameras():
+        return True
+    if not check_top_node():
+        return True
+    return False
 
 
 def publish_scene(addressed_tasks=[], comments=None):
@@ -128,21 +181,14 @@ def publish_scene(addressed_tasks=[], comments=None):
     scene_process = pm.workspace.fileRules["scene"].rsplit("/", 2)[1][3:]
     data, local_path = {}, original_file.replace("/", "\\")
 
-    if scene_process == "Assets":
+    if scene_process == "Assets" or scene_process == "Rigs":
         data = {
             "sg_file": {
                 "link_type": "local",
                 "local_path": local_path
             }
         }
-    elif scene_process == "Rigs":
-        data = {
-            "sg_file": {
-                "link_type": "local",
-                "local_path": local_path
-            }
-        }
-    elif scene_process in "Lighting":
+    elif scene_process == "Lighting":
         render_root = pm.workspace.expandName(pm.workspace.fileRules["images"])
         filename = pm.rendering.renderSettings(firstImageName=1)[0]
         output_path = ut.path("/".join([render_root, filename])).dirname().dirname().normpath()
@@ -197,16 +243,17 @@ def publish_scene(addressed_tasks=[], comments=None):
 
 
 def get_window():
+    if error():
+        return
+
     global mw
     try:
         mw.ui.close()
     except:
         pass
 
-    # check for errors before publishing
-    if fail_safe():
-        mw = MyWindow()
-        mw.ui.show()
+    mw = MyWindow()
+    mw.ui.show()
 
 
 class MyWindow(QtWidgets.QDialog):
