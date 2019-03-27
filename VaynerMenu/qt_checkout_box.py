@@ -1,7 +1,6 @@
 from PySide2 import QtCore, QtWidgets, QtUiTools
 from pymel.core import optionVar
-from pymel.core.uitypes import Menu, MenuItem
-from pymel.core import optionVar
+
 
 def get_window():
     global mw
@@ -34,10 +33,10 @@ def save_startup_warnings():
         print ">>> Warnings turned off"
 
 
-
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
         self.ui = self.import_ui()
+        self.ui.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
         self.connect_signals(self.ui)
         return
 
