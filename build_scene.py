@@ -56,7 +56,7 @@ class MyWindow(QtWidgets.QDialog):
         row.setWhatsThis(publish)
         row.setToolTip(reference)
 
-        # label quanty - max width 25, arial 14, align horizontal center, horizontal expanding
+        # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
         num = QtWidgets.QLabel("{}".format(number))
         num.setFont(font)
         num.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
@@ -76,10 +76,6 @@ class MyWindow(QtWidgets.QDialog):
         frame.setFrameShadow(QtWidgets.QFrame.Plain)
         frame.setLineWidth(3)
         frame.setStyleSheet("color:None")
-        # if current is None:
-        #     frame.setStyleSheet("color:rgb(255,255,102)")  # first publish available, add to scene
-        # elif items.index(current) != 0:
-        #     frame.setStyleSheet("color:rgb(255,165,0)")  # new publish available
 
         # combobox - horizontal expanding, arial 14, style color none,
         combo = QtWidgets.QComboBox()
