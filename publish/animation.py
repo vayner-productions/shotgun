@@ -217,10 +217,14 @@ class Publish(object):
 
         # create all_alembic.abc
         root_section = ""
+        shotgun_name = {}
         for node in nodes:
             node = pm.PyNode(node)
 
             root_section += '-root "{}" '.format(node.longName())
+
+            # check for shotgun name in non-proxy nodes
+            shotgun_name[str(node)] = node.sg_name.get()
 
         attributes = ""
         if self.attributes:
@@ -543,7 +547,13 @@ class Publish(object):
                     name += "_PXY"
                 if pm.ls("*{}".format(name)):
                     continue
-                pm.group(name=name, em=1)
+                pxy = pm.group(name=name, em=1)
+
+                # add sg_name attribute
+                pm.addAttr(pxy, ln="sg_name", nn="Shotgun Name", dt="string")
+                pxy.sg_name.set(name)
+                pxy.sg_name.lock()
+
                 proxies += [name]
             pm.select(cl=1)
 
