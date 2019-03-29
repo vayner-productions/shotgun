@@ -224,7 +224,8 @@ class Publish(object):
             root_section += '-root "{}" '.format(node.longName())
 
             # check for shotgun name in non-proxy nodes
-            shotgun_name[str(node)] = node.sg_name.get()
+            # shotgun_name[str(node)] = node.sg_name.get()
+            print ">>", node.longName()
 
         attributes = ""
         if self.attributes:
