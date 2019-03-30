@@ -218,15 +218,33 @@ class Publish(object):
         # create all_alembic.abc
         root_section = ""
         shotgun_name = {}
+        skip = []
         for node in nodes:
             node = pm.PyNode(node)
 
+            # filter for nodes with a shotgun name, which could be found in its parent
+            attr_missing = True
+            parent = node
+            while attr_missing:
+                attr_missing = not pm.attributeQuery("sg_name", node=parent, ex=1)
+
+                if not attr_missing:
+                    shotgun_name[str(node)] = parent.sg_name.get()
+                    break
+
+                parent = parent.getParent()
+                if parent is None:
+                    skip += [node]
+                    break
+
+            if parent is None:
+                pm.warning(">> Could not find shotgun name, skipping: {}".format(node))
+                continue
+
             root_section += '-root "{}" '.format(node.longName())
 
-            # check for shotgun name in non-proxy nodes
-            # shotgun_name[str(node)] = node.sg_name.get()
-            print ">>", node.longName()
-
+        for node in skip:
+            nodes.remove(node)
         attributes = ""
         if self.attributes:
             attributes = "-" + " -".join(self.attributes)
@@ -246,34 +264,42 @@ class Publish(object):
         new_nodes = importFile(all_abc_file, rnn=1)
         nodes = pm.ls(new_nodes, assemblies=1)
 
-        # skip_export = pm.group(em=1, n="skip_ABC")
-        # temp = pm.group(em=1, n="temp")
-        # for node in nodes:
-        #     pm.hide(nodes)
-        #     node.show()
-        #     self.get_in_view()
-        #     pm.showHidden()
-        #
-        #     pm.parent(self.active_geometry, temp)
-        #     try:
-        #         pm.select(cl=1)
-        #         pm.parent(node.getChildren(ad=1), skip_export)
-        #     except RuntimeError:
-        #         pass
-        #     pm.parent(self.active_geometry, node)
-        #
-        #     abc_file = self.alembic_directory.joinpath(str(node)+".abc").replace("\\", "/")
-        #
-        #     job_arg = '{}-root "{}" -file "{}"'.format(
-        #         job_arg[:job_arg.index("-root")],
-        #         node.longName(),
-        #         abc_file
-        #     )
-        #
-        #     pm.select(node)
-        #     pm.AbcExport(j=job_arg)
-        # openFile(working_file, f=1)
-        # path(all_abc_file).remove_p()
+        skip_export = pm.group(em=1, n="skip_ABC")
+        for node in nodes:
+            pm.hide(pm.ls(assemblies=1))
+            node.show()
+            self.get_in_view()
+            pm.showHidden()
+
+            pm.parent(self.active_geometry, w=1)
+            for geo in self.active_geometry:
+                pm.parent(geo.getChildren(typ="transform"), skip_export)
+            pm.parent(skip_export, w=1)
+
+            sg_name = shotgun_name[str(node)]
+            new_node = sg_name[4:]
+            if "RIG" in new_node:
+                new_node.replace("RIG", "GRP")
+            if "GRP" not in new_node:
+                new_node += "_GRP"
+
+            node.rename("temp")
+            new_node = pm.group(em=1, n=new_node)
+            pm.parent(self.active_geometry, new_node)
+            node.setParent(skip_export)
+
+            abc_file = self.alembic_directory.joinpath(sg_name+".abc").replace("\\", "/")
+
+            job_arg = '{}-root "{}" -file "{}"'.format(
+                job_arg[:job_arg.index("-root")],
+                new_node.longName(),
+                abc_file
+            )
+
+            pm.select(node)
+            pm.AbcExport(j=job_arg)
+        openFile(working_file, f=1)
+        path(all_abc_file).remove_p()
         return
 
     def multi_frame(self, nodes):
@@ -791,25 +817,25 @@ class MyWindow(Publish, QtWidgets.QDialog):
             else:
                 single_abc += [maya_obj]
 
-        # # all alembic attributes in the UI are checked by default
-        # # collect them and use them to create single and multi alembics
-        # abc_attributes = []
-        # if self.ui.world_cbx.isChecked():
-        #     abc_attributes.append("worldSpace")
-        # if self.ui.writevisibility_cbx.isChecked():
-        #     abc_attributes.append("writeVisibility")
-        # if self.ui.eulerfilter_cbx.isChecked():
-        #     abc_attributes.append("eulerFilter")
-        # if self.ui.uvwrite_cbx.isChecked():
-        #     abc_attributes.append("uvWrite")
-        # if self.ui.namespace_cbx.isChecked():
-        #     abc_attributes.append("stripNamespaces")
-        # if self.ui.writeuvsets_cbx.isChecked():
-        #     abc_attributes.append("writeUVSets")
-        #
+        # all alembic attributes in the UI are checked by default
+        # collect them and use them to create single and multi alembics
+        abc_attributes = []
+        if self.ui.world_cbx.isChecked():
+            abc_attributes.append("worldSpace")
+        if self.ui.writevisibility_cbx.isChecked():
+            abc_attributes.append("writeVisibility")
+        if self.ui.eulerfilter_cbx.isChecked():
+            abc_attributes.append("eulerFilter")
+        if self.ui.uvwrite_cbx.isChecked():
+            abc_attributes.append("uvWrite")
+        if self.ui.namespace_cbx.isChecked():
+            abc_attributes.append("stripNamespaces")
+        if self.ui.writeuvsets_cbx.isChecked():
+            abc_attributes.append("writeUVSets")
+
         # # create alembics
         # self.maya_file = published_file
-        # self.attributes = abc_attributes
+        self.attributes = abc_attributes
         #
         # start = datetime.datetime.now()
         #
