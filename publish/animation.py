@@ -330,8 +330,6 @@ class Publish(object):
         if self.attributes:
             attributes = "-" + " -".join(self.attributes)
 
-        # nodes = [pm.PyNode(node) for node in nodes]
-        # root_section = " ".join(['-root "{}"'.format(name.longName()) for name in nodes])
         root_section = ""
         shotgun_name = {}
         skip = []
@@ -376,28 +374,32 @@ class Publish(object):
         # this file will be opened multiple times to export alembics for each individual node
         new_nodes = openFile(all_abc_file, rnn=1, f=1)
         nodes = pm.ls(new_nodes, assemblies=1)
-        # first_pass = self.alembic_directory.joinpath("first_pass.ma")
-
-        # saveAs(first_pass, f=1)
 
         # returns a list of alembic files for each node
         # the alembic file contains the top node and all its children visible in the scene
         for node in nodes:
             # delete the nodes not being exported for faster evaluation
-            to_delete = set(nodes).difference({node})
+            to_delete = nodes
+            to_delete.remove(node)
             pm.delete(to_delete)
-            descendants = node.getChildren(ad=1)
-            pm.parent(descendants, w=1)
 
-            # parents what is in the view to top node
-            # the rest is in the outliner and remains there to pass on alembic data
             self.get_in_view()
-            pm.select(self.active_geometry)
-            pm.select(node, add=1)
-            pm.parent()
+            for geo in self.active_geometry:
+                try:
+                    pm.select(cl=1)
+                    pm.parent(geo.getChildren(typ="transform"), w=1)
+                except:
+                    pass
+
+            sg_name = shotgun_name[str(node)]
+            new_name = sg_name[4:]
+            if "RIG" in new_name:
+                new_name.replace("RIG", "GRP")
+            if "GRP" not in new_name:
+                new_name += "_GRP"
 
             # alembic exports just the top node and its children
-            abc_file = self.alembic_directory.joinpath(node+".abc").replace("\\", "/")
+            abc_file = self.alembic_directory.joinpath(new_name+".abc").replace("\\", "/")
             job_arg = '-frameRange {} {} * -dataFormat ogawa -root {} -file "{}"'.format(
                 start_time,
                 end_time,
