@@ -400,7 +400,6 @@ class Publish(object):
                 new_name.replace("RIG", "GRP")
             if "GRP" not in new_name:
                 new_name += "_GRP"
-            node.rename(new_name)
 
             root_section = " ".join(["-root {}".format(n.longName()) for n in self.active_geometry])
 
@@ -414,6 +413,11 @@ class Publish(object):
             ).replace("*", attributes)
             pm.select(self.active_geometry)
             pm.AbcExport(j=job_arg)
+
+            newFile(f=1)
+            importFile(abc_file, f=1, gr=1, gn=new_name)
+            ma_file = abc_file.dirname().joinpath(new_name + ".ma")  # ensures reference node is readable in outliner
+            saveAs(ma_file, f=1)
 
             # this file is opened again without saving to redo the process for other nodes
             openFile(all_abc_file, f=1)
