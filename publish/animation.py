@@ -333,8 +333,6 @@ class Publish(object):
         if self.attributes:
             attributes = "-" + " -".join(self.attributes)
 
-        # nodes = [pm.PyNode(node) for node in nodes]
-        # root_section = " ".join(['-root "{}"'.format(name.longName()) for name in nodes])
         root_section = ""
         shotgun_name = {}
         skip = []
@@ -388,37 +386,34 @@ class Publish(object):
             to_delete.remove(node)
             pm.delete(to_delete)
 
+            # renaming the node to shotgun name in case alembic node is connected
             self.get_in_view()
-            pm.parent(self.active_geometry, w=1)
-            skip_export = pm.group(em=1, n="skip_ABC")
-            for geo in self.active_geometry:
-                try:
-                    pm.select(cl=1)
-                    pm.parent(geo.getChildren(typ="transform"), skip_export)
-                except:
-                    pass
+            pm.parent(node.getChildren(ad=1, typ="transform"), w=1)
+            pm.parent(self.active_geometry, node)
+
+            pm.deleteAttr(node.sg_name)
+            for at in "trs":
+                for ax in "xyz":
+                    node.setAttr(at + ax, k=1, l=0)
+            node.setAttr("v", k=1, l=0)
 
             sg_name = shotgun_name[str(node)]
-            new_node = sg_name[4:]
-            if "RIG" in new_node:
-                new_node.replace("RIG", "GRP")
-            if "GRP" not in new_node:
-                new_node += "_GRP"
-
-            node.rename("temp")
-            new_node = pm.group(em=1, n=new_node)
-            pm.parent(self.active_geometry, new_node)
-            node.setParent(skip_export)
+            new_name = sg_name[4:]
+            if "RIG" in new_name:
+                new_name.replace("RIG", "GRP")
+            if "GRP" not in new_name:
+                new_name += "_GRP"
+            node.rename(new_name)
 
             # alembic exports just the top node and its children
             abc_file = self.alembic_directory.joinpath(sg_name + ".abc").replace("\\", "/")
             job_arg = '-frameRange {} {} * -dataFormat ogawa -root {} -file "{}"'.format(
                 start_time,
                 end_time,
-                new_node.longName(),
+                node.longName(),
                 abc_file
             ).replace("*", attributes)
-            pm.select(new_node)
+            pm.select(node)
             pm.AbcExport(j=job_arg)
 
             # this file is opened again without saving to redo the process for other nodes
@@ -552,21 +547,21 @@ class Publish(object):
         # Copying alembics from /published to /06_Cache
         all_directory = path(workspace.expandName(workspace.fileRules["Alembic"]))
         alembics = self.alembic_directory.files("*.abc")
-        # if comment == "Proxies:":
-        #     alembics = self.alembic_directory.files("*_PXY.abc")
-        #
-        # for abc in alembics:
-        #     dst = all_directory.joinpath(abc.basename())
-        #     path.copy(abc, dst)
-        #
-        # # Adding automated comment
-        # if self.comment:
-        #     self.comment += "\n\n"
-        #
-        # if alembics:
-        #     self.comment += comment
-        #     for abc in alembics:
-        #         self.comment += "\n" + abc.basename()
+        if comment == "Proxies:":
+            alembics = self.alembic_directory.files("*_PXY.abc")
+
+        for abc in alembics:
+            dst = all_directory.joinpath(abc.basename())
+            path.copy(abc, dst)
+
+        # Adding automated comment
+        if self.comment:
+            self.comment += "\n\n"
+
+        if alembics:
+            self.comment += comment
+            for abc in alembics:
+                self.comment += "\n" + abc.basename()
         return alembics
 
     def proxy(self, mode="add", remove=[], add=[], export=[]):
