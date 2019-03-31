@@ -273,8 +273,11 @@ class Publish(object):
 
             pm.parent(self.active_geometry, w=1)
             for geo in self.active_geometry:
-                pm.parent(geo.getChildren(typ="transform"), skip_export)
-            pm.parent(skip_export, w=1)
+                try:
+                    pm.select(cl=1)
+                    pm.parent(geo.getChildren(typ="transform"), skip_export)
+                except:
+                    pass
 
             sg_name = shotgun_name[str(node)]
             new_node = sg_name[4:]  # removes the numbering prefix 001_
@@ -387,9 +390,13 @@ class Publish(object):
 
             self.get_in_view()
             pm.parent(self.active_geometry, w=1)
+            skip_export = pm.group(em=1, n="skip_ABC")
             for geo in self.active_geometry:
-                pm.parent(geo.getChildren(typ="transform"), node)
-            pm.parent(node, w=1)
+                try:
+                    pm.select(cl=1)
+                    pm.parent(geo.getChildren(typ="transform"), skip_export)
+                except:
+                    pass
 
             sg_name = shotgun_name[str(node)]
             new_node = sg_name[4:]
@@ -401,6 +408,7 @@ class Publish(object):
             node.rename("temp")
             new_node = pm.group(em=1, n=new_node)
             pm.parent(self.active_geometry, new_node)
+            node.setParent(skip_export)
 
             # alembic exports just the top node and its children
             abc_file = self.alembic_directory.joinpath(sg_name + ".abc").replace("\\", "/")
@@ -544,21 +552,21 @@ class Publish(object):
         # Copying alembics from /published to /06_Cache
         all_directory = path(workspace.expandName(workspace.fileRules["Alembic"]))
         alembics = self.alembic_directory.files("*.abc")
-        if comment == "Proxies:":
-            alembics = self.alembic_directory.files("*_PXY.abc")
-
-        for abc in alembics:
-            dst = all_directory.joinpath(abc.basename())
-            path.copy(abc, dst)
-
-        # Adding automated comment
-        if self.comment:
-            self.comment += "\n\n"
-
-        if alembics:
-            self.comment += comment
-            for abc in alembics:
-                self.comment += "\n" + abc.basename()
+        # if comment == "Proxies:":
+        #     alembics = self.alembic_directory.files("*_PXY.abc")
+        #
+        # for abc in alembics:
+        #     dst = all_directory.joinpath(abc.basename())
+        #     path.copy(abc, dst)
+        #
+        # # Adding automated comment
+        # if self.comment:
+        #     self.comment += "\n\n"
+        #
+        # if alembics:
+        #     self.comment += comment
+        #     for abc in alembics:
+        #         self.comment += "\n" + abc.basename()
         return alembics
 
     def proxy(self, mode="add", remove=[], add=[], export=[]):
@@ -834,12 +842,12 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
         # separate proxies from the list view, proxies run their own command from Publish()
         multi_abc, multi_pxy = [], []
-        # for i in range(self.ui.multi_lsw.count()):
-        #     maya_obj = self.ui.multi_lsw.item(i).toolTip()
-        #     if "PXY" in maya_obj:
-        #         multi_pxy += [maya_obj]
-        #     else:
-        #         multi_abc += [maya_obj]
+        for i in range(self.ui.multi_lsw.count()):
+            maya_obj = self.ui.multi_lsw.item(i).toolTip()
+            if "PXY" in maya_obj:
+                multi_pxy += [maya_obj]
+            else:
+                multi_abc += [maya_obj]
 
         single_abc, single_pxy = [], []
         for i in range(self.ui.single_lsw.count()):
