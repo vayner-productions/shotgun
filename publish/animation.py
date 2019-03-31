@@ -397,7 +397,7 @@ class Publish(object):
 
             # alembic exports just the top node and its children
             abc_file = self.alembic_directory.joinpath(sg_name + ".abc").replace("\\", "/")
-            job_arg = '-frameRange {} {} * -sl 1 -dataFormat ogawa -root {} -file "{}"'.format(
+            job_arg = '-frameRange {} {} * -dataFormat ogawa -root {} -file "{}"'.format(
                 start_time,
                 end_time,
                 node.longName(),
