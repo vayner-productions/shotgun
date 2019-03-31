@@ -394,6 +394,12 @@ class Publish(object):
                 except:
                     pass
 
+            pm.deleteAttr(node.sg_name)
+            for at in "trs":
+                for ax in "xyz":
+                    node.setAttr(at + ax, k=1, l=0)
+            node.setAttr("v", k=1, l=0)
+
             sg_name = shotgun_name[str(node)]
             new_name = sg_name[4:]
             if "RIG" in new_name:
