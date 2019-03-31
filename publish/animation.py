@@ -395,12 +395,14 @@ class Publish(object):
                 new_name += "_GRP"
             node.rename(new_name)
 
+            root_section = " ".join(["-root {}".format(n.longName()) for n in self.active_geometry])
+
             # alembic exports just the top node and its children
             abc_file = self.alembic_directory.joinpath(sg_name + ".abc").replace("\\", "/")
-            job_arg = '-frameRange {} {} * -dataFormat ogawa -root {} -file "{}"'.format(
+            job_arg = '-frameRange {} {} * -dataFormat ogawa {} -file "{}"'.format(
                 start_time,
                 end_time,
-                node.longName(),
+                root_section,
                 abc_file
             ).replace("*", attributes)
             pm.select(self.active_geometry)
