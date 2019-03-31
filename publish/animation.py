@@ -253,7 +253,7 @@ class Publish(object):
 
         job_arg = '-frameRange {0:.0f} {0:.0f} * -dataFormat ogawa {1} -file "{2}"'.format(
             pm.currentTime(),
-            root_section[:-1],  # remove the space
+            root_section[:-1],
             all_abc_file
         ).replace("*", attributes)
         pm.select(nodes)
@@ -277,7 +277,7 @@ class Publish(object):
             pm.parent(skip_export, w=1)
 
             sg_name = shotgun_name[str(node)]
-            new_node = sg_name[4:]  # removes the numbering prefix 001_
+            new_node = sg_name[4:]
             if "RIG" in new_node:
                 new_node.replace("RIG", "GRP")
             if "GRP" not in new_node:
@@ -314,6 +314,9 @@ class Publish(object):
         working_file = pm.sceneName()
 
         # creating an all_alembic file from the working maya scene file of all the chosen top nodes
+        # frame range derived from shotgun
+        nodes = [pm.PyNode(node) for node in nodes]
+
         shot_name = path(workspace.fileRules["scene"]).basename()
         frame_range = sg.find_one(
             "Shot",
@@ -325,45 +328,16 @@ class Publish(object):
         )["sg_frame_range"]
 
         start_time, end_time = [int(t) for t in frame_range.split("-")]
+        root_section = " ".join(['-root "{}"'.format(name.longName()) for name in nodes])
         all_abc_file = self.alembic_directory.joinpath("all_alembic.abc").replace("\\", "/")
         attributes = ""
         if self.attributes:
             attributes = "-" + " -".join(self.attributes)
 
-        root_section = ""
-        shotgun_name = {}
-        skip = []
-        for node in nodes:
-            node = pm.PyNode(node)
-
-            # filter for nodes with a shotgun name, which could be found in its parent
-            attr_missing = True
-            parent = node
-            while attr_missing:
-                attr_missing = not pm.attributeQuery("sg_name", node=parent, ex=1)
-
-                if not attr_missing:
-                    shotgun_name[str(node)] = parent.sg_name.get()
-                    break
-
-                parent = parent.getParent()
-                if parent is None:
-                    skip += [node]
-                    break
-
-            if parent is None:
-                pm.warning(">> Could not find shotgun name, skipping: {}".format(node))
-                continue
-
-            root_section += '-root "{}" '.format(node.longName())
-
-        for node in skip:
-            nodes.remove(node)
-
         job_arg = '-frameRange {} {} * -dataFormat ogawa {} -file "{}"'.format(
             start_time,
             end_time,
-            root_section[:-1],
+            root_section,
             all_abc_file
         ).replace("*", attributes)
         pm.select(nodes)
@@ -372,34 +346,31 @@ class Publish(object):
         # a new file maya file called first pass is created
         # it contains one alembic file (one alembic node) with all the top nodes from the processed file
         # this file will be opened multiple times to export alembics for each individual node
-        new_nodes = openFile(all_abc_file, rnn=1, f=1)
+        newFile(f=1)
+        new_nodes = importFile(all_abc_file, rnn=1)
         nodes = pm.ls(new_nodes, assemblies=1)
+        first_pass = self.alembic_directory.joinpath("first_pass.ma")
+
+        saveAs(first_pass, f=1)
 
         # returns a list of alembic files for each node
         # the alembic file contains the top node and all its children visible in the scene
         for node in nodes:
             # delete the nodes not being exported for faster evaluation
-            to_delete = nodes
-            to_delete.remove(node)
+            to_delete = set(nodes).difference({node})
             pm.delete(to_delete)
+            descendants = node.getChildren(ad=1)
+            pm.parent(descendants, w=1)
 
+            # parents what is in the view to top node
+            # the rest is in the outliner and remains there to pass on alembic data
             self.get_in_view()
-            for geo in self.active_geometry:
-                try:
-                    pm.select(cl=1)
-                    pm.parent(geo.getChildren(typ="transform"), w=1)
-                except:
-                    pass
-
-            sg_name = shotgun_name[str(node)]
-            new_name = sg_name[4:]
-            if "RIG" in new_name:
-                new_name.replace("RIG", "GRP")
-            if "GRP" not in new_name:
-                new_name += "_GRP"
+            pm.select(self.active_geometry)
+            pm.select(node, add=1)
+            pm.parent()
 
             # alembic exports just the top node and its children
-            abc_file = self.alembic_directory.joinpath(new_name+".abc").replace("\\", "/")
+            abc_file = self.alembic_directory.joinpath(node+".abc").replace("\\", "/")
             job_arg = '-frameRange {} {} * -dataFormat ogawa -root {} -file "{}"'.format(
                 start_time,
                 end_time,
@@ -410,11 +381,10 @@ class Publish(object):
             pm.AbcExport(j=job_arg)
 
             # this file is opened again without saving to redo the process for other nodes
-            # openFile(first_pass, f=1)
-            openFile(all_abc_file, f=1)
+            openFile(first_pass, f=1)
 
         openFile(working_file, f=1)
-        # first_pass.remove_p()
+        first_pass.remove_p()
         path(all_abc_file).remove_p()
         return
 
