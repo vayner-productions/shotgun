@@ -391,12 +391,6 @@ class Publish(object):
             pm.parent(node.getChildren(ad=1, typ="transform"), w=1)
             pm.parent(self.active_geometry, node)
 
-            pm.deleteAttr(node.sg_name)
-            for at in "trs":
-                for ax in "xyz":
-                    node.setAttr(at + ax, k=1, l=0)
-            node.setAttr("v", k=1, l=0)
-
             sg_name = shotgun_name[str(node)]
             new_name = sg_name[4:]
             if "RIG" in new_name:
