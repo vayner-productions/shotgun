@@ -400,11 +400,13 @@ class Publish(object):
                 new_name.replace("RIG", "GRP")
             if "GRP" not in new_name:
                 new_name += "_GRP"
+            node.rename(new_name)
 
-            root_section = " ".join(["-root {}".format(n.longName()) for n in self.active_geometry])
+            selection = self.active_geometry + [node]
+            root_section = " ".join(["-root {}".format(n.longName()) for n in selection])
 
-            # alembic exports just the top node and its children
-            abc_file = self.alembic_directory.joinpath(sg_name + ".abc").replace("\\", "/")
+            # alembic file uses new name to ensure reference node is readable
+            abc_file = self.alembic_directory.joinpath(new_name + ".abc").replace("\\", "/")
             job_arg = '-frameRange {} {} * -dataFormat ogawa {} -file "{}"'.format(
                 start_time,
                 end_time,
@@ -414,10 +416,10 @@ class Publish(object):
             pm.select(self.active_geometry)
             pm.AbcExport(j=job_arg)
 
-            newFile(f=1)
-            importFile(abc_file, f=1, gr=1, gn=new_name)
-            ma_file = abc_file.dirname().joinpath(new_name + ".ma")  # ensures reference node is readable in outliner
-            saveAs(ma_file, f=1)
+            # newFile(f=1)
+            # importFile(abc_file, f=1, gr=1, gn=new_name)
+            # ma_file = abc_file.dirname().joinpath(new_name + ".ma")
+            # saveAs(ma_file, f=1)
 
             # this file is opened again without saving to redo the process for other nodes
             openFile(all_abc_file, f=1)
