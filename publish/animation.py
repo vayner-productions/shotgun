@@ -387,6 +387,13 @@ class Publish(object):
             pm.delete(to_delete)
 
             self.get_in_view()
+            for geo in self.active_geometry:
+                try:
+                    pm.select(cl=1)
+                    pm.parent(geo.getChildren(typ="transform"), w=1)
+                except:
+                    pass
+
             sg_name = shotgun_name[str(node)]
             new_name = sg_name[4:]
             if "RIG" in new_name:
