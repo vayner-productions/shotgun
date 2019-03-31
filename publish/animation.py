@@ -386,11 +386,7 @@ class Publish(object):
             to_delete.remove(node)
             pm.delete(to_delete)
 
-            # renaming the node to shotgun name in case alembic node is connected
             self.get_in_view()
-            pm.parent(node.getChildren(ad=1, typ="transform"), w=1)
-            pm.parent(self.active_geometry, node)
-
             sg_name = shotgun_name[str(node)]
             new_name = sg_name[4:]
             if "RIG" in new_name:
@@ -401,13 +397,13 @@ class Publish(object):
 
             # alembic exports just the top node and its children
             abc_file = self.alembic_directory.joinpath(sg_name + ".abc").replace("\\", "/")
-            job_arg = '-frameRange {} {} * -dataFormat ogawa -root {} -file "{}"'.format(
+            job_arg = '-frameRange {} {} * -sl 1 -dataFormat ogawa -root {} -file "{}"'.format(
                 start_time,
                 end_time,
                 node.longName(),
                 abc_file
             ).replace("*", attributes)
-            pm.select(node)
+            pm.select(self.active_geometry)
             pm.AbcExport(j=job_arg)
 
             # this file is opened again without saving to redo the process for other nodes
