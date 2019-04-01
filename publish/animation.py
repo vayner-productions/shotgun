@@ -511,7 +511,7 @@ class Publish(object):
                 "Version",
                 version["id"],
                 {
-                    "sg_maya_file": {
+                    "sg_alembic_directory": {
                         "link_type": "local",
                         "local_path": str(self.alembic_directory.normpath()),
                         "name": str(self.alembic_directory.basename())
@@ -523,7 +523,7 @@ class Publish(object):
                 "Version",
                 version["id"],
                 self.alembic_directory,
-                field_name="sg_maya_file",
+                field_name="sg_alembic_directory",
                 display_name=r"{}".format(path(self.alembic_directory).basename())
             )
 
