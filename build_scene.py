@@ -199,6 +199,32 @@ class MyWindow(QtWidgets.QDialog):
             #     items = ["001"]
             #     references += [[1, name, publish, reference, current, items]]
 
+            alembic_entity = sg.find_one(
+                "CustomEntity05",
+                [
+                    ["project", "is", project],
+                    ["code", "is", entity+"_Anim"]
+                ]
+            )
+
+            search = "model_set_GRP.abc"
+            versions = sg.find(
+                "Version",
+                [
+                    ["project", "is", project],
+                    ["entity", "is", alembic_entity],
+                    ["description", "contains", search]
+                ],
+                ["description"]
+            )
+
+            for version in versions:
+                info = version["description"]
+                info = info[info.index("Alembics:\n"):]
+                info = info[:info.index("\n\n")]
+                print info.split("\n")
+
+
             for name in asset_names:
                 search = name[4:] + "_GRP.abc"
                 publish = abc_wksp.files(search)
