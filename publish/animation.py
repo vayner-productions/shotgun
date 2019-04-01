@@ -282,6 +282,8 @@ class Publish(object):
                 new_node.replace("RIG", "GRP")
             if "GRP" not in new_node:
                 new_node += "_GRP"
+            if "PXY" in sg_name:
+                new_node = sg_name
 
             node.rename("temp")
             new_node = pm.group(em=1, n=new_node)
@@ -393,11 +395,12 @@ class Publish(object):
                     pass
 
             sg_name = shotgun_name[str(node)]
-            print ">>", sg_name
-            new_name = sg_name[4:]
+            new_name = str(node)
+            if sg_name is not None:  # not Proxy
+                new_name = sg_name[4:]
             if "RIG" in new_name:
                 new_name.replace("RIG", "GRP")
-            if "GRP" not in new_name:
+            if "GRP" not in new_name and "PXY" not in new_name:
                 new_name += "_GRP"
             node.rename(new_name)
 
@@ -504,7 +507,7 @@ class Publish(object):
                 "Version",
                 version["id"],
                 {
-                    "sg_alembic_directory": {
+                    "sg_maya_file": {
                         "link_type": "local",
                         "local_path": str(self.alembic_directory.normpath()),
                         "name": str(self.alembic_directory.basename())
@@ -839,9 +842,9 @@ class MyWindow(Publish, QtWidgets.QDialog):
         # )
         # path(working_file).copy2(published_file)
 
-        # # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
-        # # start with user comment
-        # self.comment += "{}".format(self.ui.comment_txt.toPlainText())
+        # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
+        # start with user comment
+        self.comment += "{}".format(self.ui.comment_txt.toPlainText())
 
         # separate proxies from the list view, proxies run their own command from Publish()
         multi_abc, multi_pxy = [], []
@@ -876,46 +879,46 @@ class MyWindow(Publish, QtWidgets.QDialog):
         if self.ui.writeuvsets_cbx.isChecked():
             abc_attributes.append("writeUVSets")
 
-        # # create alembics
-        # self.maya_file = published_file
+        # create alembics
+        self.maya_file = published_file
         self.attributes = abc_attributes
-        #
-        # start = datetime.datetime.now()
-        #
+
+        start = datetime.datetime.now()
+
         self.animation(single=single_abc, multi=multi_abc)
-        # self.proxy(mode="export", export=[single_pxy, multi_pxy])
-        #
-        # end = datetime.datetime.now()
-        # duration = end - start
-        # print "\n# Exported alembics in {:.2f} seconds. #".format(duration.seconds/60.0)
-        #
-        #
-        # # CAMERAS
-        # # cameras built into animation shots should always have a render_cam_RIG, see camera.py
-        # # process_data() works with imported nodes only
-        # # render_cam_RIG needs to be imported, it is referenced from the build scene tool
-        # if self.ui.camera_cbx.isChecked():
-        #     if referenceQuery("render_cam_RIG", inr=1):
-        #         render_camera = FileReference("render_cam_RIG")
-        #         render_camera.importContents()
-        #
-        #     # export selection as reference
-        #     self.CameraTools.comment += "Published from Animation:\n{}".format(path(pm.sceneName()).basename())
-        #     self.CameraTools.process_data()
-        #     pm.select("render_cam_RIG")
-        #     exportAsReference(self.CameraTools.camera_file, namespace=":")
-        #
-        #     # publish camera and append comment to animation
-        #     self.CameraTools.update_shotgun()
-        #     self.comment += "\n\nCameras:\n{}".format(self.CameraTools.version_name)
-        #
-        # # PLAYBLAST - creates playblast and updates shotgun with video, otherwise a thumbnail is used
-        # if self.ui.skip_cbx.isChecked():
-        #     self.rich_media(playblast=1, size=(1920, 1080), range="playback")
-        # else:
-        #     self.rich_media(playblast=0)
-        #
-        # # updates shotgun at the end to get all the comments
-        # self.update_shotgun()
+        self.proxy(mode="export", export=[single_pxy, multi_pxy])
+
+        end = datetime.datetime.now()
+        duration = end - start
+        print "\n# Exported alembics in {:.2f} seconds. #".format(duration.seconds/60.0)
+
+
+        # CAMERAS
+        # cameras built into animation shots should always have a render_cam_RIG, see camera.py
+        # process_data() works with imported nodes only
+        # render_cam_RIG needs to be imported, it is referenced from the build scene tool
+        if self.ui.camera_cbx.isChecked():
+            if referenceQuery("render_cam_RIG", inr=1):
+                render_camera = FileReference("render_cam_RIG")
+                render_camera.importContents()
+
+            # export selection as reference
+            self.CameraTools.comment += "Published from Animation:\n{}".format(path(pm.sceneName()).basename())
+            self.CameraTools.process_data()
+            pm.select("render_cam_RIG")
+            exportAsReference(self.CameraTools.camera_file, namespace=":")
+
+            # publish camera and append comment to animation
+            self.CameraTools.update_shotgun()
+            self.comment += "\n\nCameras:\n{}".format(self.CameraTools.version_name)
+
+        # PLAYBLAST - creates playblast and updates shotgun with video, otherwise a thumbnail is used
+        if self.ui.skip_cbx.isChecked():
+            self.rich_media(playblast=1, size=(1920, 1080), range="playback")
+        else:
+            self.rich_media(playblast=0)
+
+        # updates shotgun at the end to get all the comments
+        self.update_shotgun()
         self.ui.close()
         return
