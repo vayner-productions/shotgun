@@ -160,7 +160,7 @@ class CameraTools(object):
             self.camera_file = self.camera_file.normpath()
             sg.update("Version",
                       version["id"],
-                      {"sg_maya_camera": {
+                      {"sg_maya_file": {
                           "link_type": "local",
                           "local_path": self.camera_file,
                           "name": camera_display_name}})
@@ -169,7 +169,7 @@ class CameraTools(object):
             sg.upload("Version",
                       version["id"],
                       self.camera_file,
-                      field_name="sg_maya_camera",
+                      field_name="sg_maya_file",
                       display_name=camera_display_name)
         print "\n>> published render_cam_RIG to shotgun",  # checkout_scene.py called in publish_camera() prints
         return
