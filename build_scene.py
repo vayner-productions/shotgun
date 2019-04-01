@@ -8,6 +8,7 @@ sg.get_window()
 from . import *  # imports root, sg, and project
 from PySide2 import QtCore, QtGui, QtWidgets, QtUiTools
 import pymel.core as pm
+from pymel.util import path
 
 
 def get_window():
@@ -158,32 +159,87 @@ class MyWindow(QtWidgets.QDialog):
 
         # add cache to lighting scene process
         if "Lighting" in scene_process:
-            number = 1
-            asset_name = "Alembic Cache"
-            publish = sg.find_one(
+            abc_wksp = path(pm.workspace.expandName(pm.workspace.fileRules["Alembic"]))
+
+            # load in all the proxies, they are not tracked
+            abc_files = abc_wksp.files("*_PXY.abc")
+
+            assets = sg.find_one(
                 type,
                 [["project", "is", project], ["code", "is", entity]],
-                ["sg_alembic_cache"])["sg_alembic_cache"]
+                ["assets"])["assets"]
 
-            if publish is not None:
-                publish = pm.util.common.path(publish["local_path_windows"])
-                current = publish.stripext().rsplit("_", 1)[1]
+            asset_names = []
+            for asset in assets:
+                asset_names += [asset["name"]]
+                data = sg.find_one(
+                    "Asset",
+                    [["project", "is", project], ["id", "is", asset["id"]]],
+                    ["sg_asset_type", "assets"]
+                )
 
-                # root switching
-                if root:
-                    publish = publish.replace("\\", "/").split("04_Maya")
-                    publish = "".join([root, publish[1]])
+                if data["sg_asset_type"] == "CG Rig":
+                    asset_names += [data["assets"][0]["name"]]
 
-                files = publish.dirname().files("*.abc")
-                items = sorted([f.stripext().rsplit("_", 1)[1] for f in files])[::-1]
+            # references = []
+            # print abc_files
+            # for pxy in abc_files:
+            #     name = path(pxy).namebase
+            #     publish = pxy
+            #
+            #     abc_files += publish
+            #     reference = pm.ls(name+"RN")
+            #     print name+"RN"
+            #     if reference:
+            #         reference = str(reference[0])
+            #     else:
+            #         reference = None
+            #     current = "001"
+            #     items = ["001"]
+            #     references += [[1, name, publish, reference, current, items]]
 
-                reference = None
-                match = publish.dirname().replace("\\", "/")
-                for ref in pm.listReferences():
-                    if match in ref.path:
-                        reference = ref.refNode.__unicode__()
-                references += [[number, asset_name, publish, reference, current, items]]
+            for name in asset_names:
+                search = name[4:] + "_GRP.abc"
+                publish = abc_wksp.files(search)
+                if not publish:
+                    continue
 
+                abc_files += publish
+                reference = pm.ls(search.replace(".abc", "RN"))
+                if reference:
+                    reference = str(reference[0])
+                else:
+                    reference = None
+                current = None
+                items = []
+                references += [[1, name, publish[0], reference, current, items]]
+
+            # number = 1
+            # asset_name = "Alembic Cache"
+            # publish = sg.find_one(
+            #     type,
+            #     [["project", "is", project], ["code", "is", entity]],
+            #     ["sg_alembic_cache"])["sg_alembic_cache"]
+            #
+            # if publish is not None:
+            #     publish = pm.util.common.path(publish["local_path_windows"])
+            #     current = publish.stripext().rsplit("_", 1)[1]
+            #
+            #     # root switching
+            #     if root:
+            #         publish = publish.replace("\\", "/").split("04_Maya")
+            #         publish = "".join([root, publish[1]])
+            #
+            #     files = publish.dirname().files("*.abc")
+            #     items = sorted([f.stripext().rsplit("_", 1)[1] for f in files])[::-1]
+            #
+            #     reference = None
+            #     match = publish.dirname().replace("\\", "/")
+            #     for ref in pm.listReferences():
+            #         if match in ref.path:
+            #             reference = ref.refNode.__unicode__()
+            #     references += [[number, asset_name, publish, reference, current, items]]
+            #
             # CREATE ROWS WITH QUERIED DATA
             index = 0  # first row is the header
             for ast in references:
@@ -268,7 +324,11 @@ class MyWindow(QtWidgets.QDialog):
             asset_file = pm.util.common.path(child.whatsThis())
             version = child.findChild(QtWidgets.QComboBox).currentText()
             search = "*{}{}".format(version, asset_file.ext)
+
             reference_file = asset_file.dirname().files(search)[0]
+            if ".abc" in reference_file:
+                reference_file = asset_file
+
             reference_node = child.toolTip()
             if reference_node:  # asset already referenced in scene
                 pm.FileReference(refnode=reference_node).replaceWith(reference_file)
