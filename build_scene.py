@@ -360,12 +360,16 @@ class MyWindow(QtWidgets.QDialog):
 
             reference_file = asset_file
             if ".abc" not in reference_file:
-                print search
                 reference_file = asset_file.dirname().files(search)[0]
 
             reference_node = child.toolTip()
             if reference_node:  # asset already referenced in scene
                 pm.FileReference(refnode=reference_node).replaceWith(reference_file)
+            elif "06_Cache" in reference_file:
+                print reference_file
+                #TODO: REFERENCE NODE SHOULD SHARE THE SAME CONSISTENCY AS THE OTHER SCENE PROCESSES
+                # USE ABC FILE TO SEARCH FOR MODEL ASSETS CONTAINING THAT NAME, MOVING ONTO RIGGING LATER
+
             else:
                 # name = reference_file.namebase.split("_original")[0] + "_"  # rig_a_
                 name = "_{}_".format(reference_file.dirname().namebase)
