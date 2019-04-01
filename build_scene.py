@@ -162,9 +162,6 @@ class MyWindow(QtWidgets.QDialog):
         if "Lighting" in scene_process:
             abc_wksp = path(pm.workspace.expandName(pm.workspace.fileRules["Alembic"]))
 
-            # load in all the proxies, they are not tracked
-            abc_files = abc_wksp.files("*_PXY.abc")
-
             assets = sg.find_one(
                 type,
                 [["project", "is", project], ["code", "is", entity]],
@@ -182,23 +179,6 @@ class MyWindow(QtWidgets.QDialog):
                 if data["sg_asset_type"] == "CG Rig":
                     asset_names += [data["assets"][0]["name"]]
 
-            # references = []
-            # print abc_files
-            # for pxy in abc_files:
-            #     name = path(pxy).namebase
-            #     publish = pxy
-            #
-            #     abc_files += publish
-            #     reference = pm.ls(name+"RN")
-            #     print name+"RN"
-            #     if reference:
-            #         reference = str(reference[0])
-            #     else:
-            #         reference = None
-            #     current = "001"
-            #     items = ["001"]
-            #     references += [[1, name, publish, reference, current, items]]
-
             alembic_entity = sg.find_one(
                 "CustomEntity05",
                 [
@@ -207,66 +187,92 @@ class MyWindow(QtWidgets.QDialog):
                 ]
             )
 
-            search = "model_set_GRP.abc"
-            versions = sg.find(
-                "Version",
-                [
-                    ["project", "is", project],
-                    ["entity", "is", alembic_entity],
-                    ["description", "contains", search]
-                ],
-                ["description"]
-            )
-
-            for version in versions:
-                info = version["description"]
-                info = info[info.index("Alembics:\n"):]
-                info = info[:info.index("\n\n")]
-                print info.split("\n")
-
-
             for name in asset_names:
                 search = name[4:] + "_GRP.abc"
                 publish = abc_wksp.files(search)
                 if not publish:
                     continue
 
-                abc_files += publish
+                publish = publish[0]
+
                 reference = pm.ls(search.replace(".abc", "RN"))
                 if reference:
                     reference = str(reference[0])
                 else:
                     reference = None
+
+                versions = sg.find(
+                    "Version",
+                    [
+                        ["project", "is", project],
+                        ["entity", "is", alembic_entity],
+                        ["description", "contains", search]
+                    ],
+                    ["description", "sg_alembic_directory"]
+                )[::-1]
+
                 current = None
                 items = []
-                references += [[1, name, publish[0], reference, current, items]]
 
-            # number = 1
-            # asset_name = "Alembic Cache"
-            # publish = sg.find_one(
-            #     type,
-            #     [["project", "is", project], ["code", "is", entity]],
-            #     ["sg_alembic_cache"])["sg_alembic_cache"]
-            #
-            # if publish is not None:
-            #     publish = pm.util.common.path(publish["local_path_windows"])
-            #     current = publish.stripext().rsplit("_", 1)[1]
-            #
-            #     # root switching
-            #     if root:
-            #         publish = publish.replace("\\", "/").split("04_Maya")
-            #         publish = "".join([root, publish[1]])
-            #
-            #     files = publish.dirname().files("*.abc")
-            #     items = sorted([f.stripext().rsplit("_", 1)[1] for f in files])[::-1]
-            #
-            #     reference = None
-            #     match = publish.dirname().replace("\\", "/")
-            #     for ref in pm.listReferences():
-            #         if match in ref.path:
-            #             reference = ref.refNode.__unicode__()
-            #     references += [[number, asset_name, publish, reference, current, items]]
-            #
+                for version in versions:
+                    info = version["description"]
+                    info = info[info.index("Alembics:\n"):]
+                    if "\n\n" in info:
+                        info = info[:info.index("\n\n")]
+                    info = info.split("\n")[1:]
+
+                    # ensure alembic file is shotgun search results
+                    if search not in info:
+                        continue
+
+                    items += [version["sg_alembic_directory"]["local_path_windows"][-3:].zfill(4)]
+                    if current is None:
+                        current = items[-1]
+                references += [[1, name, publish, reference, current, items]]
+
+            # load in all the proxies, they are not tracked
+            abc_files = abc_wksp.files("*_PXY.abc")
+
+            for pxy in abc_files:
+                name = path(pxy).namebase
+                publish = pxy
+
+                reference = pm.ls(name + "RN")
+                if reference:
+                    reference = str(reference[0])
+                else:
+                    reference = None
+
+                current = None
+                items = []
+
+                versions = sg.find(
+                    "Version",
+                    [
+                        ["project", "is", project],
+                        ["entity", "is", alembic_entity],
+                        ["description", "contains", "Proxies:\n"]
+                    ],
+                    ["description", "sg_alembic_directory"]
+                )[::-1]
+
+                for version in versions:
+                    info = version["description"]
+                    info = info[info.index("Proxies:\n"):]
+                    if "\n\n" in info:
+                        info = info[:info.index("\n\n")]
+                    info = info.split("\n")[1:]
+
+                    # ensure alembic file is shotgun search results
+                    search = name + ".abc"
+                    if search not in info:
+                        continue
+
+                    items += [version["sg_alembic_directory"]["local_path_windows"][-3:].zfill(4)]
+                    if current is None:
+                        current = items[-1]
+                references += [[1, name, publish, reference, current, items]]
+
             # CREATE ROWS WITH QUERIED DATA
             index = 0  # first row is the header
             for ast in references:
@@ -352,9 +358,9 @@ class MyWindow(QtWidgets.QDialog):
             version = child.findChild(QtWidgets.QComboBox).currentText()
             search = "*{}{}".format(version, asset_file.ext)
 
-            reference_file = asset_file.dirname().files(search)[0]
-            if ".abc" in reference_file:
-                reference_file = asset_file
+            reference_file = asset_file
+            if ".abc" not in reference_file:
+                reference_file = asset_file.dirname().files(search)[0]
 
             reference_node = child.toolTip()
             if reference_node:  # asset already referenced in scene
