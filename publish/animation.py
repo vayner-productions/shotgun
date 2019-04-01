@@ -253,7 +253,7 @@ class Publish(object):
 
         job_arg = '-frameRange {0:.0f} {0:.0f} * -dataFormat ogawa {1} -file "{2}"'.format(
             pm.currentTime(),
-            root_section[:-1],  # remove the space
+            root_section[:-1],
             all_abc_file
         ).replace("*", attributes)
         pm.select(nodes)
@@ -273,14 +273,11 @@ class Publish(object):
 
             pm.parent(self.active_geometry, w=1)
             for geo in self.active_geometry:
-                try:
-                    pm.select(cl=1)
-                    pm.parent(geo.getChildren(typ="transform"), skip_export)
-                except:
-                    pass
+                pm.parent(geo.getChildren(typ="transform"), skip_export)
+            pm.parent(skip_export, w=1)
 
             sg_name = shotgun_name[str(node)]
-            new_node = sg_name[4:]  # removes the numbering prefix 001_
+            new_node = sg_name[4:]
             if "RIG" in new_node:
                 new_node.replace("RIG", "GRP")
             if "GRP" not in new_node:
@@ -375,7 +372,8 @@ class Publish(object):
         # a new file maya file called first pass is created
         # it contains one alembic file (one alembic node) with all the top nodes from the processed file
         # this file will be opened multiple times to export alembics for each individual node
-        new_nodes = openFile(all_abc_file, rnn=1, f=1)
+        newFile(f=1)
+        new_nodes = importFile(all_abc_file, rnn=1)
         nodes = pm.ls(new_nodes, assemblies=1)
 
         # returns a list of alembic files for each node
@@ -408,24 +406,16 @@ class Publish(object):
                 new_name += "_GRP"
             node.rename(new_name)
 
-            selection = self.active_geometry + [node]
-            root_section = " ".join(["-root {}".format(n.longName()) for n in selection])
-
-            # alembic file uses new name to ensure reference node is readable
-            abc_file = self.alembic_directory.joinpath(new_name + ".abc").replace("\\", "/")
-            job_arg = '-frameRange {} {} * -dataFormat ogawa {} -file "{}"'.format(
+            # alembic exports just the top node and its children
+            abc_file = self.alembic_directory.joinpath(new_name+".abc").replace("\\", "/")
+            job_arg = '-frameRange {} {} * -dataFormat ogawa -root {} -file "{}"'.format(
                 start_time,
                 end_time,
-                root_section,
+                node.longName(),
                 abc_file
             ).replace("*", attributes)
-            pm.select(self.active_geometry)
+            pm.select(node)
             pm.AbcExport(j=job_arg)
-
-            # newFile(f=1)
-            # importFile(abc_file, f=1, gr=1, gn=new_name)
-            # ma_file = abc_file.dirname().joinpath(new_name + ".ma")
-            # saveAs(ma_file, f=1)
 
             # this file is opened again without saving to redo the process for other nodes
             openFile(all_abc_file, f=1)
@@ -848,12 +838,12 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
         # separate proxies from the list view, proxies run their own command from Publish()
         multi_abc, multi_pxy = [], []
-        for i in range(self.ui.multi_lsw.count()):
-            maya_obj = self.ui.multi_lsw.item(i).toolTip()
-            if "PXY" in maya_obj:
-                multi_pxy += [maya_obj]
-            else:
-                multi_abc += [maya_obj]
+        # for i in range(self.ui.multi_lsw.count()):
+        #     maya_obj = self.ui.multi_lsw.item(i).toolTip()
+        #     if "PXY" in maya_obj:
+        #         multi_pxy += [maya_obj]
+        #     else:
+        #         multi_abc += [maya_obj]
 
         single_abc, single_pxy = [], []
         for i in range(self.ui.single_lsw.count()):
