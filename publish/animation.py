@@ -273,24 +273,28 @@ class Publish(object):
 
             pm.parent(self.active_geometry, w=1)
             for geo in self.active_geometry:
-                pm.parent(geo.getChildren(typ="transform"), skip_export)
+                try:
+                    pm.select(cl=1)
+                    pm.parent(geo.getChildren(typ="transform"), w=1)
+                except:
+                    pass
             pm.parent(skip_export, w=1)
 
             sg_name = shotgun_name[str(node)]
-            new_node = sg_name[4:]
-            if "RIG" in new_node:
-                new_node.replace("RIG", "GRP")
-            if "GRP" not in new_node:
-                new_node += "_GRP"
-            if "PXY" in sg_name:
-                new_node = sg_name
+            new_name = str(node)
+            if sg_name is not None:  # not Proxy
+                new_name = sg_name[4:]
+            if "RIG" in new_name:
+                new_name.replace("RIG", "GRP")
+            if "GRP" not in new_name and "PXY" not in new_name:
+                new_name += "_GRP"
 
             node.rename("temp")
             new_node = pm.group(em=1, n=new_node)
             pm.parent(self.active_geometry, new_node)
             node.setParent(skip_export)
 
-            abc_file = self.alembic_directory.joinpath(sg_name+".abc").replace("\\", "/")
+            abc_file = self.alembic_directory.joinpath(new_name + ".abc").replace("\\", "/")
 
             job_arg = '{}-root "{}" -file "{}"'.format(
                 job_arg[:job_arg.index("-root")],
