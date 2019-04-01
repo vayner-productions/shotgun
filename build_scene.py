@@ -132,8 +132,8 @@ class MyWindow(QtWidgets.QDialog):
                 "Version",
                 [["project", "is", project], ["code", "contains", entity+"_Cam"]],
                 additional_filter_presets=additional_filter_presets,
-                fields=["sg_maya_camera"]
-            )["sg_maya_camera"]
+                fields=["sg_maya_file"]
+            )["sg_maya_file"]
 
             if publish is not None:
                 publish = publish["local_path_windows"]
@@ -154,6 +154,7 @@ class MyWindow(QtWidgets.QDialog):
                 for ref in pm.listReferences():
                     if match in ref.path:
                         reference = ref.refNode.__unicode__()
+                        current = ref.path.split(".")[1]
                         break
                 references += [[number, asset_name, publish, reference, current, items]]
 
