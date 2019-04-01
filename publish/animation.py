@@ -380,8 +380,8 @@ class Publish(object):
         # the alembic file contains the top node and all its children visible in the scene
         for node in nodes:
             # delete the nodes not being exported for faster evaluation
-            to_delete = nodes
-            to_delete.remove(node)
+            to_delete = [str(n) for n in nodes]
+            to_delete.remove(str(node))
             pm.delete(to_delete)
 
             self.get_in_view()
@@ -393,6 +393,7 @@ class Publish(object):
                     pass
 
             sg_name = shotgun_name[str(node)]
+            print ">>", sg_name
             new_name = sg_name[4:]
             if "RIG" in new_name:
                 new_name.replace("RIG", "GRP")
@@ -401,18 +402,30 @@ class Publish(object):
             node.rename(new_name)
 
             # alembic exports just the top node and its children
-            abc_file = self.alembic_directory.joinpath(new_name+".abc").replace("\\", "/")
-            job_arg = '-frameRange {} {} * -dataFormat ogawa -root {} -file "{}"'.format(
+            root_section = " ".join(["-root {}".format(n.longName()) for n in self.active_geometry])
+            abc_file = self.alembic_directory.joinpath(new_name+"_.abc").replace("\\", "/")
+            job_arg = '-frameRange {} {} * -dataFormat ogawa {} -file "{}"'.format(
                 start_time,
                 end_time,
-                node.longName(),
+                root_section,
                 abc_file
             ).replace("*", attributes)
+            pm.select(self.active_geometry)
+            pm.AbcExport(j=job_arg)
+
+            newFile(f=1)
+            importFile(abc_file, f=1, gr=1, gn=new_name)
+            job_arg = '{}-root "{}" -file "{}"'.format(
+                job_arg[:job_arg.index("-root")],
+                node.longName(),
+                abc_file.replace("_.abc", ".abc")
+            )
             pm.select(node)
             pm.AbcExport(j=job_arg)
 
             # this file is opened again without saving to redo the process for other nodes
             openFile(all_abc_file, f=1)
+            path(abc_file).remove_p()
 
         openFile(working_file, f=1)
         path(all_abc_file).remove_p()
@@ -832,12 +845,12 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
         # separate proxies from the list view, proxies run their own command from Publish()
         multi_abc, multi_pxy = [], []
-        # for i in range(self.ui.multi_lsw.count()):
-        #     maya_obj = self.ui.multi_lsw.item(i).toolTip()
-        #     if "PXY" in maya_obj:
-        #         multi_pxy += [maya_obj]
-        #     else:
-        #         multi_abc += [maya_obj]
+        for i in range(self.ui.multi_lsw.count()):
+            maya_obj = self.ui.multi_lsw.item(i).toolTip()
+            if "PXY" in maya_obj:
+                multi_pxy += [maya_obj]
+            else:
+                multi_abc += [maya_obj]
 
         single_abc, single_pxy = [], []
         for i in range(self.ui.single_lsw.count()):
