@@ -360,13 +360,24 @@ class MyWindow(QtWidgets.QDialog):
 
             reference_file = asset_file
             if ".abc" not in reference_file:
+                print search
                 reference_file = asset_file.dirname().files(search)[0]
 
             reference_node = child.toolTip()
             if reference_node:  # asset already referenced in scene
                 pm.FileReference(refnode=reference_node).replaceWith(reference_file)
             else:
-                pm.createReference(reference_file, namespace=":")
+                # name = reference_file.namebase.split("_original")[0] + "_"  # rig_a_
+                name = "_{}_".format(reference_file.dirname().namebase)
+
+                if "Shot" in name:
+                    name = name[1:] + "Cam_"
+
+                start_file = reference_file.dirname().joinpath(name + ".ma")
+                reference_file.copy2(start_file)
+                pm.createReference(start_file, namespace=":")
+                pm.FileReference(refnode=name + "RN").replaceWith(reference_file)
+                start_file.remove_p()
         print ">> references loaded/updated",
         self.ui.close()
         return
