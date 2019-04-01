@@ -823,7 +823,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         Automated comments contain what is in the alembic directory
         """
         # # TESTING - uses the same maya scene file and version folder
-        # self.version(up=0)
+        # self.version(up=1)
         # working_file = pm.sceneName()
         # published_file = self.alembic_directory.joinpath(
         #     "{}_original.{}.ma".format(
@@ -907,7 +907,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
                 render_camera.importContents()
 
             # export selection as reference
-            self.CameraTools.comment += "Published from Animation:\n{}".format(path(pm.sceneName()).basename())
+            self.CameraTools.comment += "Published from Animation:\n{}".format(self.maya_file.basename())
             self.CameraTools.process_data()
             pm.select("render_cam_RIG")
             exportAsReference(self.CameraTools.camera_file, namespace=":")
