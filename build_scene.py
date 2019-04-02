@@ -57,12 +57,12 @@ class MyWindow(QtWidgets.QDialog):
         row.setWhatsThis(publish)
         row.setToolTip(reference)
 
-        # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
-        num = QtWidgets.QLabel("{}".format(number))
-        num.setFont(font)
-        num.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        num.setMaximumWidth(25)
-        num.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        # # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
+        # num = QtWidgets.QLabel("{}".format(number))
+        # num.setFont(font)
+        # num.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        # num.setMaximumWidth(25)
+        # num.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 
         # label name - horizontal expanding, arial 14
         name = QtWidgets.QLabel(asset_name)
@@ -87,6 +87,8 @@ class MyWindow(QtWidgets.QDialog):
         combo.addItems(items)
         combo.setCurrentText(current)
         combo.setFocusPolicy(QtCore.Qt.NoFocus)
+        if combo.currentIndex() > 0:
+            frame.setStyleSheet("color: rgb(208, 255, 96)")  # indicates new version available
 
         vlayout = QtWidgets.QVBoxLayout()
         vlayout.setSpacing(0)
@@ -97,9 +99,9 @@ class MyWindow(QtWidgets.QDialog):
 
         hlayout = QtWidgets.QHBoxLayout()
         hlayout.setSpacing(3)
-        hlayout.setContentsMargins(0, 3, 6, 3)
+        hlayout.setContentsMargins(6, 3, 6, 3)
 
-        hlayout.addWidget(num)
+        # hlayout.addWidget(num)
         hlayout.addWidget(name)
         hlayout.addWidget(frame)
 
@@ -351,6 +353,10 @@ class MyWindow(QtWidgets.QDialog):
 
     def set_latest(self):
         for child in self.ui.findChildren(QtWidgets.QComboBox):
+            frame = None
+            if child.currentIndex() > 0:
+                frame = child.parent()
+                frame.setStyleSheet("color: None")
             child.setCurrentIndex(0)
         return
 
@@ -456,8 +462,19 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.close()
         return
 
+    def color(self, combobox):
+        option = combobox.currentIndex()
+        frame = combobox.parent()
+        if option == 0:
+            frame.setStyleSheet("color: None")
+        else:
+            frame.setStyleSheet("color: rgb(208, 255, 96)")
+        return
+
     def init_ui(self):
         self.init_rows()
+        for child in self.ui.findChildren(QtWidgets.QComboBox):
+            child.currentIndexChanged.connect(lambda state, x=child: self.color(x))
 
         # RUNS AS NORMAL
         self.ui.latest_btn.clicked.connect(self.set_latest)
