@@ -79,10 +79,7 @@ sg.get_window()
 """
 
 reload_menu = """
-from shotgun.VaynerMenu import vayner_menu as sg
-reload(sg)
-vm = sg.VaynerMenu()
-vm.run()
+print ">>>"
 """
 
 class VaynerMenu:
