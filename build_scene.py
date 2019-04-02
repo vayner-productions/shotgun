@@ -365,7 +365,7 @@ class MyWindow(QtWidgets.QDialog):
             reference_node = child.toolTip()
             if reference_node:  # asset already referenced in scene
                 pm.FileReference(refnode=reference_node).replaceWith(reference_file)
-            elif "06_Cache" in reference_file:
+            elif "06_Cache" in reference_file:  # building into the lighting scene process
                 print reference_file
                 #TODO: REFERENCE NODE SHOULD SHARE THE SAME CONSISTENCY AS THE OTHER SCENE PROCESSES
                 # USE ABC FILE TO SEARCH FOR MODEL ASSETS CONTAINING THAT NAME, MOVING ONTO RIGGING LATER
