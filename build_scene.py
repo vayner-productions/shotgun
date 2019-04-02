@@ -366,11 +366,60 @@ class MyWindow(QtWidgets.QDialog):
             if reference_node:  # asset already referenced in scene
                 pm.FileReference(refnode=reference_node).replaceWith(reference_file)
             elif "06_Cache" in reference_file:  # building into the lighting scene process
-                if "_PXY.abc" in reference_file:
-                    pm.createReference(reference_file, namespace=":")
-                    continue
                 reference_file = path(reference_file)
-                search = reference_file.namebase.rsplit("_", 1)[0]
+
+                current_shot = reference_file.dirname().basename()  # Shot_###
+                assets = sg.find_one(
+                    "Shot",
+                    [
+                        ["project", "is", project],
+                        ["code", "is", current_shot]
+                    ],
+                    ["assets"]
+                )["assets"]
+                models, rigs = [], []
+                for asset in assets:
+                    asset_type = sg.find_one(
+                        "Asset",
+                        [
+                            ["project", "is", project],
+                            ["id", "is", asset["id"]]
+                        ],
+                        ["sg_asset_type"]
+                    )["sg_asset_type"]
+
+                    if asset_type == "CG Model":
+                        models += [asset["name"]]
+                    elif asset_type == "CG Rig":
+                        sub_assets = sg.find_one(
+                            "Asset",
+                            [
+                                ["project", "is", project],
+                                ["id", "is", asset["id"]]
+                            ],
+                            ["assets"]
+                        )["assets"]
+                        # assumes sub assets are models because rigs reference models
+                        for sub in sub_assets:
+                            models += [sub["name"]]
+                        rigs += [asset["name"]]
+
+                ordered_type = models + rigs
+                search = reference_file.namebase.rsplit("_", 1)[0]  # model_a
+
+                name = None
+                for item in ordered_type:
+                    if search in item:
+                        name = "_{}_".format(item)
+
+                if "_PXY.abc" in reference_file:
+                    name = reference_file.namebase + "_"
+
+                start_file = reference_file.dirname().joinpath(name + ".ma")
+                reference_file.copy2(start_file)
+                pm.createReference(start_file, namespace=":")
+                pm.FileReference(refnode=name + "RN").replaceWith(reference_file)
+                start_file.remove_p()
             else:
                 # name = reference_file.namebase.split("_original")[0] + "_"  # rig_a_
                 name = "_{}_".format(reference_file.dirname().namebase)
