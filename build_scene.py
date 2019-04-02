@@ -195,7 +195,7 @@ class MyWindow(QtWidgets.QDialog):
 
                 publish = publish[0]
 
-                reference = pm.ls(search.replace(".abc", "RN"))
+                reference = pm.ls("*{}_RN".format(name))
                 if reference:
                     reference = str(reference[0])
                 else:
@@ -237,7 +237,7 @@ class MyWindow(QtWidgets.QDialog):
                 name = path(pxy).namebase
                 publish = pxy
 
-                reference = pm.ls(name + "RN")
+                reference = pm.ls(name + "_RN")
                 if reference:
                     reference = str(reference[0])
                 else:
@@ -305,7 +305,6 @@ class MyWindow(QtWidgets.QDialog):
                 publish = "".join([root, publish[1]])
 
             # QUERY DATA FOR ROWS
-            #TODO: SG SITE "assets" doesn't allow inputting the entities multiple times, need to find a work around
             asset_name = asset["name"]
             asset_names += [asset_name]
             number = asset_names.count(asset_name)  # times same asset is used
@@ -358,86 +357,97 @@ class MyWindow(QtWidgets.QDialog):
             version = child.findChild(QtWidgets.QComboBox).currentText()
             search = "*{}{}".format(version, asset_file.ext)
 
+            # FOR LIGHTING
             reference_file = asset_file
-            if ".abc" not in reference_file:
-                reference_file = asset_file.dirname().files(search)[0]
+            print reference_file
 
-            reference_node = child.toolTip()
-            if reference_node:  # asset already referenced in scene
-                pm.FileReference(refnode=reference_node).replaceWith(reference_file)
-            elif "06_Cache" in reference_file:  # building into the lighting scene process
-                reference_file = path(reference_file)
-
-                current_shot = reference_file.dirname().basename()  # Shot_###
-                assets = sg.find_one(
-                    "Shot",
-                    [
-                        ["project", "is", project],
-                        ["code", "is", current_shot]
-                    ],
-                    ["assets"]
-                )["assets"]
-                models, rigs = [], []
-                for asset in assets:
-                    asset_type = sg.find_one(
-                        "Asset",
-                        [
-                            ["project", "is", project],
-                            ["id", "is", asset["id"]]
-                        ],
-                        ["sg_asset_type"]
-                    )["sg_asset_type"]
-
-                    if asset_type == "CG Model":
-                        models += [asset["name"]]
-                    elif asset_type == "CG Rig":
-                        sub_assets = sg.find_one(
-                            "Asset",
-                            [
-                                ["project", "is", project],
-                                ["id", "is", asset["id"]]
-                            ],
-                            ["assets"]
-                        )["assets"]
-                        # assumes sub assets are models because rigs reference models
-                        for sub in sub_assets:
-                            models += [sub["name"]]
-                        rigs += [asset["name"]]
-
-                ordered_type = models + rigs
-                search = reference_file.namebase.rsplit("_", 1)[0]  # model_a
-
-                name = None
-                for item in ordered_type:
-                    if search in item:
-                        name = "_{}_".format(item)
-
-                if "_PXY.abc" in reference_file:
-                    name = reference_file.namebase + "_"
-
-                start_file = reference_file.dirname().joinpath(name + ".ma")
-                reference_file.copy2(start_file)
-                pm.createReference(start_file, namespace=":")
-                pm.FileReference(refnode=name + "RN").replaceWith(reference_file)
-                start_file.remove_p()
-            else:
-                # name = reference_file.namebase.split("_original")[0] + "_"  # rig_a_
-                name = "_{}_".format(reference_file.dirname().namebase)
-
-                if "Shot" in name:
-                    name = name[1:] + "Cam_"
-
-                start_file = reference_file.dirname().joinpath(name + ".ma")
-                reference_file.copy2(start_file)
-                pm.createReference(start_file, namespace=":")
-                pm.FileReference(refnode=name + "RN").replaceWith(reference_file)
-                start_file.remove_p()
-        print ">> references loaded/updated",
-        self.ui.close()
+        #     # FOR ALL OTHER SCENE PROCESSES
+        #     if ".abc" not in reference_file:
+        #         reference_file = asset_file.dirname().files(search)[0]
+        #
+        #     reference_node = child.toolTip()
+        #     if reference_node:
+        #         # FOR REFERENCE NODES IN IN AN SCENE PROCESS
+        #         pm.FileReference(refnode=reference_node).replaceWith(reference_file)
+        #     elif "06_Cache" in reference_file:
+        #         # FOR LIGHTING
+        #         reference_file = path(reference_file)
+        #
+        #         current_shot = reference_file.dirname().basename()  # Shot_###
+        #         assets = sg.find_one(
+        #             "Shot",
+        #             [
+        #                 ["project", "is", project],
+        #                 ["code", "is", current_shot]
+        #             ],
+        #             ["assets"]
+        #         )["assets"]
+        #         models, rigs = [], []
+        #         for asset in assets:
+        #             asset_type = sg.find_one(
+        #                 "Asset",
+        #                 [
+        #                     ["project", "is", project],
+        #                     ["id", "is", asset["id"]]
+        #                 ],
+        #                 ["sg_asset_type"]
+        #             )["sg_asset_type"]
+        #
+        #             if asset_type == "CG Model":
+        #                 models += [asset["name"]]
+        #             elif asset_type == "CG Rig":
+        #                 sub_assets = sg.find_one(
+        #                     "Asset",
+        #                     [
+        #                         ["project", "is", project],
+        #                         ["id", "is", asset["id"]]
+        #                     ],
+        #                     ["assets"]
+        #                 )["assets"]
+        #                 # assumes sub assets are models because rigs reference models
+        #                 for sub in sub_assets:
+        #                     models += [sub["name"]]
+        #                 rigs += [asset["name"]]
+        #
+        #         ordered_type = models + rigs
+        #         search = reference_file.namebase.rsplit("_", 1)[0]  # model_a
+        #
+        #         name = None
+        #         for item in ordered_type:
+        #             if search in item:
+        #                 name = "_{}_".format(item)
+        #
+        #         if "_PXY.abc" in reference_file:
+        #             name = reference_file.namebase + "_"
+        #
+        #         start_file = reference_file.dirname().joinpath(name + ".ma")
+        #         reference_file.copy2(start_file)
+        #         pm.createReference(start_file, namespace=":")
+        #         pm.FileReference(refnode=name + "RN").replaceWith(reference_file)
+        #         start_file.remove_p()
+        #     else:
+        #         # FOR ALL SCENE PROCESSES AND CAMERA
+        #         name = "_{}_".format(reference_file.dirname().namebase)
+        #
+        #         if "Shot" in name:
+        #             name = name[1:] + "Cam_"
+        #
+        #         start_file = reference_file.dirname().joinpath(name + ".ma")
+        #         reference_file.copy2(start_file)
+        #         pm.createReference(start_file, namespace=":")
+        #         pm.FileReference(refnode=name + "RN").replaceWith(reference_file)
+        #         start_file.remove_p()
+        # print ">> references loaded/updated",
+        # self.ui.close()
         return
 
     def init_ui(self):
         self.init_rows()
-        self.ui.latest_btn.clicked.connect(self.set_latest)
-        self.ui.update_btn.clicked.connect(self.update_scene)
+
+        # # RUNS AS NORMAL
+        # self.ui.latest_btn.clicked.connect(self.set_latest)
+        # self.ui.update_btn.clicked.connect(self.update_scene)
+
+        # TESTING - COMMENT OUT RUNS AS NORMAL SECTION
+        self.update_scene()
         return
