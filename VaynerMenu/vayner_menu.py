@@ -78,6 +78,12 @@ from shotgun.publish import animation as sg; reload(sg)
 sg.get_window()
 """
 
+reload_menu = """
+from shotgun.VaynerMenu import vayner_menu as sg
+reload(sg)
+vm = sg.VaynerMenu()
+vm.run()
+"""
 
 class VaynerMenu:
     def __init__(self):
@@ -220,6 +226,13 @@ class VaynerMenu:
         publish_lighting_item = MenuItem(
             label="Publish Lighting",
             command=publish_scene,
+        )
+
+        # reloads menu
+        reload_menu_item = MenuItem(
+            label="Reload Vayner Menu",
+            command=reload_menu,
+            parent="Vayner"
         )
 
         # removes pyc files
