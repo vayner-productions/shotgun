@@ -57,12 +57,12 @@ class MyWindow(QtWidgets.QDialog):
         row.setWhatsThis(publish)
         row.setToolTip(reference)
 
-        # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
-        num = QtWidgets.QLabel("{}".format(number))
-        num.setFont(font)
-        num.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        num.setMaximumWidth(25)
-        num.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        # # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
+        # num = QtWidgets.QLabel("{}".format(number))
+        # num.setFont(font)
+        # num.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        # num.setMaximumWidth(25)
+        # num.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 
         # label name - horizontal expanding, arial 14
         name = QtWidgets.QLabel(asset_name)
@@ -87,6 +87,8 @@ class MyWindow(QtWidgets.QDialog):
         combo.addItems(items)
         combo.setCurrentText(current)
         combo.setFocusPolicy(QtCore.Qt.NoFocus)
+        if combo.currentIndex() > 0:
+            frame.setStyleSheet("color: rgb(208, 255, 96)")  # indicates new version available
 
         vlayout = QtWidgets.QVBoxLayout()
         vlayout.setSpacing(0)
@@ -97,9 +99,9 @@ class MyWindow(QtWidgets.QDialog):
 
         hlayout = QtWidgets.QHBoxLayout()
         hlayout.setSpacing(3)
-        hlayout.setContentsMargins(0, 3, 6, 3)
+        hlayout.setContentsMargins(6, 3, 6, 3)
 
-        hlayout.addWidget(num)
+        # hlayout.addWidget(num)
         hlayout.addWidget(name)
         hlayout.addWidget(frame)
 
@@ -195,8 +197,12 @@ class MyWindow(QtWidgets.QDialog):
 
                 publish = publish[0]
 
-                reference = pm.ls(search.replace(".abc", "RN"))
+                current = None
+                reference = pm.ls("*{}_RN".format(name))
                 if reference:
+                    ref_file = str(reference[0].referenceFile())
+                    if "ver_" in ref_file:
+                        current = path(ref_file).dirname().basename()[-3:].zfill(4)
                     reference = str(reference[0])
                 else:
                     reference = None
@@ -211,9 +217,7 @@ class MyWindow(QtWidgets.QDialog):
                     ["description", "sg_alembic_directory"]
                 )[::-1]
 
-                current = None
                 items = []
-
                 for version in versions:
                     info = version["description"]
                     info = info[info.index("Alembics:\n"):]
@@ -237,13 +241,16 @@ class MyWindow(QtWidgets.QDialog):
                 name = path(pxy).namebase
                 publish = pxy
 
-                reference = pm.ls(name + "RN")
+                current = None
+                reference = pm.ls(name + "_RN")
                 if reference:
+                    ref_file = str(reference[0].referenceFile())
+                    if "ver_" in ref_file:
+                        current = path(ref_file).dirname().basename()[-3:].zfill(4)
                     reference = str(reference[0])
                 else:
                     reference = None
 
-                current = None
                 items = []
 
                 versions = sg.find(
@@ -305,7 +312,6 @@ class MyWindow(QtWidgets.QDialog):
                 publish = "".join([root, publish[1]])
 
             # QUERY DATA FOR ROWS
-            #TODO: SG SITE "assets" doesn't allow inputting the entities multiple times, need to find a work around
             asset_name = asset["name"]
             asset_names += [asset_name]
             number = asset_names.count(asset_name)  # times same asset is used
@@ -347,6 +353,10 @@ class MyWindow(QtWidgets.QDialog):
 
     def set_latest(self):
         for child in self.ui.findChildren(QtWidgets.QComboBox):
+            frame = None
+            if child.currentIndex() > 0:
+                frame = child.parent()
+                frame.setStyleSheet("color: None")
             child.setCurrentIndex(0)
         return
 
@@ -358,20 +368,86 @@ class MyWindow(QtWidgets.QDialog):
             version = child.findChild(QtWidgets.QComboBox).currentText()
             search = "*{}{}".format(version, asset_file.ext)
 
+            # FOR LIGHTING
             reference_file = asset_file
+            rollback = child.findChild(QtWidgets.QComboBox).currentIndex()
+
+            # FOR LIGHTING
+            if rollback > 0 and ".abc" in reference_file:
+                version = "ver_" + version[1:]
+                filename = path(reference_file).basename()
+                shot = path(pm.workspace.fileRules["scene"]).namebase
+
+                reference_file = pm.workspace.path.joinpath(
+                    "published", "08_Animation", shot, version, filename
+                ).normpath()
+
+            # FOR ALL OTHER SCENE PROCESSES
             if ".abc" not in reference_file:
                 reference_file = asset_file.dirname().files(search)[0]
 
             reference_node = child.toolTip()
-            if reference_node:  # asset already referenced in scene
+            if reference_node:
+                # FOR REFERENCE NODES IN IN AN SCENE PROCESS
                 pm.FileReference(refnode=reference_node).replaceWith(reference_file)
-            elif "06_Cache" in reference_file:  # building into the lighting scene process
-                print reference_file
-                #TODO: REFERENCE NODE SHOULD SHARE THE SAME CONSISTENCY AS THE OTHER SCENE PROCESSES
-                # USE ABC FILE TO SEARCH FOR MODEL ASSETS CONTAINING THAT NAME, MOVING ONTO RIGGING LATER
+            elif "06_Cache" in reference_file:
+                # FOR LIGHTING
+                reference_file = path(reference_file)
 
+                current_shot = reference_file.dirname().basename()  # Shot_###
+                assets = sg.find_one(
+                    "Shot",
+                    [
+                        ["project", "is", project],
+                        ["code", "is", current_shot]
+                    ],
+                    ["assets"]
+                )["assets"]
+                models, rigs = [], []
+                for asset in assets:
+                    asset_type = sg.find_one(
+                        "Asset",
+                        [
+                            ["project", "is", project],
+                            ["id", "is", asset["id"]]
+                        ],
+                        ["sg_asset_type"]
+                    )["sg_asset_type"]
+
+                    if asset_type == "CG Model":
+                        models += [asset["name"]]
+                    elif asset_type == "CG Rig":
+                        sub_assets = sg.find_one(
+                            "Asset",
+                            [
+                                ["project", "is", project],
+                                ["id", "is", asset["id"]]
+                            ],
+                            ["assets"]
+                        )["assets"]
+                        # assumes sub assets are models because rigs reference models
+                        for sub in sub_assets:
+                            models += [sub["name"]]
+                        rigs += [asset["name"]]
+
+                ordered_type = models + rigs
+                search = reference_file.namebase.rsplit("_", 1)[0]  # model_a
+
+                name = None
+                for item in ordered_type:
+                    if search in item:
+                        name = "_{}_".format(item)
+
+                if "_PXY.abc" in reference_file:
+                    name = reference_file.namebase + "_"
+
+                start_file = reference_file.dirname().joinpath(name + ".ma")
+                reference_file.copy2(start_file)
+                pm.createReference(start_file, namespace=":")
+                pm.FileReference(refnode=name + "RN").replaceWith(reference_file)
+                start_file.remove_p()
             else:
-                # name = reference_file.namebase.split("_original")[0] + "_"  # rig_a_
+                # FOR ALL SCENE PROCESSES AND CAMERA
                 name = "_{}_".format(reference_file.dirname().namebase)
 
                 if "Shot" in name:
@@ -386,8 +462,24 @@ class MyWindow(QtWidgets.QDialog):
         self.ui.close()
         return
 
+    def color(self, combobox):
+        option = combobox.currentIndex()
+        frame = combobox.parent()
+        if option == 0:
+            frame.setStyleSheet("color: None")
+        else:
+            frame.setStyleSheet("color: rgb(208, 255, 96)")
+        return
+
     def init_ui(self):
         self.init_rows()
+        for child in self.ui.findChildren(QtWidgets.QComboBox):
+            child.currentIndexChanged.connect(lambda state, x=child: self.color(x))
+
+        # RUNS AS NORMAL
         self.ui.latest_btn.clicked.connect(self.set_latest)
         self.ui.update_btn.clicked.connect(self.update_scene)
+
+        # # TESTING - COMMENT OUT RUNS AS NORMAL SECTION
+        # self.update_scene()
         return
