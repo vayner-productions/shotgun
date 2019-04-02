@@ -69,7 +69,7 @@ sg.get_window("publish_camera")
 """
 
 manage_proxies = """
-from Cat.shotgun.VaynerMenu import manage_proxies as sg; reload(sg)
+from shotgun.VaynerMenu import manage_proxies as sg; reload(sg)
 sg.get_window()
 """
 
