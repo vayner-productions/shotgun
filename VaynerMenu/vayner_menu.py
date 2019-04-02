@@ -68,6 +68,11 @@ from shotgun.publish import camera as sg; reload(sg)
 sg.get_window("publish_camera")
 """
 
+manage_proxies = """
+from Cat.shotgun.VaynerMenu import manage_proxies as sg; reload(sg)
+sg.get_window()
+"""
+
 publish_animation = """
 from shotgun.publish import animation as sg; reload(sg)
 sg.get_window()
@@ -172,6 +177,13 @@ class VaynerMenu:
             subMenu=True,
             parent="Vayner"
         )
+
+        # brings up manage proxy window
+        update_timeline_item = MenuItem(
+            label="Manage Proxies",
+            command=manage_proxies,
+        )
+
 
         # matches start/end playback to frame range on shotgun site
         update_timeline_item = MenuItem(
