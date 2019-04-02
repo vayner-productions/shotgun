@@ -82,6 +82,7 @@ reload_menu = """
 print ">>>"
 """
 
+
 class VaynerMenu:
     def __init__(self):
         self.vayner_menu = None
@@ -225,12 +226,12 @@ class VaynerMenu:
             command=publish_scene,
         )
 
-        # reloads menu
-        reload_menu_item = MenuItem(
-            label="Reload Vayner Menu",
-            command=reload_menu,
-            parent="Vayner"
-        )
+        # # reloads menu
+        # reload_menu_item = MenuItem(
+        #     label="Reload Vayner Menu",
+        #     command=reload_menu,
+        #     parent="Vayner"
+        # )
 
         # removes pyc files
         from pymel.util.common import path
