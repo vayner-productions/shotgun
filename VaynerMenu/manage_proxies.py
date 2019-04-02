@@ -18,7 +18,7 @@ class MyWindow(QtWidgets.QDialog):
         self.ui = self.import_ui()
         self.ui.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
         self.proxy_files = self.get_proxy_names()
-        self.connect_signals(self.proxy_files, self.ui)
+        self.connect_signals(self.proxy_files)
         return
 
     def import_ui(self):
@@ -34,25 +34,21 @@ class MyWindow(QtWidgets.QDialog):
         proxy_files = []
         project_file = workspace.getName()
         project_shot = workspace.expandName(workspace.fileRules["scene"]).split("/")[-1]
-        cache_dir = project_file + r'/scenes/06_Cache/08_Animation/'+ project_shot + "/"
+        cache_dir = project_file + r"/scenes/06_Cache/08_Animation/"+ project_shot + "/"
         for p_file in listdir(cache_dir):
             if "_PXY.abc" in str(p_file):
                 proxy_files.append(str(p_file))
-
         return proxy_files
 
-
-    def connect_signals(self, proxy_files, ui):
+    def connect_signals(self, proxy_files):
         for p_file in proxy_files:
             self.ui.list_wdj.addItem(p_file)
-
         self.ui.remove_btn.clicked.connect(self.remove_btn)
-
 
     def remove_btn(self):
         project_file = workspace.getName()
         project_shot = workspace.expandName(workspace.fileRules["scene"]).split("/")[-1]
-        cache_dir = project_file + r'/scenes/06_Cache/08_Animation/'+ project_shot + "/"
+        cache_dir = project_file + r"/scenes/06_Cache/08_Animation/"+ project_shot + "/"
         selected_obj = self.ui.list_wdj.selectedItems()
 
         for p_file in selected_obj:
