@@ -32,7 +32,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def get_proxy_names(self):
         proxy_files = []
-        project_file = workspace(q=True, sn=True)
+        project_file = workspace.getName()
         project_shot = workspace.expandName(workspace.fileRules["scene"]).split("/")[-1]
         cache_dir = project_file + r'/scenes/06_Cache/08_Animation/'+ project_shot + "/"
         for p_file in listdir(cache_dir):
@@ -50,11 +50,9 @@ class MyWindow(QtWidgets.QDialog):
 
 
     def remove_btn(self):
-        project_file = workspace(q=True, sn=True)
+        project_file = workspace.getName()
         project_shot = workspace.expandName(workspace.fileRules["scene"]).split("/")[-1]
         cache_dir = project_file + r'/scenes/06_Cache/08_Animation/'+ project_shot + "/"
-
-        selected_obj = []
         selected_obj = self.ui.list_wdj.selectedItems()
 
         for p_file in selected_obj:
