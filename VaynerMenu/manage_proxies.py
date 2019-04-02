@@ -1,6 +1,21 @@
+"""
+# USED FROM UI
+from shotgun.VaynerMenu import manage_proxies as sg
+reload(sg)
+sg.get_window()
+
+# USED FROM CODE
+from shotgun.VaynerMenu import manage_proxies as sg
+reload(sg)
+mp = sg.MyWindow()
+mp.remove = ["Shot_006_PXY"]  # expects the exact name of the proxy, assumes it's an alembic
+mp.remove_proxies()
+"""
+
 from PySide2 import QtCore, QtWidgets, QtUiTools
-from pymel.core import workspace, confirmDialog
-from os import listdir, remove
+from pymel.core.system import Workspace, warning
+workspace = Workspace()
+from pymel.util import path
 
 
 def get_window():
@@ -15,10 +30,18 @@ def get_window():
 
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
+        self.alembic_directory = path(workspace.expandName(workspace.fileRules["Alembic"])).normpath()
+        if "data" in self.alembic_directory:
+            warning(">> Set project to Animation")
+            self.ui.close()
+            return
+        self.proxies = [pxy.namebase for pxy in self.alembic_directory.files("*_PXY.abc")]
+        self.remove = []
+
         self.ui = self.import_ui()
         self.ui.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
-        self.proxy_files = self.get_proxy_names()
-        self.connect_signals(self.proxy_files)
+        self.ui.list_wdj.addItems(self.proxies)
+        self.ui.remove_btn.clicked.connect(self.remove_proxies)
         return
 
     def import_ui(self):
@@ -30,28 +53,21 @@ class MyWindow(QtWidgets.QDialog):
         ui_file.close()
         return ui
 
-    def get_proxy_names(self):
-        proxy_files = []
-        project_file = workspace.getName()
-        project_shot = workspace.expandName(workspace.fileRules["scene"]).split("/")[-1]
-        cache_dir = project_file + r"/scenes/06_Cache/08_Animation/"+ project_shot + "/"
-        for p_file in listdir(cache_dir):
-            if "_PXY.abc" in str(p_file):
-                proxy_files.append(str(p_file))
-        return proxy_files
+    def remove_proxies(self):
+        """
+        expects the exact name of the proxy, assumes it's an alembic
+        can remove proxies from selection
+        can remove proxies as strings using self.remove = ["Shot_006_PXY"]
+        :return:
+        """
+        proxies = self.remove
 
-    def connect_signals(self, proxy_files):
-        for p_file in proxy_files:
-            self.ui.list_wdj.addItem(p_file)
-        self.ui.remove_btn.clicked.connect(self.remove_btn)
+        if not proxies:
+            proxies = [str(proxy) for proxy in self.ui.list_wdj.selectedItems()]
 
-    def remove_btn(self):
-        project_file = workspace.getName()
-        project_shot = workspace.expandName(workspace.fileRules["scene"]).split("/")[-1]
-        cache_dir = project_file + r"/scenes/06_Cache/08_Animation/"+ project_shot + "/"
-        selected_obj = self.ui.list_wdj.selectedItems()
+        for proxy in proxies:
+            proxy_file = self.alembic_directory.joinpath(proxy + ".abc")
+            proxy_file.remove_p()
 
-        for p_file in selected_obj:
-            remove(cache_dir + p_file.text())
-
-        mw.ui.close()
+        self.ui.close()
+        return
