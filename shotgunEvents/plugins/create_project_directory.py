@@ -54,9 +54,17 @@ def create_project_directory(sg, logger, event, args):
             return
         name[key] = data[f]["name"]
 
+    media_space = sg.find_one(
+        "CustomNonProjectEntity28",
+        filters=[["sg_projects", "is", project]],
+        fields=["sg_unc_path"]
+    )
+    unc_path = media_space["sg_unc_path"]
+
     # create project, shot, and asset directory
     event_type = event["event_type"]
-    start = r"//genesisnx/genesisnx/Animation/Projects/Client/{}/{}/{}".format(
+    start = r"{}/Animation/Projects/Client/{}/{}/{}".format(
+        unc_path,
         name["client"],
         name["brand"],
         name["project"]
