@@ -89,8 +89,8 @@ class CreateDirectory(object):
         ))
 
         try:
-            mkdir(a_drive, self.project_directory)
             shutil.copytree(template, self.project_directory)
+            mkdir(a_drive)
         except:
             pass
         return
