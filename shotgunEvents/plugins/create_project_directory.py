@@ -1,4 +1,4 @@
-from os import path, mkdir
+from os import path, makedirs
 import shutil
 import shotgun_api3
 
@@ -42,6 +42,7 @@ def create_project_directory(sg, logger, event, args):
     elif "Shotgun_Asset_Change" == event["event_type"]:
         create = CreateDirectory(sg, logger, event)
         create.asset()
+    # logger.info(event)
     return
 
 
@@ -52,7 +53,7 @@ class CreateDirectory(object):
         self.event = event
 
         project = event["entity"]  # assumes project change
-        if not project:  # asset/shot change
+        if event["event_type"] != "Shotgun_Project_Change":
             project = event["project"]
 
         unc_path = "sg_media_space.CustomNonProjectEntity28.sg_unc_path"
@@ -98,7 +99,29 @@ class CreateDirectory(object):
         return
 
     def shot(self):
-        self.logger.info(">> SHOT CHANGED")
+        folders = [
+            "scenes/03_Cameras",
+            # "scenes/04_Layouts",  # not used
+            "scenes/05_Dynamics",
+            "scenes/06_Cache/08_Animation",  # 06_Cache/08_Animation/Shot_### or 06_Cache/05_Dynamics/Shot_###
+            "scenes/07_Lighting",
+            "scenes/08_Animation",
+            "sourceimages/Assets",  # everything that isn't HDRI goes into Assets, including textures for shots
+        ]
+
+        shot_name = self.event["entity"]["name"]
+        for folder in folders:
+            directory = path.normpath(path.join(
+                self.project_directory,
+                "Project Directory/02_Production/04_Maya",
+                folder,
+                shot_name
+            ))
+            try:
+                makedirs(directory)
+            except:
+                pass
+            self.logger.info(">> {}".format(directory))
         return
 
     def asset(self):
@@ -106,3 +129,4 @@ class CreateDirectory(object):
         # create source images folder
         self.logger.info(">> ASSET CHANGED")
         return
+
