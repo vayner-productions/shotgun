@@ -33,14 +33,15 @@ def registerCallbacks(reg):
 
 
 def create_project_directory(sg, logger, event, args):
-    create = CreateDirectory(sg, logger, event)
     if "Shotgun_Project_Change" == event["event_type"]:
+        create = CreateDirectory(sg, logger, event)
         create.project()
     elif "Shotgun_Shot_Change" == event["event_type"]:
+        create = CreateDirectory(sg, logger, event)
         create.shot()
     elif "Shotgun_Asset_Change" == event["event_type"]:
+        create = CreateDirectory(sg, logger, event)
         create.asset()
-    # logger.info(event)
     return
 
 
@@ -50,8 +51,9 @@ class CreateDirectory(object):
         self.logger = logger
         self.event = event
 
-        # project path is used in all methods
-        project = event["entity"]
+        project = event["entity"]  # assumes project change
+        if not project:  # asset/shot change
+            project = event["project"]
 
         unc_path = "sg_media_space.CustomNonProjectEntity28.sg_unc_path"
         client = "sg_client.CustomNonProjectEntity15.code"
