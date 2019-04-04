@@ -32,7 +32,7 @@ def registerCallbacks(reg):
     reg.logger.debug("Registered callback.")
 
 
-def create_project_directory(sg, logger, event, args):
+def create_project_directory(sg, logger, event):
     if "Shotgun_Project_Change" == event["event_type"]:
         create = CreateDirectory(sg, logger, event)
         create.project()
@@ -93,12 +93,14 @@ class CreateDirectory(object):
 
         try:
             shutil.copytree(template, self.project_directory)
-            mkdir(a_drive)
+            makedirs(a_drive)
         except:
             pass
         return
 
     def shot(self):
+        self.logger.info(">> SHOT CHANGED")
+
         folders = [
             "scenes/03_Cameras",
             # "scenes/04_Layouts",  # not used
@@ -128,5 +130,35 @@ class CreateDirectory(object):
         # create asset folder
         # create source images folder
         self.logger.info(">> ASSET CHANGED")
+
+        asset = self.event["entity"]
+        asset_type = self.sg.find_one(
+            "Asset",
+            filters=[["id", "is", asset["id"]]],
+            fields=["sg_asset_type"]
+        )
+
+        asset_folder = "01_Assets"
+        if asset_type == "CG Rig":
+            asset_folder = "02_Rigs"
+
+        folders = [
+            "scenes/" + asset_folder,
+            "sourceimages/Assets/",
+        ]
+
+        for folder in folders:
+            directory = path.normpath(path.join(
+                self.project_directory,
+                "Project Directory/02_Production/04_Maya",
+                folder,
+                asset["name"]
+            ))
+
+            try:
+                makedirs(directory)
+            except:
+                pass
+            self.logger.info(">> {}".format(directory))
         return
 
