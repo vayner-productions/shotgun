@@ -1,4 +1,4 @@
-import os
+from os import path, makedirs
 import shutil
 import shotgun_api3
 
@@ -7,8 +7,7 @@ def registerCallbacks(reg):
     """
     Register all necessary or appropriate callbacks for this plugin.
     """
-    file_object = open(r"//genesisnx/genesisnx/Animation/Shotgun/System/Tools/shotgun/create_project_directory.txt",
-                       "r")
+    file_object = open(r"//genesisnx/genesisnx/Animation/Shotgun/System/Tools/shotgun/create_project_directory.txt")
 
     eventFilter = {
         "Shotgun_Project_Change": ["name", "sg_client", "sg_brand"],
@@ -16,7 +15,7 @@ def registerCallbacks(reg):
         "Shotgun_Shot_Change": ["code"]
     }
     server = "https://vaynerproductions.shotgunstudio.com"
-    script_name = os.path.basename(__file__).split(".")[0] + ".py"
+    script_name = path.basename(__file__).split(".")[0] + ".py"  # no pyc files
     script_key = file_object.readline()
 
     file_object.close()
@@ -33,122 +32,133 @@ def registerCallbacks(reg):
     reg.logger.debug("Registered callback.")
 
 
-def create_project_directory(sg, logger, event, args):
-    # check for event id and project before continuing
-    event_id = event.get("id")
-    project = event["project"]
-    if project is None:
-        project = event.get("entity", {})
+def create_project_directory(sg, logger, event):
+    if "Shotgun_Project_Change" == event["event_type"]:
+        create = CreateDirectory(sg, logger, event)
+        create.project()
+    elif "Shotgun_Shot_Change" == event["event_type"]:
+        create = CreateDirectory(sg, logger, event)
+        create.shot()
+    elif "Shotgun_Asset_Change" == event["event_type"]:
+        create = CreateDirectory(sg, logger, event)
+        create.asset()
+    # logger.info(event)
+    return
 
-    if None is [event_id, project]:
-        logger.warning("Missing info in event dictionary, skipping.")
+
+class CreateDirectory(object):
+    def __init__(self, sg, logger, event):
+        self.sg = sg
+        self.logger = logger
+        self.event = event
+
+        project = event["entity"]  # assumes project change
+        if event["event_type"] != "Shotgun_Project_Change":
+            project = event["project"]
+
+        unc_path = "sg_media_space.CustomNonProjectEntity28.sg_unc_path"
+        client = "sg_client.CustomNonProjectEntity15.code"
+        brand = "sg_brand.CustomNonProjectEntity29.code"
+        project_name = "name"
+
+        fields = sg.find_one(
+            "Project",
+            filters=[["id", "is", project["id"]]],
+            fields=[client, brand, unc_path, project_name]
+        )
+
+        self.project_directory = path.normpath(path.join(
+            fields[unc_path],
+            "Animation/Projects/Client",
+            fields[client],
+            fields[brand],
+            fields[project_name]
+        ))
         return
 
-    # check for project path by getting the client, brand, and project
-    name = {"project": project["name"]}
-    for f in ["sg_client", "sg_brand"]:
-        key = f.split("_")[1]
-        data = sg.find_one("Project", [["id", "is", project["id"]]], [f])
-        if None is data:
-            logger.info("Missing {}".format(f))
-            return
-        name[key] = data[f]["name"]
+    def project(self):
+        """
+        creates project directory from template for production and another project directory on A: for tracking
+        :return:
+        """
+        self.logger.info(">> PROJECT CHANGED")
 
-    media_space = sg.find_one(
-        "CustomNonProjectEntity28",
-        filters=[["sg_projects", "is", project]],
-        fields=["sg_unc_path"]
-    )
-    unc_path = media_space["sg_unc_path"]
+        template = path.normpath(
+            "//genesisnx/genesisnx/Animation/Directory Source/New Project/0000_Project"
+        )
+        a_drive = path.normpath(path.join(
+            "//genesisnx/genesisnx",
+            self.project_directory[self.project_directory.index("Animation"):]
+        ))
 
-    # create project, shot, and asset directory
-    event_type = event["event_type"]
-    start = r"{}/Animation/Projects/Client/{}/{}/{}".format(
-        unc_path,
-        name["client"],
-        name["brand"],
-        name["project"]
-    )
-
-    if "Shotgun_Project_Change" == event_type:
-        if not os.path.exists(start):
-            logger.info(">> created project directory: {}".format(start))
-            os.makedirs(start)
-            os.rmdir(start)
-            template = r"//genesisnx/genesisnx/Animation/Directory Source/New Project/0000_Project"
-            shutil.copytree(template, start)
-        logger.info(">> created project directory")
-    elif "Shotgun_Shot_Change" == event_type:
-        # omitting tests, assets, rigs, dynamics
-        scene_dir = r"{}/Project Directory/02_Production/04_Maya/scenes".format(start)
-
-        # create shot paths for cameras, layouts, cache, lighting, animation
-        new_shot = event["meta"]["new_value"]
-        folders = []  # full path to each scene process, including images
-        for s in ["Cameras", "Layouts", "Lighting", "Dynamics", "Animation"]:
-            for fld in os.listdir(scene_dir):
-                if s in fld:
-                    new_folder = r"{}/{}/{}".format(scene_dir, fld, new_shot)
-                    folders += [new_folder]
-
-        # /sourceimages contains /Assets, /HDRI, and /000_Unsorted -- everything that isn't HDRI goes into Assets,
-        # including textures from Shots. I know. Confusing.
-        source_images_dir = scene_dir.replace("scenes", "sourceimages/Assets/{}".format(new_shot))
-
-        cache_dir = "{}/06_Cache/08_Animation/{}".format(scene_dir, new_shot)
-
-        folders += [source_images_dir, cache_dir]
-        # create folders
-        for pth in folders:
-            try:
-                os.makedirs(pth)
-            except:
-                pass
-
-        logger.info(">> created shot directory")
-
-        # create and link camera entity to newly created shot
-        camera_entity = sg.find_one(
-            "Shot",
-            [["project", "is", project],
-             ["code", "is", new_shot]],
-            ["sg_camera"]
-        )["sg_camera"]
-
-        if not camera_entity:
-            shot_entity = event["entity"]
-            data = {
-                "project": project,
-                "code": shot_entity["name"] + "_Cam",
-                "shot_sg_camera_shots": [shot_entity],
-            }
-            sg.create("Camera", data)
-            logger.info(">> created and link camera entity to shot")
-    elif "Shotgun_Asset_Change" == event_type:
-        # omit tests, dynamics, cameras, layouts, cache, lighting, animation
-        sg_asset_type = sg.find_one(
-            "Asset",
-            [["project", "is", project],
-             ["id", "is", event["meta"]["entity_id"]]],
-            ["sg_asset_type"]
-        )["sg_asset_type"]
-
-        # create asset paths
-        scene_dir = r"{}/Project Directory/02_Production/04_Maya/scenes".format(start)
-        scene_folder = {
-            "CG Model": "01_Assets",
-            "CG Rig": "02_Rigs"
-        }
-        asset = event["meta"]["new_value"]
-
-        asset_folder_path = r"{}/{}/{}".format(scene_dir, scene_folder[sg_asset_type], asset)
-        source_images_dir = scene_dir.replace("scenes", "sourceimages/Assets/{}".format(asset))
-
-        # create asset folders assets, rigs
         try:
-            os.makedirs(asset_folder_path)
-            os.makedirs(source_images_dir)
+            shutil.copytree(template, self.project_directory)
+            makedirs(a_drive)
         except:
             pass
-        logger.info(">> created asset directory")
-    return
+        return
+
+    def shot(self):
+        self.logger.info(">> SHOT CHANGED")
+
+        folders = [
+            "scenes/03_Cameras",
+            # "scenes/04_Layouts",  # not used
+            "scenes/05_Dynamics",
+            "scenes/06_Cache/08_Animation",  # 06_Cache/08_Animation/Shot_### or 06_Cache/05_Dynamics/Shot_###
+            "scenes/07_Lighting",
+            "scenes/08_Animation",
+            "sourceimages/Assets",  # everything that isn't HDRI goes into Assets, including textures for shots
+        ]
+
+        shot_name = self.event["entity"]["name"]
+        for folder in folders:
+            directory = path.normpath(path.join(
+                self.project_directory,
+                "Project Directory/02_Production/04_Maya",
+                folder,
+                shot_name
+            ))
+            try:
+                makedirs(directory)
+            except:
+                pass
+            self.logger.info(">> {}".format(directory))
+        return
+
+    def asset(self):
+        # create asset folder
+        # create source images folder
+        self.logger.info(">> ASSET CHANGED")
+
+        asset = self.event["entity"]
+        asset_type = self.sg.find_one(
+            "Asset",
+            filters=[["id", "is", asset["id"]]],
+            fields=["sg_asset_type"]
+        )
+
+        asset_folder = "01_Assets"
+        if asset_type == "CG Rig":
+            asset_folder = "02_Rigs"
+
+        folders = [
+            "scenes/" + asset_folder,
+            "sourceimages/Assets/",
+        ]
+
+        for folder in folders:
+            directory = path.normpath(path.join(
+                self.project_directory,
+                "Project Directory/02_Production/04_Maya",
+                folder,
+                asset["name"]
+            ))
+
+            try:
+                makedirs(directory)
+            except:
+                pass
+            self.logger.info(">> {}".format(directory))
+        return
+

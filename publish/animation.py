@@ -422,6 +422,7 @@ class Publish(object):
 
             newFile(f=1)
             importFile(abc_file, f=1, gr=1, gn=new_name)
+            node = pm.PyNode(new_name)
             job_arg = '{}-root "{}" -file "{}"'.format(
                 job_arg[:job_arg.index("-root")],
                 node.longName(),
@@ -485,7 +486,7 @@ class Publish(object):
         # ATTACHMENTS - local files/directories are updated, whereas remote files/directories are uploaded
         # updating each attachment to the version individually in case they're being uploaded from different places
         # remote publishes are wip, and therefore commented out of use, vayner IT deparment needs to check securities!!!
-        if self.maya_file.drive == media_space:
+        if self.maya_file.drive == mapped_letter:
             sg.update(
                 "Version",
                 version["id"],
@@ -506,7 +507,7 @@ class Publish(object):
                 display_name=r"{}".format(path(self.maya_file).basename())
             )
 
-        if self.alembic_directory.drive == media_space:
+        if self.alembic_directory.drive == mapped_letter:
             sg.update(
                 "Version",
                 version["id"],
@@ -565,8 +566,10 @@ class Publish(object):
         if comment == "Proxies:":
             alembics = self.alembic_directory.files("*_PXY.abc")
 
+        # Ensures 06_Cache is created in case shotgun event daemon does not
         for abc in alembics:
-            dst = all_directory.joinpath(abc.basename())
+            dst = all_directory.joinpath(abc.basename()).normpath()
+            path.mkdir_p(all_directory)
             path.copy(abc, dst)
 
         # Adding automated comment
