@@ -52,7 +52,7 @@ def create_project_directory(sg, logger, event, args):
     elif "Shotgun_Asset_Change" == event["event_type"]:
         create = CreateDirectory(sg, logger, event)
         create.asset()
-    logger.info(event)
+    # logger.info(event)
     return
 
 
