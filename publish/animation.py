@@ -448,7 +448,8 @@ class Publish(object):
             [
                 ["project", "is", project],
                 ["code", "is", entity_name]
-            ]
+            ],
+            ["code"]
         )
 
         version_entity = sg.find_one(
