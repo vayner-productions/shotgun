@@ -458,11 +458,14 @@ class MyWindow(QtWidgets.QDialog):
                 pm.FileReference(refnode=name + "RN").replaceWith(reference_file)
                 start_file.remove_p()
             else:
-                # FOR ALL SCENE PROCESSES AND CAMERA
                 name = "_{}_".format(reference_file.dirname().namebase)
+                if "Rigs" in reference_file:
+                    name += "RIG_"
+
+                # FOR ALL SCENE PROCESSES AND CAMERA
 
                 if "Shot" in name:
-                    name = name[1:] + "Cam_"
+                    name = name[1:] + "CAM_"
 
                 start_file = reference_file.dirname().joinpath(name + ".ma")
                 reference_file.copy2(start_file)
