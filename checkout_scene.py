@@ -174,7 +174,6 @@ class Checkout:
             )[data[key]]["local_path_windows"]
         published_file = path(published_file).normpath()
         published_file = "{}".format(published_file)
-        print ">>>>>>>>>>", published_file
         return published_file
 
     def run(self, checkout_type="processed", checkout_file=None):
