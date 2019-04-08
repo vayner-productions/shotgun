@@ -290,9 +290,16 @@ class MyWindow(QtWidgets.QDialog):
             return
 
         # add assets to every scene process except lighting
+        filter_asset = None
+        if scene_process == "02_Rigs":
+            filter_asset = ["sg_asset_type", "is", "CG Rig"]
+        elif scene_process == "01_Assets":
+            filter_asset = ["sg_asset_type", "is", "CG Model"]
+
         assets = sg.find_one(type,
                              [["project", "is", project],
-                              ["code", "is", entity]],
+                              ["code", "is", entity],
+                              filter_asset],
                              ["assets"])["assets"]
 
         asset_names = []
