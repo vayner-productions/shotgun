@@ -44,14 +44,17 @@ def create_project_directory(sg, logger, event, args):
         return
 
     if "Shotgun_Project_Change" == event["event_type"]:
-        create = CreateDirectory(sg, logger, event)
-        create.project()
+        directory = CreateDirectory(sg, logger, event)
+        directory.project()
     elif "Shotgun_Shot_Change" == event["event_type"]:
-        create = CreateDirectory(sg, logger, event)
-        create.shot()
+        directory = CreateDirectory(sg, logger, event)
+        directory.shot()
+
+        entity = CreateEntity(sg, logger, event)
+        entity.camera()
     elif "Shotgun_Asset_Change" == event["event_type"]:
-        create = CreateDirectory(sg, logger, event)
-        create.asset()
+        directory = CreateDirectory(sg, logger, event)
+        directory.asset()
     # logger.info(event)
     return
 
