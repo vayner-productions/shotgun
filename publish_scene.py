@@ -37,7 +37,11 @@ def get_alembic_file(file_path):
     if pm.objExists(name):
         top_node = pm.PyNode(name)
     else:
-        top_node = pm.group(em=1, n=name)
+        prefix, maya_name = name.split("_", 1)
+        if prefix.isdigit():
+            top_node = pm.group(em=1, n=maya_name)
+        else:
+            top_node = pm.group(em=1, n=name)
 
     default_cameras = set([pm.PyNode(cam) for cam in ["persp", "top", "front", "side"]])
     outliner = list(set(pm.ls(assemblies=1)).difference(default_cameras).difference(set([top_node])))
@@ -105,8 +109,12 @@ def check_top_node(top_node=None, suffix=""):
 
     name = "{}{}".format(scene.basename().split("_processed.")[0], suffix)
     incomplete = 0
+    prefix, maya_name = name.split("_", 1)
     try:
-        top_node = pm.PyNode(name)
+        if prefix.isdigit():
+            top_node = pm.PyNode(maya_name)
+        else:
+            top_node = pm.PyNode(name)
 
         children = pm.ls(assemblies=1)
         for view in ["persp", "top", "front", "side", top_node]:
@@ -116,7 +124,10 @@ def check_top_node(top_node=None, suffix=""):
         if children:
             incomplete = 1
     except:
-        top_node = pm.group(em=1, n=name)
+        if prefix.isdigit():
+            top_node = pm.group(em=1, n=maya_name)
+        else:
+            top_node = pm.group(em=1, n=name)
         incomplete = 1
 
     if incomplete:
