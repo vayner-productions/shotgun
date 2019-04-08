@@ -32,7 +32,17 @@ def registerCallbacks(reg):
     reg.logger.debug("Registered callback.")
 
 
-def create_project_directory(sg, logger, event):
+def create_project_directory(sg, logger, event, args):
+    # check for event id and project before continuing
+    event_id = event.get("id")
+    project = event["project"]
+    if project is None:
+        project = event.get("entity", {})
+
+    if None is [event_id, project]:
+        logger.warning("Missing info in event dictionary, skipping.")
+        return
+
     if "Shotgun_Project_Change" == event["event_type"]:
         create = CreateDirectory(sg, logger, event)
         create.project()
@@ -42,7 +52,7 @@ def create_project_directory(sg, logger, event):
     elif "Shotgun_Asset_Change" == event["event_type"]:
         create = CreateDirectory(sg, logger, event)
         create.asset()
-    # logger.info(event)
+    logger.info(event)
     return
 
 
