@@ -20,13 +20,18 @@ workspace = Workspace()
 def get_entity(file_path):
     scene_process, entity_name = file_path.rsplit("/", 2)[1:]
     parent_entity = "Shot"
-    if scene_process[3:] in ["Assets", "Rigs"]:
-        parent_entity = "Asset"
 
     filters = [
         ["project", "is", project],
         ["code", "is", entity_name]
     ]
+
+    if scene_process[3:] in "Assets":
+        parent_entity = "Asset"
+        filters += [["sg_asset_type", "is", "CG Model"]]
+    elif scene_process[3:] in "Rigs":
+        parent_entity = "Asset"
+        filters += [["sg_asset_type", "is", "CG Rig"]]
     entity = sg.find_one(parent_entity, filters)
     return entity
 
