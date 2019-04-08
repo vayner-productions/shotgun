@@ -199,6 +199,7 @@ def publish_scene(addressed_tasks=[], comments=None):
     data, local_path = {}, original_file.replace("/", "\\")
 
     if scene_process == "Assets" or scene_process == "Rigs":
+        # TODO: TRACK VERSIONS!!!!
         data = {
             "sg_file": {
                 "link_type": "local",
