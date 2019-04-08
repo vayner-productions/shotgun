@@ -146,7 +146,7 @@ class CreateDirectory(object):
             "Asset",
             filters=[["id", "is", asset["id"]]],
             fields=["sg_asset_type"]
-        )
+        )["sg_asset_type"]
 
         asset_folder = "01_Assets"
         if asset_type == "CG Rig":
