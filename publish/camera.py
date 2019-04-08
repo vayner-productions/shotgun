@@ -104,7 +104,7 @@ class CameraTools(object):
         )
 
         if shot_entity["sg_frame_range"] != sg_frame_range:
-            self.comment += "frame range changed from {} to {}".format(
+            self.comment += "\n\nframe range changed from {} to {}".format(
                 shot_entity["sg_frame_range"],
                 sg_frame_range
             )
