@@ -51,7 +51,6 @@ def create_project_directory(sg, logger, event, args):
         directory.shot()
 
         entity = CreateEntity(sg, logger, event)
-        entity.camera()
     elif "Shotgun_Asset_Change" == event["event_type"]:
         directory = CreateDirectory(sg, logger, event)
         directory.asset()
@@ -136,7 +135,7 @@ class CreateDirectory(object):
                 makedirs(directory)
             except:
                 pass
-            self.logger.info(">> {}".format(directory))
+            # self.logger.info(">> {}".format(directory))
         return
 
     def asset(self):
@@ -172,7 +171,7 @@ class CreateDirectory(object):
                 makedirs(directory)
             except:
                 pass
-            self.logger.info(">> {}".format(directory))
+            # self.logger.info(">> {}".format(directory))
         return
 
 
@@ -181,33 +180,46 @@ class CreateEntity(object):
         self.sg = sg
         self.logger = logger
         self.event = event
-
-        # project = self.event["project"]
-        # shot = self.event["entity"]
-        self.logger.info(">>>>> {} {}".format(self.event["entity"]), self.event["project"])
+        self.camera()
+        self.animation()
         return
 
     def camera(self):
-        self.logger.info(">> CREATING CAMERA ENTITY")
+        self.logger.info(">> CAMERA ENTITY")
 
-        # camera_entity = self.sg.find_one(
-        #     "Shot",
-        #     [["project", "is", self.project],
-        #      ["code", "is", new_shot]],
-        #     ["sg_camera"]
-        # )["sg_camera"]
+        camera = self.sg.find_one(
+            "Shot",
+            filters=[["id", "is", self.event["entity"]["id"]]],
+            fields=["sg_camera"]
+        )["sg_camera"]
 
-        # if not camera_entity:
-        #     shot_entity = event["entity"]
-        #     data = {
-        #         "project": project,
-        #         "code": shot_entity["name"] + "_Cam",
-        #         "shot_sg_camera_shots": [shot_entity],
-        #     }
-        #     sg.create("Camera", data)
-        #     logger.info(">> created and link camera entity to shot")
+        if not camera:
+            self.sg.create(
+                "Camera",
+                {
+                    "project": self.event["project"],
+                    "code": self.event["entity"]["name"] + "_Cam",
+                    "shot_sg_camera_shots": [self.event["entity"]]
+                }
+            )
         return
 
     def animation(self):
-        self.logger.info(">> CREATING CAMERA ENTITY")
+        self.logger.info(">> ANIMATION ENTITY")
+
+        animation = self.sg.find_one(
+            "Shot",
+            filters=[["id", "is", self.event["entity"]["id"]]],
+            fields=["sg_anim"]
+        )["sg_anim"]
+
+        if not animation:
+            self.sg.create(
+                "CustomEntity05",
+                {
+                    "project": self.event["project"],
+                    "code": self.event["entity"]["name"] + "_Anim",
+                    "sg_shots": [self.event["entity"]]
+                }
+            )
         return
