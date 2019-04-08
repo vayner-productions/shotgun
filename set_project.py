@@ -57,8 +57,8 @@ class MyWindow(QtWidgets.QDialog):
         client_brand = data["sg_client"]["name"]
         sub_brand = data["sg_brand"]["name"]
         project_name = data["name"]
-        self.project_path = r"A:/Animation/Projects/Client/{}/{}/{}/Project Directory/02_Production/04_Maya".format(
-            client_brand, sub_brand, project_name)
+        self.project_path = r"{}/Animation/Projects/Client/{}/{}/{}/Project Directory/02_Production/04_Maya".format(
+            mapped_letter, client_brand, sub_brand, project_name)
         return
 
     def add_scene_items(self):
