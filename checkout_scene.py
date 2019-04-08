@@ -161,6 +161,12 @@ class Checkout:
                 ["project", "is", project],
                 ["code", "is", entity_code]
             ]
+
+            if key == "Rigs":
+                entity_filters += [["sg_asset_type", "is", "CG Rig"]]
+            elif key == "Assets":
+                entity_filters += [["sg_asset_type", "is", "CG Model"]]
+
             published_file = sg.find_one(
                 entity_type,
                 entity_filters,
@@ -168,6 +174,7 @@ class Checkout:
             )[data[key]]["local_path_windows"]
         published_file = path(published_file).normpath()
         published_file = "{}".format(published_file)
+        print ">>>>>>>>>>", published_file
         return published_file
 
     def run(self, checkout_type="processed", checkout_file=None):
