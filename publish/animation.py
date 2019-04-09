@@ -441,7 +441,8 @@ class Publish(object):
 
     def update_shotgun(self):
         # GET ENTITY - get the latest alembic entity for the shot
-        entity_name = path(workspace.fileRules["scene"]).basename() + "_Anim"
+        shot_name = path(workspace.fileRules["scene"]).basename()  # for thumbnail updates in Shots page
+        entity_name = shot_name + "_Anim"
 
         alembic_entity = sg.find_one(
             "CustomEntity05",
@@ -529,15 +530,25 @@ class Publish(object):
                 display_name=r"{}".format(path(self.alembic_directory).basename())
             )
 
-        # THUMBNAIL - ensures play icon appears for videos, images appear as thumbnails, and thumbnail from previous
-        # version is reused if user opts out of making a playblast for this version
+        # THUMBNAIL - ensures versions display the right media icon (movies with the play icon)
+        # thumbnail attachments are then shared to the Shot entity's thumbnail
         if self.playblast and not what(self.playblast):
             sg.upload("Version", version["id"], self.playblast, field_name="sg_uploaded_movie")
-            sg.update("Version", version["id"], {"image": None})
         elif self.thumbnail:
             sg.upload_thumbnail("Version", version["id"], self.thumbnail)
-        elif not (self.thumbnail or self.playblast):
-            sg.share_thumbnail(entities=[version], source_entity=version_entity)
+            sg.upload("CustomEntity05", alembic_entity["id"], self.thumbnail, field_name="image")
+
+        shot_version = sg.find_one(  # latest version of Shot
+            "Version",
+            [["project", "is", project], ["code", "is", shot_name]],
+            additional_filter_presets=[{
+                "preset_name": "LATEST",
+                "latest_by": "ENTITIES_CREATED_AT"
+            }]
+        )
+        media_file = self.playblast or self.thumbnail
+
+        sg.upload("Version", shot_version["id"], media_file, field_name="sg_uploaded_movie")
         print "\n>> published animation to shotgun"
         return
 
