@@ -179,7 +179,7 @@ class MyWindow(QtWidgets.QDialog):
                 )
 
                 if data["sg_asset_type"] == "CG Rig":
-                    asset_names += [data["assets"][0]["name"]]
+                    asset_names[-1] = data["assets"][0]["name"]
 
             alembic_entity = sg.find_one(
                 "CustomEntity05",
