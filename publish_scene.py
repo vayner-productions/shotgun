@@ -98,6 +98,9 @@ def get_tasks():
 
 def check_top_node(top_node=None, suffix=""):
     scene = pm.sceneName()
+    if "07_Lighting" in scene:
+        return True
+
     if suffix:
         if "_" not in suffix:
             suffix = "_" + suffix
