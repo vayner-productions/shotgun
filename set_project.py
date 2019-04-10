@@ -105,7 +105,7 @@ class MyWindow(QtWidgets.QDialog):
 
         mel.eval('setProject \"' + self.project_path + '\"')
         self.ui.close()
-        print ">> project set",
+        print ">> project set\n",
         return
 
     def init_ui(self):
