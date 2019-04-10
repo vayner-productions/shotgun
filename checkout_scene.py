@@ -226,5 +226,5 @@ class Checkout:
             saveAs(checkout_file)
         else:
             return warning("Wrong checkout type and/or missing checkout file.")
-        print ">>", checkout_file,
+        print ">> {}\n".format(checkout_file),
         return checkout_file
