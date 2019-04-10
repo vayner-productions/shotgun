@@ -7,9 +7,7 @@ sg.get_window()
 # USED FROM CODE
 from shotgun.VaynerMenu import manage_proxies as sg
 reload(sg)
-mp = sg.MyWindow()
-mp.remove = ["Shot_006_PXY"]  # expects the exact name of the proxy, assumes it's an alembic
-mp.remove_proxies()
+sg.remove("Shot_006_PXY", "Other_PXY")
 """
 
 from PySide2 import QtCore, QtWidgets, QtUiTools
@@ -26,6 +24,13 @@ def get_window():
         pass
     mw = MyWindow()
     mw.ui.show()
+
+
+def remove(*argv):
+    mp = MyWindow()
+    mp.remove = argv
+    mp.remove_proxies()
+    return
 
 
 class MyWindow(QtWidgets.QDialog):
