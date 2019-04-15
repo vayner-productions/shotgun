@@ -1,24 +1,35 @@
+"""
+from shotgun import update_timeline as sg
+reload(sg)
+sg.update_timeline()
+
+from shotgun import update_timeline as sg
+reload(sg)
+sg.get_frame_range()
+"""
+
+
 from . import sg, project
-from pymel.core.system import Workspace, warning
+from pymel.core.system import Workspace
 from pymel.core.animation import playbackOptions
-import pymel.util.path as path
+workspace = Workspace()
 
 
-def update_timeline(frame_range=None):
-    try:
-        workspace = Workspace()
-        shot_code = path(workspace.fileRules["scene"]).basename()  # Shot_###
+def get_frame_range():
+    shot_code = workspace.fileRules["scene"].rsplit("/", 1)[1]  # Shot_###
 
-        filter = [
-            ["project", "is", project],
-            ["code", "is", shot_code]
-        ]
-        frame_range = sg.find_one("Shot", filter, ["sg_frame_range"])["sg_frame_range"]
+    filters = [
+        ["project", "is", project],
+        ["code", "is", shot_code]
+    ]
+    sg_frame_range = sg.find_one("Shot", filters, ["sg_frame_range"])["sg_frame_range"]
 
-        start, end = [int(t) for t in frame_range.split("-")]
-        playbackOptions(min=start, max=end)
-    except:
-        warning("Update timeline failed, set project to shot.")
-        pass
-    print ">> updated timeline: {}".format(frame_range),
+    start, end = [int(t) for t in sg_frame_range.split("-")]
+    return start, end
+
+
+def update_timeline(start=None, end=None):
+    if not all([start, end]):
+        start, end = get_frame_range()
+    playbackOptions(ast=start, aet=end)
     return
