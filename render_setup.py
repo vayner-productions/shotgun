@@ -1,7 +1,5 @@
 """
-from shotgun import render_setup
-reload(render_setup)
-render_setup.update()
+USE
 """
 
 
