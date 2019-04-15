@@ -98,14 +98,13 @@ class MyWindow(QtWidgets.QDialog):
             self.scene_dict[self.ui.scene_cbx.currentText()],
             self.ui.asset_cbx.currentText()])
 
-        if "Shot" in self.ui.asset_cbx.currentText():
-            workspace.fileRules["Alembic"] = "scenes/06_Cache/08_Animation/{}".format(self.ui.asset_cbx.currentText())
+        workspace.fileRules["Alembic"] = "scenes/06_Cache/08_Animation/{}".format(self.ui.asset_cbx.currentText())
 
-            workspace.fileRules["shaders"] = "data/001_Shaders"
+        workspace.fileRules["shaders"] = "data/001_Shaders"
 
         mel.eval('setProject \"' + self.project_path + '\"')
         self.ui.close()
-        print ">> project set",
+        print ">> project set\n",
         return
 
     def init_ui(self):
