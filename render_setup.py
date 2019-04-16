@@ -1,17 +1,13 @@
 """
 from shotgun import render_setup as sg
 reload(sg)
-sg.update()  # sg.RenderSettings()
+sg.RenderSettings()
 """
 
 from . import sg, project
 from pymel.core import workspace, PyNode, ls, shadingNode, sets, listNodeTypes, nodeType
 from mtoa.aovs import AOVInterface
 aov_ui = AOVInterface()
-
-
-def update():
-    return RenderSettings()
 
 
 class Common(object):
@@ -99,16 +95,6 @@ class AOVs(object):
         daro.aovMode.set(1)
         return
 
-    def aov_shaders(self):
-        ao_name = "aiAmbientOcclusion"
-        if not ls(type=ao_name):
-            ao_aov = PyNode("aiAOV_AO")
-            ao_shader = shadingNode(ao_name, asShader=1)
-            ao_sg = sets(name=ao_name + "SG", empty=1, renderable=1, noSurfaceShader=1)
-            ao_shader.outColor >> ao_aov.defaultValue
-            ao_shader.outColor >> ao_sg.surfaceShader
-        return
-
     def aov_browser(self, default_aovs=[]):
         default_aovs = list(set(
             default_aovs +
@@ -132,6 +118,14 @@ class AOVs(object):
         for aov in default_aovs:
             if not aov_ui.getAOVNode(aov):
                 aov_ui.addAOV(aov)
+
+        ao_name = "aiAmbientOcclusion"
+        if not ls(type=ao_name):
+            ao_aov = PyNode("aiAOV_AO")
+            ao_shader = shadingNode(ao_name, asShader=1)
+            ao_sg = sets(name=ao_name + "SG", empty=1, renderable=1, noSurfaceShader=1)
+            ao_shader.outColor >> ao_aov.defaultValue
+            ao_shader.outColor >> ao_sg.surfaceShader
         return
 
     def light_group(self):
@@ -199,7 +193,6 @@ class RenderSettings(Common, AOVs):
 
     def aovs_tab(self):
         self.maya_render_view()
-        self.aov_shaders()
         self.aov_browser(default_aovs=[])  # self.aov_browser(default_aovs=["volume"])  # add to defaults
         self.light_group()
         return
