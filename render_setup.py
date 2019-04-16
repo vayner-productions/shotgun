@@ -4,7 +4,8 @@ reload(sg)
 sg.RenderSettings()
 """
 
-from . import sg, project
+from shotgun import update_timeline
+reload(update_timeline)
 from pymel.core import workspace, PyNode, ls, shadingNode, sets, listNodeTypes, nodeType
 from mtoa.aovs import AOVInterface
 aov_ui = AOVInterface()
@@ -60,18 +61,7 @@ class Common(object):
             self.drg.endFrame.set(end)
             return
 
-        # # OPT 1
-        # from shotgun import update_timeline as sg
-        # reload(sg)
-        # start, end = sg.get_frame_range()
-
-        # OPT 2
-        sg_frame_range = sg.find_one(
-            "Shot",
-            filters=[["project", "is", project], ["code", "is", self.shot]],
-            fields=["sg_frame_range"]
-        )["sg_frame_range"]
-        start, end = [int(t) for t in sg_frame_range.split("-")]
+        start, end = update_timeline.get_frame_range()
 
         self.drg.startFrame.set(start)
         self.drg.endFrame.set(end)
