@@ -54,8 +54,8 @@ sg.get_window()
 """
 
 render_setup = """
-import shotgun.render_setup as sg; reload(sg)
-sg.get_window()
+from shotgun import render_setup as sg; reload(sg)
+sg.RenderSettings()
 """
 
 import_camera = """
