@@ -4,11 +4,9 @@ USE
 
 # Common
 from . import sg, project
-from pymel.core import workspace, PyNode
-
-# AOVs
-# from mtoa.core import createOptions
-
+from pymel.core import workspace, PyNode, ls, shadingNode, sets, listNodeTypes, nodeType
+from mtoa.aovs import AOVInterface
+aov_ui = AOVInterface()
 
 
 def update():
@@ -104,6 +102,13 @@ class AOVs(object):
         return
 
     def aov_shaders(self):
+        ao_name = "aiAmbientOcclusion"
+        if not ls(type=ao_name):
+            ao_aov = PyNode("aiAOV_AO")
+            ao_shader = shadingNode(ao_name, asShader=1)
+            ao_sg = sets(name=ao_name + "SG", empty=1, renderable=1, noSurfaceShader=1)
+            ao_shader.outColor >> ao_aov.defaultValue
+            ao_shader.outColor >> ao_sg.surfaceShader
         return
 
     def aov_browser(self, default_aovs=[]):
@@ -126,12 +131,53 @@ class AOVs(object):
             ]
         ))
 
-        from mtoa.aovs import AOVInterface
-        aov_ui = AOVInterface()
-
         for aov in default_aovs:
             if not aov_ui.getAOVNode(aov):
                 aov_ui.addAOV(aov)
+        return
+
+    def light_group(self):
+        lights = ls(type=["light"] + listNodeTypes("light"), dag=True)
+
+        for light in lights:
+            light.getParent().rename("_")
+
+        another_name = {
+            "aiAreaLight": "area",
+            "aiAtmosphereVolume": None,
+            "aiBarndoor": None,
+            "aiFog": "fog",
+            "aiGobo": None,
+            "aiLightBlocker": None,
+            "aiLightDecay": None,
+            "aiMeshLight": "mesh",
+            "aiPhotometricLight": "photometric",
+            "aiSkyDomeLight": "dome",
+            "ambientLight": "ambient",
+            "areaLight": "area",
+            "directionalLight": "directional",
+            "lightGroup": None,
+            "lightItem": None,
+            "pointLight": "point",
+            "spotLight": "spot",
+            "volumeLight": "volume",
+        }
+
+        for light in lights:
+            name = another_name[nodeType(light)]
+            if not name:
+                name = nodeType(light)
+            name += "_01"
+
+            top_node = light.getParent()
+            top_node.rename(name)
+
+        for light in lights:
+            name = light.getParent() + "_LGT"
+            light.getParent().rename(name)
+            light.aiAov.set(name)
+            if not aov_ui.getAOVNode(name):
+                aov_ui.addAOV(name)
         return
 
 
