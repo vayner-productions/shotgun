@@ -4,10 +4,7 @@ USE
 
 
 from . import sg, project
-from pymel.core import Workspace, PyNode
-from pymel.util import path
-
-workspace = Workspace()
+from pymel.core import workspace, PyNode
 
 
 def update():
@@ -19,7 +16,7 @@ def update():
 
 class Common(object):
     def __init__(self):
-        self.shot = path(workspace.fileRules["scene"]).basename()  # Shot_###
+        self.shot = workspace.fileRules["scene"].rsplit("/", 1)[1]  # Shot_###
         self.drg = PyNode("defaultRenderGlobals")
         self.dad = PyNode("defaultArnoldDriver")
         return
@@ -44,7 +41,7 @@ class Common(object):
             return
 
         # increments up a version if the latest version has content
-        shot_path = path(workspace.expandName(workspace.fileRules["images"])).joinpath("Shots", self.shot)
+        shot_path = workspace.path.joinpath(workspace.fileRules["images"], "Shots", self.shot).normpath()
         shot_path.makedirs_p()
 
         version_label = "v001"
