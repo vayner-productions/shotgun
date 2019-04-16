@@ -1,8 +1,9 @@
 """
-USE
+from shotgun import render_setup as sg
+reload(sg)
+sg.update()  # sg.RenderSettings()
 """
 
-# Common
 from . import sg, project
 from pymel.core import workspace, PyNode, ls, shadingNode, sets, listNodeTypes, nodeType
 from mtoa.aovs import AOVInterface
@@ -10,10 +11,7 @@ aov_ui = AOVInterface()
 
 
 def update():
-    render_settings = RenderSettings()
-    render_settings.common_tab()
-    render_settings.aovs_tab()
-    return
+    return RenderSettings()
 
 
 class Common(object):
@@ -183,14 +181,25 @@ class AOVs(object):
 
 class RenderSettings(Common, AOVs):
     def __init__(self, **kwargs):
-        super(RenderSettings).__init__(**kwargs)
+        super(RenderSettings, self).__init__(**kwargs)
 
         # ensure default image file rule is set
         workspace.fileRules["images"] = "images"
+
+        self.common_tab()
+        self.aovs_tab()
         return
 
     def common_tab(self):
+        self.file_output()
+        self.metadata(version_label=None)  # self.metadata(version_label="ver_001")  # to reuse version
+        self.frame_range(start=None, end=None)  # self.frame_range(start=3, end=12)  # re-render certain frames
+        self.renderable_cameras(camera="render_cam")  # self.renderable_cameras(camera="other_camera")
         return
 
     def aovs_tab(self):
+        self.maya_render_view()
+        self.aov_shaders()
+        self.aov_browser(default_aovs=[])  # self.aov_browser(default_aovs=["volume"])  # add to defaults
+        self.light_group()
         return
