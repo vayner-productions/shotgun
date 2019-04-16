@@ -35,6 +35,7 @@ class Common(object):
 
     def metadata(self, version_label=None):
         self.drg.animation.set(1)
+        self.drg.putFrameBeforeExt.set(1)
         self.drg.extensionPadding.set(4)
 
         # intended for reusing an old version or experimenting alternate versions
