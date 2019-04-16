@@ -2,9 +2,13 @@
 USE
 """
 
-
+# Common
 from . import sg, project
 from pymel.core import workspace, PyNode
+
+# AOVs
+# from mtoa.core import createOptions
+
 
 
 def update():
@@ -28,6 +32,7 @@ class Common(object):
         self.dad.ai_translator.set("exr")
         self.dad.exr_compression.set(2)
         self.dad.merge_AOVs.set(1)
+        self.dad.halfPrecision.set(1)
         return
 
     def metadata(self, version_label=None):
@@ -88,6 +93,45 @@ class Common(object):
 
 class AOVs(object):
     def __init__(self):
+        # RENDER USING ARNOLD RENDERER
+        self.drg = PyNode("defaultRenderGlobals")
+        self.drg.currentRenderer.set("arnold")
+        return
+
+    def maya_render_view(self):
+        daro = PyNode("defaultArnoldRenderOptions")
+        daro.aovMode.set(1)
+        return
+
+    def aov_shaders(self):
+        return
+
+    def aov_browser(self, default_aovs=[]):
+        default_aovs = list(set(
+            default_aovs +
+            [
+                "diffuse_direct",
+                "diffuse_indirect",
+                "specular_direct",
+                "specular_indirect",
+                "sss_direct",
+                "sss_indirect",
+                "N",
+                "P",
+                "Z",
+                "crypto_asset",
+                "crypto_material",
+                "crypto_object",
+                "AO"
+            ]
+        ))
+
+        from mtoa.aovs import AOVInterface
+        aov_ui = AOVInterface()
+
+        for aov in default_aovs:
+            if not aov_ui.getAOVNode(aov):
+                aov_ui.addAOV(aov)
         return
 
 
