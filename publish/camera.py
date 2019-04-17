@@ -215,7 +215,7 @@ class CameraTools(object):
             self.camera_file = camera_path.__div__("{}_original.0001.ma".format(shot))
         return
 
-    def publish_camera(self):
+    def publish_camera(self, scene_name=None):
         """publishing anything parented to render_cam_RIG node--incremement and saves current file, and saves a copy to
         the published folder"""
         # determines the next camera file
@@ -237,7 +237,8 @@ class CameraTools(object):
             checkout.run(checkout_type="increment")
         else:
             scene_process = workspace.fileRules["scene"].split("/")[1].split("_")[1]  # Lighting
-            scene_name = sceneName().basename()
+            if scene_name is None:
+                scene_name = sceneName().basename()
             self.comment += "Published from {}:\n{}\n\n".format(scene_process, scene_name)
 
         select("render_cam_RIG")
