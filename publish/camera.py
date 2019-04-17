@@ -176,6 +176,7 @@ class CameraTools(object):
 
     def process_data(self):
         """
+        ensures top node is 'render_cam_RIG' and camera is 'render_cam'
         determines the next camera file and ensures the directory is made
         it is used in part with animation.py to export anim's referenced camera as the next camera version
         :return:
@@ -190,8 +191,14 @@ class CameraTools(object):
             pm.warning("place camera in render_cam_RIG")
             return
 
+        # camera can only be renamed when it isn't a reference
+        # by sandwiching this command in try/except, it allows process_data() to get generate the camera file
+        try:
+            cameras[0].getParent().rename("render_cam")
+        except:
+            pass
+
         # - create camera path based on the scene name 04_Maya/published/03_Cameras/Shot_###
-        render_cam = cameras[0].getParent().rename("render_cam")
         workspace = pm.system.Workspace()
         shot = path(workspace.fileRules["scene"]).basename()
         camera_path = path(workspace.getName()).joinpath(
@@ -224,14 +231,27 @@ class CameraTools(object):
         except:
             pass
 
-        # - increment and save the current working file, and save a copy to the published folder
-        from shotgun import checkout_scene
-        reload(checkout_scene)
-        checkout = checkout_scene.Checkout()
-        working_file = checkout.run(checkout_type="increment")
-        path(working_file).copy2(self.camera_file)
+        # in cameras, render_cam_RIG is local, everywhere else it is referenced
+        # export the camera with the path derived from process_data(), it is saved as a original
+        # only in cameras, increment and save
+        workspace = pm.system.Workspace()
+        if "03_Cameras" in workspace.fileRules["scene"]:
+            pass
 
-        self.update_shotgun()
+        # pm.select("render_cam_RIG")
+        # pm.system.exportSelected(
+        #     self.camera_file,
+        #     constructionHistory=1,
+        #     channels=1,
+        #     constraints=1,
+        #     expressions=1,
+        #     shader=1,
+        #     type="mayaAscii",
+        #     preserveReferences=0,
+        #     force=1
+        # )
+
+        # self.update_shotgun()
         return
 
 
