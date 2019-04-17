@@ -42,7 +42,7 @@ class CameraTools(object):
             self.camera_file = sorted(camera_path.files())[::-1][0]  # ensures latest version
         nodes = pm.system.importFile(self.camera_file, defaultNamespace=1, returnNewNodes=1)
         top_node = pm.PyNode("render_cam_RIG")  # pm.ls(nodes, assemblies=1)[0]
-        print ">> loaded: {}".format(top_node),
+        print ">> Loaded: {}\n".format(top_node),
         return top_node
 
     def load_other(self):
@@ -69,7 +69,7 @@ class CameraTools(object):
             camera_filename = path(self.camera_file).basename().stripext()
             imported = pm.group(top_nodes, name=camera_filename+"_IMPORT")
             pm.select(imported, camera_top_node)  # for testing, delete later
-            print ">> loaded: {}".format(imported),
+            print ">> Loaded: {}\n".format(imported),
         return
 
     def update_shotgun(self):
@@ -104,7 +104,7 @@ class CameraTools(object):
         )
 
         if shot_entity["sg_frame_range"] != sg_frame_range:
-            self.comment += "\n\nframe range changed from {} to {}".format(
+            self.comment += "Frame range changed from {} to {}".format(
                 shot_entity["sg_frame_range"],
                 sg_frame_range
             )
@@ -171,7 +171,7 @@ class CameraTools(object):
                       self.camera_file,
                       field_name="sg_maya_file",
                       display_name=camera_display_name)
-        print "\n>> published render_cam_RIG to shotgun",  # checkout_scene.py called in publish_camera() prints
+        print ">> Published camera to Shotgun.\n",  # checkout_scene.py called in publish_camera() prints
         return
 
     def process_data(self):
@@ -231,27 +231,32 @@ class CameraTools(object):
         except:
             pass
 
-        # in cameras, render_cam_RIG is local, everywhere else it is referenced
-        # export the camera with the path derived from process_data(), it is saved as a original
-        # only in cameras, increment and save
+        # - increment and save the current working file, and save a copy to the published folder if user's in Cameras
         workspace = pm.system.Workspace()
         if "03_Cameras" in workspace.fileRules["scene"]:
-            pass
+            from shotgun import checkout_scene
+            reload(checkout_scene)
+            checkout = checkout_scene.Checkout()
+            checkout.run(checkout_type="increment")
+        else:
+            scene_process = workspace.fileRules["scene"].split("/")[1].split("_")[1]  # Lighting
+            scene_name = pm.sceneName().basename()
+            self.comment = "Published from {}:\n{}\n\n".format(scene_process, scene_name)
 
-        # pm.select("render_cam_RIG")
-        # pm.system.exportSelected(
-        #     self.camera_file,
-        #     constructionHistory=1,
-        #     channels=1,
-        #     constraints=1,
-        #     expressions=1,
-        #     shader=1,
-        #     type="mayaAscii",
-        #     preserveReferences=0,
-        #     force=1
-        # )
+        pm.select("render_cam_RIG")
+        pm.system.exportSelected(
+            self.camera_file,
+            constructionHistory=1,
+            channels=1,
+            constraints=1,
+            expressions=1,
+            shader=1,
+            type="mayaAscii",
+            preserveReferences=0,
+            force=1
+        )
 
-        # self.update_shotgun()
+        self.update_shotgun()
         return
 
 
