@@ -32,4 +32,5 @@ def update_timeline(start=None, end=None):
     if not all([start, end]):
         start, end = get_frame_range()
     playbackOptions(ast=start, aet=end)
+    print ">> Animation timeline changed.\n",
     return
