@@ -2,13 +2,22 @@
 from shotgun import render_setup as sg
 reload(sg)
 sg.RenderSettings()
+
+# FOR CUSTOM CHANGES ON VERSION LABEL/FRAME RANGE/CAMERA
+from shotgun import render_setup as sg
+reload(sg)
+sg.RenderSettings()
+common = sg.Common()
+common.metadata(version_label="ALT_001")
+common.frame_range(start=-12, end=0)
+common.renderable_cameras(camera="other_cam")
 """
 
 from shotgun import update_timeline
 reload(update_timeline)
 from pymel.core import workspace, PyNode, ls, shadingNode, sets, listNodeTypes, nodeType
 from mtoa.aovs import AOVInterface
-aov_ui = AOVInterface()
+aov_ui = AOVInterface()  # could not pass as variable instance in AOVs()
 
 
 class Common(object):
@@ -56,7 +65,7 @@ class Common(object):
         return
 
     def frame_range(self, start=None, end=None):
-        if start and end:
+        if start is not None and end is not None:
             self.drg.startFrame.set(start)
             self.drg.endFrame.set(end)
             return
