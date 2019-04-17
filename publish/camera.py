@@ -10,7 +10,8 @@ sg.get_window("load_camera")
 from . import *
 from PySide2 import QtCore, QtWidgets, QtUiTools
 from pymel.util import path
-import pymel.core as pm
+from pymel.core import importFile, PyNode, workspace, fileDialog2, importFile, ls, group, select, playbackOptions, \
+    warning, delete, sceneName, exportSelected
 
 
 def get_window(method):
@@ -40,8 +41,8 @@ class CameraTools(object):
         if self.camera_file is None:
             camera_path = path(__file__).dirname().dirname().joinpath("render_cam_RIG")  # skips publish module
             self.camera_file = sorted(camera_path.files())[::-1][0]  # ensures latest version
-        nodes = pm.system.importFile(self.camera_file, defaultNamespace=1, returnNewNodes=1)
-        top_node = pm.PyNode("render_cam_RIG")  # pm.ls(nodes, assemblies=1)[0]
+        importFile(self.camera_file, defaultNamespace=1)
+        top_node = PyNode("render_cam_RIG")  # ls(nodes, assemblies=1)[0]
         print ">> Loaded: {}\n".format(top_node),
         return top_node
 
@@ -50,25 +51,24 @@ class CameraTools(object):
         # open file dialog to 03_Cameras and filter for maya files
         if self.camera_file is None:
             filters = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
-            workspace = pm.system.Workspace()
             shot = path(workspace.fileRules["scene"]).basename()
             camera_path = path(workspace.getName()).joinpath("scenes", "03_Cameras", shot).normpath()
-            self.camera_file = pm.fileDialog2(ff=filters, dir=camera_path, fm=1)[0]
+            self.camera_file = fileDialog2(ff=filters, dir=camera_path, fm=1)[0]
 
         # import camera and place in import group to easily see
         # create render_cam_RIG null for user to place camera in
         # select import and null for user to see results
-        nodes = pm.system.importFile(self.camera_file, defaultNamespace=1, returnNewNodes=1)
+        nodes = importFile(self.camera_file, defaultNamespace=1, returnNewNodes=1)
         if "render_cam_RIG" not in nodes:
-            top_nodes = pm.ls(nodes, assemblies=1)
-            camera_top_node = pm.group(em=1, name="render_cam_RIG")
+            top_nodes = ls(nodes, assemblies=1)
+            camera_top_node = group(em=1, name="render_cam_RIG")
             camera_top_node.setAttr("v", lock=1, k=0, cb=0)
             for at in "trs":
                 for ax in "xyz":
                     camera_top_node.setAttr(at + ax, lock=1, k=0, cb=0)
             camera_filename = path(self.camera_file).basename().stripext()
-            imported = pm.group(top_nodes, name=camera_filename+"_IMPORT")
-            pm.select(imported, camera_top_node)  # for testing, delete later
+            imported = group(top_nodes, name=camera_filename+"_IMPORT")
+            select(imported, camera_top_node)  # for testing, delete later
             print ">> Loaded: {}\n".format(imported),
         return
 
@@ -81,7 +81,6 @@ class CameraTools(object):
         the frame range
         """
         # SHOT - update frame range in shot
-        workspace = pm.system.Workspace()
         shot_name = path(workspace.fileRules["scene"]).basename()  # Shot_###
         shot_filters = [
             ["project", "is", project],
@@ -99,8 +98,8 @@ class CameraTools(object):
             shot_fields  # used for camera entity updates
         )
         sg_frame_range = "{0:.0f}-{1:.0f}".format(
-            pm.playbackOptions(q=1, ast=1),
-            pm.playbackOptions(q=1, aet=1)
+            playbackOptions(q=1, ast=1),
+            playbackOptions(q=1, aet=1)
         )
 
         if shot_entity["sg_frame_range"] != sg_frame_range:
@@ -181,14 +180,14 @@ class CameraTools(object):
         it is used in part with animation.py to export anim's referenced camera as the next camera version
         :return:
         """
-        camera_top_node = pm.PyNode("render_cam_RIG")
+        camera_top_node = PyNode("render_cam_RIG")
 
         cameras = camera_top_node.getChildren(ad=1, typ="camera")
         if len(cameras) > 1:
-            pm.warning("too many cameras in render_cam_RIG, choose one")
+            warning("too many cameras in render_cam_RIG, choose one")
             return
         elif len(cameras) == 0:
-            pm.warning("place camera in render_cam_RIG")
+            warning("place camera in render_cam_RIG")
             return
 
         # camera can only be renamed when it isn't a reference
@@ -199,9 +198,8 @@ class CameraTools(object):
             pass
 
         # - create camera path based on the scene name 04_Maya/published/03_Cameras/Shot_###
-        workspace = pm.system.Workspace()
         shot = path(workspace.fileRules["scene"]).basename()
-        camera_path = path(workspace.getName()).joinpath(
+        camera_path = workspace.path.joinpath(
             "published",
             "03_Cameras",
             shot).normpath()
@@ -225,14 +223,13 @@ class CameraTools(object):
 
         # cleans up the scene, deletes _IMPORT node
         try:
-            imported = pm.ls("*_IMPORT")[0]
+            imported = ls("*_IMPORT")[0]
             if not imported.getChildren():
-                pm.delete(imported)
+                delete(imported)
         except:
             pass
 
         # - increment and save the current working file, and save a copy to the published folder if user's in Cameras
-        workspace = pm.system.Workspace()
         if "03_Cameras" in workspace.fileRules["scene"]:
             from shotgun import checkout_scene
             reload(checkout_scene)
@@ -240,11 +237,11 @@ class CameraTools(object):
             checkout.run(checkout_type="increment")
         else:
             scene_process = workspace.fileRules["scene"].split("/")[1].split("_")[1]  # Lighting
-            scene_name = pm.sceneName().basename()
+            scene_name = sceneName().basename()
             self.comment += "Published from {}:\n{}\n\n".format(scene_process, scene_name)
 
-        pm.select("render_cam_RIG")
-        pm.system.exportSelected(
+        select("render_cam_RIG")
+        exportSelected(
             self.camera_file,
             constructionHistory=1,
             channels=1,
