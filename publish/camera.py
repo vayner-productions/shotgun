@@ -241,7 +241,7 @@ class CameraTools(object):
         else:
             scene_process = workspace.fileRules["scene"].split("/")[1].split("_")[1]  # Lighting
             scene_name = pm.sceneName().basename()
-            self.comment = "Published from {}:\n{}\n\n".format(scene_process, scene_name)
+            self.comment += "Published from {}:\n{}\n\n".format(scene_process, scene_name)
 
         pm.select("render_cam_RIG")
         pm.system.exportSelected(
@@ -277,7 +277,7 @@ class MyWindow(QtWidgets.QDialog):
     def camera_tools(self, method):
         ct = CameraTools()
         if method == "publish_camera":
-            ct.comment = self.ui.comment_txt.toPlainText()
+            ct.comment = self.ui.comment_txt.toPlainText() + "\n\n"
         getattr(ct, method)()
         self.ui.close()
         return
