@@ -28,15 +28,12 @@ versioning changes in SG site..
 from . import *
 from . import camera; reload(camera)
 from PySide2 import QtCore, QtWidgets, QtUiTools
-from pymel.core.system import Workspace, FileReference, referenceQuery, exportAsReference, importFile, openFile, \
+from pymel.core.system import workspace, FileReference, referenceQuery, exportAsReference, importFile, openFile, \
     newFile, saveAs
 from pymel.util import path
 from imghdr import what
 import datetime
-
-
 import pymel.core as pm
-workspace = Workspace()
 
 
 def get_window():
@@ -549,7 +546,7 @@ class Publish(object):
         media_file = self.playblast or self.thumbnail
 
         sg.upload("Version", shot_version["id"], media_file, field_name="sg_uploaded_movie")
-        print "\n>> published animation to shotgun"
+        print ">> Published animation to Shotgun.\n",
         return
 
     def animation(self, single=[], multi=[], alembics=[], comment="Alembics:"):
@@ -658,7 +655,7 @@ class Publish(object):
             alembics = self.animation(single=export[0], multi=export[1], comment=comment)
 
             if alembics:
-                print "\n>> Exported the following proxies:", self.comment.split(comment)[1],
+                print ">> Exported the following proxies:", self.comment.split(comment)[1] + "\n",
         elif "remove" == mode:
             cache_directory = path(workspace.expandName(workspace.fileRules["alembicCache"]))
 
@@ -909,7 +906,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
         end = datetime.datetime.now()
         duration = end - start
-        print "\n# Exported alembics in {:.2f} seconds. #".format(duration.seconds/60.0)
+        print "# Exported alembics in {:.2f} seconds. #".format(duration.seconds/60.0)
 
 
         # CAMERAS
@@ -917,19 +914,8 @@ class MyWindow(Publish, QtWidgets.QDialog):
         # process_data() works with imported nodes only
         # render_cam_RIG needs to be imported, it is referenced from the build scene tool
         if self.ui.camera_cbx.isChecked():
-            if referenceQuery("render_cam_RIG", inr=1):
-                render_camera = FileReference("render_cam_RIG")
-                render_camera.importContents()
-
-            # export selection as reference
-            self.CameraTools.comment += "Published from Animation:\n{}".format(self.maya_file.basename())
-            self.CameraTools.process_data()
-            pm.select("render_cam_RIG")
-            exportAsReference(self.CameraTools.camera_file, namespace=":")
-
-            # publish camera and append comment to animation
-            self.CameraTools.update_shotgun()
-            self.comment += "\n\nCameras:\n{}".format(self.CameraTools.version_name)
+            self.CameraTools.publish_camera(scene_name=self.maya_file.basename())
+            self.comment += "Cameras:\n{}\n\n".format(self.CameraTools.version_name)
 
         # PLAYBLAST - creates playblast and updates shotgun with video, otherwise a thumbnail is used
         if self.ui.skip_cbx.isChecked():
