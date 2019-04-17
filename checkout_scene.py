@@ -226,5 +226,5 @@ class Checkout:
             saveAs(checkout_file)
         else:
             return warning("Wrong checkout type and/or missing checkout file.")
-        print ">> {}\n".format(checkout_file),
+        print ">> Checked out file: ..{}\n".format(checkout_file.split("scenes")[1]),
         return checkout_file
