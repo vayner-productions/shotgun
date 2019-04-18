@@ -19,4 +19,5 @@ unc_path = project[sg_unc_path]
 
 root = None  # the drive you're working on i.e. Mac/../04_Maya
 
-__all__ = ["root", "sg", "project", "mapped_letter", "unc_path"]
+print ">>> from __init__", root, ">>", project
+__all__ = ["sg", "project", "mapped_letter", "unc_path", "root"]
