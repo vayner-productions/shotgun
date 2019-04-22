@@ -400,7 +400,7 @@ class MyWindow(QtWidgets.QDialog):
             reference_node = child.toolTip()
             if reference_node:
                 # FOR REFERENCE NODES IN IN AN SCENE PROCESS
-                pm.FileReference(refnode=reference_node).replaceWith(reference_file)
+                pm.FileReference(refnode=reference_node).load(reference_file)
             elif "06_Cache" in reference_file:
                 # FOR LIGHTING
                 reference_file = path(reference_file)
@@ -455,7 +455,7 @@ class MyWindow(QtWidgets.QDialog):
                 start_file = reference_file.dirname().joinpath(name + ".ma")
                 reference_file.copy2(start_file)
                 pm.createReference(start_file, namespace=":")
-                pm.FileReference(refnode=name + "RN").replaceWith(reference_file)
+                pm.FileReference(refnode=name + "RN").load(reference_file)
                 start_file.remove_p()
             else:
                 name = "_{}_".format(reference_file.dirname().namebase)
@@ -470,7 +470,7 @@ class MyWindow(QtWidgets.QDialog):
                 start_file = reference_file.dirname().joinpath(name + ".ma")
                 reference_file.copy2(start_file)
                 pm.createReference(start_file, namespace=":")
-                pm.FileReference(refnode=name + "RN").replaceWith(reference_file)
+                pm.FileReference(refnode=name + "RN").load(reference_file)
                 start_file.remove_p()
         print ">> references loaded/updated",
         self.ui.close()
