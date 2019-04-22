@@ -1,12 +1,24 @@
 """
-old check out scene tools are used by publish scene and update timeline
 """
 from . import *
-from pym.core import workspace, openFile, saveAs, warning
+from pymel.core import workspace, openFile, saveAs, warning
 from pymel.util import path
+from PySide2 import QtCore, QtWidgets, QtUiTools
+import maya.mel as mel
 
 
-class Checkout:
+def get_window():
+    global mw
+    try:
+        mw.ui.close()
+    except:
+        pass
+
+    mw = MyWindow()
+    mw.ui.show()
+
+
+class Checkout(object):
     def __init__(self):
         # self.processed_file()
         # self.published_file()
@@ -127,3 +139,77 @@ class Checkout:
             return warning("Wrong checkout type and/or missing checkout file.")
         print ">> Checked out file: ..{}\n".format(checkout_file.split("scenes")[1]),
         return checkout_file
+
+
+class SetProject(object):
+    def __init__(self):
+        self.project_path = self.get_project_path()
+        self.get_scene_items()
+        self.exclude = {
+            "edits",
+            "03_Cameras",
+            "04_Layouts",
+            "06_Cache",
+            "None"
+        }
+
+    def get_project_path(self):
+        # used for remote-work, change the root variable
+        if root:
+            project_path = root
+            return
+
+        # used for in-office development
+        data = sg.find_one(
+            "Project",
+            [
+                ["id", "is", project["id"]]
+            ],
+            [
+                "sg_client",
+                "sg_brand",
+                "name"
+            ]
+        )
+        client_brand = data["sg_client"]["name"]
+        sub_brand = data["sg_brand"]["name"]
+        project_name = data["name"]
+        project_path = r"{}/Animation/Projects/Client/{}/{}/{}/Project Directory/02_Production/04_Maya".format(
+            mapped_letter, client_brand, sub_brand, project_name)
+        return project_path
+
+    def get_scene_items(self):
+        scene_dir = self.project_path + "/scenes"
+        scene_subfolders = {r"{}".format(sub.namebase) for sub in path(scene_dir).dirs()}.difference(self.exclude)
+
+        scene_items = {sub[3:]: sub for sub in scene_subfolders.difference(self.exclude)}
+        # self.ui.scene_cbx.addItems(self.scene_dict.keys())
+        return scene_items
+
+    def set_project(self, scene, alembic):
+        workspace.open(self.project_path)
+
+        workspace.fileRules["scene"] = scene
+
+        workspace.fileRules["Alembic"] = alembic
+
+        workspace.fileRules["shaders"] = "data/001_Shaders"
+
+        mel.eval('setProject \"' + self.project_path + '\"')
+        print ">> project set\n",
+        return
+
+
+class MyWindow(QtWidgets.QDialog):
+    def __init__(self):
+        self.ui = self.import_ui()
+        # self.init_ui()
+
+    def import_ui(self):
+        ui_path = __file__.split(".")[0] + ".ui"
+        loader = QtUiTools.QUiLoader()
+        ui_file = QtCore.QFile(ui_path)
+        ui_file.open(QtCore.QFile.ReadOnly)
+        ui = loader.load(ui_file)
+        ui_file.close()
+        return ui
