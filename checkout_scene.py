@@ -144,14 +144,13 @@ class Checkout(object):
 class SetProject(object):
     def __init__(self):
         self.project_path = self.get_project_path()
-        self.get_scene_items()
         self.exclude = {
             "edits",
-            "03_Cameras",
             "04_Layouts",
             "06_Cache",
             "None"
         }
+        self.scene_dict = self.get_scene_items()
 
     def get_project_path(self):
         # used for remote-work, change the root variable
@@ -182,11 +181,10 @@ class SetProject(object):
         scene_dir = self.project_path + "/scenes"
         scene_subfolders = {r"{}".format(sub.namebase) for sub in path(scene_dir).dirs()}.difference(self.exclude)
 
-        scene_items = {sub[3:]: sub for sub in scene_subfolders.difference(self.exclude)}
-        # self.ui.scene_cbx.addItems(self.scene_dict.keys())
+        scene_items = {sub[3:]: sub for sub in scene_subfolders}
         return scene_items
 
-    def set_project(self, scene, alembic):
+    def set_project(self, scene=None, alembic=None):
         workspace.open(self.project_path)
 
         workspace.fileRules["scene"] = scene
@@ -200,10 +198,11 @@ class SetProject(object):
         return
 
 
-class MyWindow(QtWidgets.QDialog):
-    def __init__(self):
+class MyWindow(SetProject, Checkout, QtWidgets.QDialog):
+    def __init__(self, **kwargs):
+        super(MyWindow, self).__init__(**kwargs)
         self.ui = self.import_ui()
-        # self.init_ui()
+        self.init_ui()
 
     def import_ui(self):
         ui_path = __file__.split(".")[0] + ".ui"
@@ -213,3 +212,37 @@ class MyWindow(QtWidgets.QDialog):
         ui = loader.load(ui_file)
         ui_file.close()
         return ui
+
+    def change_entity_items(self):
+        scene_process = self.ui.scene_cbx.currentText()
+        scene_process_folder = self.scene_dict[scene_process]
+
+        scene_process_dir = path(r"{}{}{}".format(
+            self.project_path,
+            "/scenes/",
+            scene_process_folder))
+
+        folders = []
+        self.ui.asset_cbx.clear()
+        for dir in scene_process_dir.dirs():
+            folder = dir.basename()
+            if "Archive" not in folder:
+                folders += [folder]
+        folders = sorted(folders)
+
+        self.ui.asset_cbx.addItems(folders)
+        return
+
+    def checkout(self):
+
+        self.set_project(scene=scene, alembic=alembic)
+        return
+
+    def init_ui(self):
+        self.ui.scene_cbx.currentTextChanged.connect(self.change_entity_items)
+
+        items = [item[3:] for item in sorted(self.scene_dict.values())]
+        self.ui.scene_cbx.addItems(items)
+
+        self.ui.checkout_cbx.clicked.connect(self.checkout)
+        return
