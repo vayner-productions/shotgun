@@ -169,6 +169,8 @@ class MyWindow(QtWidgets.QDialog):
                 [["project", "is", project], ["code", "is", entity]],
                 ["assets"])["assets"]
 
+            # alembic file names come from shotgun asset names, and they also only contain geometries/nurbs
+            # gather asset names to making searching for the right alembic file possible
             asset_names = []
             for asset in assets:
                 asset_names += [asset["name"]]
@@ -178,6 +180,7 @@ class MyWindow(QtWidgets.QDialog):
                     ["sg_asset_type", "assets"]
                 )
 
+                # when exporting alembic caches for rigs, the only important top node to export is the geometry top node
                 if data["sg_asset_type"] == "CG Rig":
                     asset_names[-1] = data["assets"][0]["name"]
 
