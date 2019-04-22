@@ -543,9 +543,24 @@ class Publish(object):
                 "latest_by": "ENTITIES_CREATED_AT"
             }]
         )
-        media_file = self.playblast or self.thumbnail
 
+        if not shot_version:
+            shot_entity = sg.find_one(
+                "Shot",
+                [["project", "is", project], ["code", "is", shot_name]]
+            )
+
+            data = {
+                "project": project,
+                "entity": shot_entity,
+                "code": shot_name + "_v001"
+            }
+
+            shot_version = sg.create("Version", data)
+
+        media_file = self.playblast or self.thumbnail
         sg.upload("Version", shot_version["id"], media_file, field_name="sg_uploaded_movie")
+
         print ">> Published animation to Shotgun.\n",
         return
 
