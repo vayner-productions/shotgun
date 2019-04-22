@@ -78,6 +78,11 @@ from shotgun.publish import animation as sg; reload(sg)
 sg.get_window()
 """
 
+create_ticket = """
+from Kathy.shotgun import ticket; reload(ticket)
+ticket.get_window()
+"""
+
 reload_menu = """
 from shotgun.VaynerMenu import vayner_menu as sg
 reload(sg)
@@ -164,6 +169,13 @@ class VaynerMenu:
         return
 
     def run(self):
+        ticket_menu_item = MenuItem(
+            label="Create Shotgun Ticket",
+            command=create_ticket,
+            parent="Vayner",
+            insertAfter=""
+        )
+
         lighting_menu = MenuItem(
             label="Lighting",
             subMenu=True,
