@@ -227,7 +227,7 @@ class MyWindow(QtWidgets.QDialog):
             pass
 
         # - increment and save the current working file, and save a copy to the published folder
-        from shotgun import checkout_scene
+        from . import checkout_scene
         reload(checkout_scene)
         checkout = checkout_scene.Checkout()
         working_file = checkout.increment_file()
