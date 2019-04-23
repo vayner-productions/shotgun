@@ -4,9 +4,9 @@ import pymel.util.common as ut
 from PySide2 import QtCore, QtWidgets, QtUiTools
 import os
 
-from shotgun import checkout_scene
+from . import checkout_scene
 reload(checkout_scene)
-checkout = Checkout()
+checkout = checkout_scene.Checkout()
 
 scene_process, entity_name = pm.workspace.fileRules["scene"].split("/")[1:]
 entity_type = "Asset"
