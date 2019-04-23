@@ -861,10 +861,10 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
         # - increment and save the current working file, and save a copy to the published version folder
         self.version()
-        from shotgun import checkout_scene
+        from . import checkout_scene
         reload(checkout_scene)
         checkout = checkout_scene.Checkout()
-        working_file = checkout.run(checkout_type="increment")
+        working_file = checkout.increment_file()
         published_file = self.alembic_directory.joinpath(
             "{}_original.{}.ma".format(
                 path(workspace.fileRules["scene"]).basename(),
