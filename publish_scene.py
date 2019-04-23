@@ -1,15 +1,21 @@
+from . import *
 import pymel.core as pm
 import pymel.util.common as ut
-import sgtk.platform
 from PySide2 import QtCore, QtWidgets, QtUiTools
 import os
-import checkout_scene
-reload(checkout_scene)
 
-engine = sgtk.platform.current_engine()
-sg = engine.shotgun
-project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]])
-entity = checkout_scene.get_entity(pm.workspace.fileRules["scene"])
+from shotgun import checkout_scene
+reload(checkout_scene)
+checkout = Checkout()
+
+scene_process, entity_name = pm.workspace.fileRules["scene"].split("/")[1:]
+entity_type = "Asset"
+if "Lighting" in scene_process:
+    entity_type = "Shot"
+entity = sg.find_one(
+    entity_type,
+    [["project", "is", project], ["code", "is", entity_name]],
+)
 
 
 def create_thumbnail():
@@ -183,10 +189,7 @@ def publish_scene(addressed_tasks=[], comments=None):
     #
     # increments for the last maya ascii on sg
     #
-    # processed_file = pm.sceneName()
-    processed_file = checkout_scene.increment_and_save(pm.sceneName(),
-                                                       entity_type=entity["type"],
-                                                       publish=1)
+    processed_file = checkout.processed_file(open_file=0)
 
     original_file = pm.sceneName().replace("scenes", "published").replace("processed", "original")
 
