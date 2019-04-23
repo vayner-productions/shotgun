@@ -230,7 +230,7 @@ class MyWindow(QtWidgets.QDialog):
         from shotgun import checkout_scene
         reload(checkout_scene)
         checkout = checkout_scene.Checkout()
-        working_file = checkout.run(checkout_type="increment")
+        working_file = checkout.increment_file()
         ppath.path(working_file).copy2(camera_file)
 
         self.update_shotgun(camera_file=camera_file, comment=comment)
