@@ -231,10 +231,10 @@ class CameraTools(object):
 
         # - increment and save the current working file, and save a copy to the published folder if user's in Cameras
         if "03_Cameras" in workspace.fileRules["scene"]:
-            from shotgun import checkout_scene
+            from . import checkout_scene
             reload(checkout_scene)
             checkout = checkout_scene.Checkout()
-            checkout.run(checkout_type="increment")
+            checkout.increment_file()
         else:
             scene_process = workspace.fileRules["scene"].split("/")[1].split("_")[1]  # Lighting
             if scene_name is None:
