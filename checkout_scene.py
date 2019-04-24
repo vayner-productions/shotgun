@@ -49,7 +49,7 @@ class Checkout(object):
         return self.checkout_file
 
     def increment_file(self, open_file=1):
-        self.processed_file()
+        self.processed_file(open_file=0)
 
         if self.checkout_file.exists():
             self.checkout_file = self.checkout_file.split(".")
