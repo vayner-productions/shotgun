@@ -18,9 +18,10 @@ entity = sg.find_one(
 )
 
 
-def create_thumbnail():
+def create_thumbnail(file_name=None):
     current_time = pm.currentTime(q=1)
-    file_name = pm.sceneName().replace(".ma", ".jpg").replace("scenes", "published").replace("processed", "original")
+    if not file_name:
+        file_name = pm.sceneName().replace(".ma", ".jpg").replace("scenes", "published").replace("processed", "original")
     media_file = pm.playblast(
         frame=current_time,
         format="image",
@@ -192,13 +193,19 @@ def publish_scene(addressed_tasks=[], comments=None):
 
     # THE NUMBERING ON THE ORIGINAL IS COMING FROM THE ORIGINAL FILE -- WRONG
     processed_file = checkout.increment_file(open_file=1)
+    checkout_file = pm.sceneName()
+    original_directory = ut.path(checkout_file.dirname().replace("scenes", "published"))
+    search_pattern = checkout_file.namebase.replace("processed", "original").split(".")[0] + ".*.ma"
+    original_files = sorted(original_directory.files(search_pattern))[::-1]
+    original_file = None
+    if original_files:
+        original_file = original_files[0].normpath().split(".")
+        original_file[1] = str(int(original_file[1]) + 1).zfill(4)
+        original_file = ut.path(".".join(original_file)).normpath()
+    else:
+        original_file = original_directory.joinpath(search_pattern.replace("*", "0001")).normpath()
 
-    original_file = pm.sceneName().replace("scenes", "published").replace("processed", "original")
-
-    original_directory = ut.path(original_file.rsplit("/", 1)[0])
-    if not ut.path.exists(original_directory):
-        ut.path.makedirs(original_directory)
-
+    original_directory.makedirs_p()
     ut.path.copy2(ut.path(processed_file), ut.path(original_file))
     #
     # prepare for shotgun updates
@@ -254,15 +261,22 @@ def publish_scene(addressed_tasks=[], comments=None):
     #
     # update entity with a image/video link
     #
+    version_name = str(original_file.parent.basename() + "_v001")
+
+    # sg.find(
+    #     "version",
+    #     fields=[["project", "is", project], ["code", "contains", ]]
+    # )
+
     version_data = {
         "project": project,
         "entity": entity,
-        "code": original_file.rsplit("/", 1)[1].split("_original")[0],
+        "code": version_name,
         "description": comments
     }
     version = sg.create("Version", version_data)
     if scene_process != "Lighting":
-        media_file = create_thumbnail()
+        media_file = create_thumbnail(file_name=original_file.replace(".ma", ".jpg"))
         sg.upload("Version", version["id"], media_file, field_name="sg_uploaded_movie")
     print ">> published all files to shotgun",
     return
