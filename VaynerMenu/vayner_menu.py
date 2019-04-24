@@ -5,32 +5,15 @@ import shotgun.set_project as sg; reload(sg)
 sg.get_window()
 """
 
-checkout_preferences = """
-from shotgun.VaynerMenu import qt_checkout_box as sg; reload(sg)
-sg.get_window()
-"""
-
 checkout = """
-from shotgun.VaynerMenu import qt_checkout_box as sg; reload(sg)
-sg.checkout_saved_option()
-"""
-
-checkout_published_version = """
-import shotgun.checkout_scene as sg; reload(sg)
-checkout = sg.Checkout()
-checkout.run(checkout_type="published")
-"""
-
-checkout_working_version = """
-import shotgun.checkout_scene as sg; reload(sg)
-checkout = sg.Checkout()
-checkout.run(checkout_type="processed")
+from shotgun import checkout_scene as sg; reload(sg)
+sg.get_window()
 """
 
 increment_and_save = """
 import shotgun.checkout_scene as sg; reload(sg)
 checkout = sg.Checkout()
-checkout.run(checkout_type="increment")
+checkout.increment_file()
 """
 
 build_scene = """
@@ -79,7 +62,7 @@ sg.get_window()
 """
 
 create_ticket = """
-from Kathy.shotgun import ticket; reload(ticket)
+from shotgun import ticket; reload(ticket)
 ticket.get_window()
 """
 
@@ -237,23 +220,8 @@ class VaynerMenu:
 
         checkout_item = MenuItem(
             "checkout_item",
-            label="Checkout",
+            label="Checkout Scene",
             command=checkout,
-            parent="Vayner",
-            insertAfter=""
-        )
-
-        checkout_box_item = MenuItem(
-            optionBox=1,
-            label="Checkout Option",
-            command=checkout_preferences,
-            parent="Vayner",
-            insertAfter=checkout_item
-        )
-
-        set_project_item = MenuItem(
-            label="Set Project",
-            command=set_project,
             parent="Vayner",
             insertAfter=""
         )
