@@ -402,7 +402,6 @@ class MyWindow(QtWidgets.QDialog):
 
             reference_node = child.toolTip()
             if reference_node:
-                print "> Reference", reference_file
                 # FOR REFERENCE NODES IN IN AN SCENE PROCESS
                 pm.FileReference(refnode=reference_node).load(reference_file)
             elif "06_Cache" in reference_file:
@@ -462,7 +461,6 @@ class MyWindow(QtWidgets.QDialog):
                 pm.FileReference(refnode=name + "RN").load(reference_file)
                 start_file.remove_p()
             else:
-                print "> Cam and everything else", reference_file
                 name = "_{}_".format(reference_file.dirname().namebase)
                 if "Rigs" in reference_file:
                     name += "RIG_"
