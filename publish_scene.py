@@ -189,7 +189,9 @@ def publish_scene(addressed_tasks=[], comments=None):
     #
     # increments for the last maya ascii on sg
     #
-    processed_file = checkout.processed_file(open_file=1)
+
+    # THE NUMBERING ON THE ORIGINAL IS COMING FROM THE ORIGINAL FILE -- WRONG
+    processed_file = checkout.increment_file(open_file=1)
 
     original_file = pm.sceneName().replace("scenes", "published").replace("processed", "original")
 
