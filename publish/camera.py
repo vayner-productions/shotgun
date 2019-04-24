@@ -244,10 +244,10 @@ class CameraTools(object):
         select("render_cam_RIG")
         exportSelected(
             self.camera_file,
-            constructionHistory=1,
-            channels=1,
-            constraints=1,
-            expressions=1,
+            constructionHistory=0,
+            channels=0,
+            constraints=0,
+            expressions=0,
             shader=1,
             type="mayaAscii",
             preserveReferences=0,
