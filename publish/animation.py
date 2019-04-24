@@ -26,7 +26,8 @@ option to skip playblast
 versioning changes in SG site..
 """
 from . import *
-from . import camera; reload(camera)
+from . import camera
+from .. import checkout_scene
 from PySide2 import QtCore, QtWidgets, QtUiTools
 from pymel.core.system import workspace, FileReference, referenceQuery, exportAsReference, importFile, openFile, \
     newFile, saveAs
@@ -34,6 +35,11 @@ from pymel.util import path
 from imghdr import what
 import datetime
 import pymel.core as pm
+
+reload(camera)
+reload(checkout_scene)
+camera_tools = camera.CameraTools()
+checkout = checkout_scene.Checkout()
 
 
 def get_window():
@@ -704,7 +710,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         super(MyWindow, self).__init__(**kwargs)
         self.ui = self.import_ui()
         self.init_ui()
-        self.CameraTools = camera.CameraTools()
+        self.CameraTools = camera_tools
 
     def import_ui(self):
         ui_path = __file__.split(".")[0] + ".ui"
@@ -861,9 +867,6 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
         # - increment and save the current working file, and save a copy to the published version folder
         self.version()
-        from . import checkout_scene
-        reload(checkout_scene)
-        checkout = checkout_scene.Checkout()
         working_file = checkout.increment_file()
         published_file = self.alembic_directory.joinpath(
             "{}_original.{}.ma".format(
