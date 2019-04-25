@@ -10,9 +10,8 @@ sg.get_frame_range()
 
 
 from . import sg, project
-from pymel.core.system import Workspace
+from pymel.core.system import workspace
 from pymel.core.animation import playbackOptions
-workspace = Workspace()
 
 
 def get_frame_range():
