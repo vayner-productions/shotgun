@@ -21,11 +21,6 @@ import shotgun.build_scene as sg; reload(sg)
 sg.get_window()
 """
 
-update_timeline = """
-import shotgun.update_timeline as sg; reload(sg)
-sg.update_timeline()
-"""
-
 organize_textures = """
 import shotgun.organize_textures as sg; reload(sg)
 sg.organize_textures()
@@ -112,11 +107,6 @@ class VaynerMenu:
         manage_proxies_item = MenuItem(
             label="Manage Proxies",
             command=manage_proxies,
-        )
-
-        update_timeline_item = MenuItem(
-            label="Update Timeline",
-            command=update_timeline,
         )
 
         publish_animation_item = MenuItem(
