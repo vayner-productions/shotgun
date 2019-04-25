@@ -195,6 +195,8 @@ def publish_scene(addressed_tasks=[], comments=None):
     processed_file = checkout.increment_file(open_file=1)
     checkout_file = pm.sceneName()
     original_directory = ut.path(checkout_file.dirname().replace("scenes", "published"))
+    original_directory.makedirs_p()
+
     search_pattern = checkout_file.namebase.replace("processed", "original").split(".")[0] + ".*.ma"
     original_files = sorted(original_directory.files(search_pattern))[::-1]
     original_file = None
@@ -205,7 +207,6 @@ def publish_scene(addressed_tasks=[], comments=None):
     else:
         original_file = original_directory.joinpath(search_pattern.replace("*", "0001")).normpath()
 
-    original_directory.makedirs_p()
     ut.path.copy2(ut.path(processed_file), ut.path(original_file))
     #
     # prepare for shotgun updates
