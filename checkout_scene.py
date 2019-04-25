@@ -45,7 +45,9 @@ class Checkout(object):
         if open_file and self.checkout_file.exists():
             openFile(self.checkout_file, f=1)
         elif open_file and not self.checkout_file.exists():
-            saveAs(self.checkout_file, f=1)
+            # saveAs(self.checkout_file, f=1)
+            newFile(f=1)
+            displayInfo("No file to checkout, opened new file.")
         return self.checkout_file
 
     def increment_file(self, open_file=1):
