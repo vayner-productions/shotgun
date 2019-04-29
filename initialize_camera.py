@@ -15,13 +15,12 @@ if there's a new tracked camera to publish, open empty scene, set project to its
 
 import sgtk
 from PySide2 import QtCore, QtWidgets, QtUiTools
-import pymel.util.common as ppath
+from pymel.util import path
 import pymel.core as pm
 
 engine = sgtk.platform.current_engine()
 sg = engine.shotgun
 project = sg.find_one("Project", [["name", "is", engine.context.project["name"]]])
-root = None
 
 
 def get_window():
@@ -52,7 +51,7 @@ class MyWindow(QtWidgets.QDialog):
     def load_vayner(self, camera_file=None):
         """loads in-house camera rig"""
         if camera_file is None:
-            camera_path = ppath.path(__file__).dirname().joinpath("render_cam_RIG")
+            camera_path = path(__file__).dirname().joinpath("render_cam_RIG")
             camera_file = sorted(camera_path.files())[::-1][0]  # ensures latest version
         nodes = pm.system.importFile(camera_file, defaultNamespace=1, returnNewNodes=1)
         top_node = pm.PyNode("render_cam_RIG")  # pm.ls(nodes, assemblies=1)[0]
@@ -66,8 +65,8 @@ class MyWindow(QtWidgets.QDialog):
         if camera_file is None:
             filters = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
             workspace = pm.system.Workspace()
-            shot = ppath.path(workspace.fileRules["scene"]).basename()
-            camera_path = ppath.path(workspace.getName()).joinpath("scenes", "03_Cameras", shot).normpath()
+            shot = path(workspace.fileRules["scene"]).basename()
+            camera_path = path(workspace.getName()).joinpath("scenes", "03_Cameras", shot).normpath()
             camera_file = pm.fileDialog2(ff=filters, dir=camera_path, fm=1)[0]
 
         # import camera and place in import group to easily see
@@ -81,7 +80,7 @@ class MyWindow(QtWidgets.QDialog):
             for at in "trs":
                 for ax in "xyz":
                     camera_top_node.setAttr(at + ax, lock=1, k=0, cb=0)
-            camera_filename = ppath.path(camera_file).basename().stripext()
+            camera_filename = path(camera_file).basename().stripext()
             imported = pm.group(top_nodes, name=camera_filename+"_IMPORT")
             pm.select(imported, camera_top_node)  # for testing, delete later
 
@@ -94,7 +93,7 @@ class MyWindow(QtWidgets.QDialog):
         the frame range"""
         # SHOT - update frame range in shot
         workspace = pm.system.Workspace()
-        shot_name = ppath.path(workspace.fileRules["scene"]).basename()  # Shot_###
+        shot_name = path(workspace.fileRules["scene"]).basename()  # Shot_###
         shot_filters = [
             ["project", "is", project],
             ["code", "is", shot_name]
@@ -165,24 +164,15 @@ class MyWindow(QtWidgets.QDialog):
         }
         version = sg.create("Version", data)
 
-        # PUBLISH - local and remote files are treated differently on sg
-        camera_display_name = ppath.path(camera_file).basename()
-        if root is None:
-            # attaching local file
-            camera_file = camera_file.normpath()
-            sg.update("Version",
-                      version["id"],
-                      {"sg_maya_camera": {
-                          "link_type": "local",
-                          "local_path": camera_file,
-                          "name": camera_display_name}})
-        else:
-            # uploading manually/remotely
-            sg.upload("Version",
-                      version["id"],
-                      camera_file,
-                      field_name="sg_maya_camera",
-                      display_name=camera_display_name)
+        # PUBLISH
+        camera_display_name = path(camera_file).basename()
+        camera_file = camera_file.normpath()
+        sg.update("Version",
+                  version["id"],
+                  {"sg_maya_camera": {
+                      "link_type": "local",
+                      "local_path": camera_file,
+                      "name": camera_display_name}})
         print ">> published render_cam_RIG to shotgun",
         return
 
@@ -202,8 +192,8 @@ class MyWindow(QtWidgets.QDialog):
         # - create camera path based on the scene name 04_Maya/published/03_Cameras/Shot_###
         render_cam = cameras[0].getParent().rename("render_cam")
         workspace = pm.system.Workspace()
-        shot = ppath.path(workspace.fileRules["scene"]).basename()
-        camera_path = ppath.path(workspace.getName()).joinpath(
+        shot = path(workspace.fileRules["scene"]).basename()
+        camera_path = path(workspace.getName()).joinpath(
             "published",
             "03_Cameras",
             shot).normpath()
@@ -215,7 +205,7 @@ class MyWindow(QtWidgets.QDialog):
         if camera_files:
             latest_file = camera_files[0].split(".")
             latest_file[1] = str(int(latest_file[1]) + 1).zfill(4)
-            camera_file = ppath.path(".".join(latest_file))
+            camera_file = path(".".join(latest_file))
         else:
             camera_file = camera_path.__div__("{}_original.0001.ma".format(shot))
 
@@ -231,7 +221,7 @@ class MyWindow(QtWidgets.QDialog):
         reload(checkout_scene)
         checkout = checkout_scene.Checkout()
         working_file = checkout.increment_file()
-        ppath.path(working_file).copy2(camera_file)
+        path(working_file).copy2(camera_file)
 
         self.update_shotgun(camera_file=camera_file, comment=comment)
         self.ui.close()

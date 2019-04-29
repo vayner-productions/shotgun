@@ -139,12 +139,6 @@ class SetProject(object):
         self.scene_dict = self.get_scene_items()
 
     def get_project_path(self):
-        # used for remote-work, change the root variable
-        if root:
-            project_path = root
-            return
-
-        # used for in-office development
         data = sg.find_one(
             "Project",
             [
