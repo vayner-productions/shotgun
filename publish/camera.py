@@ -238,11 +238,11 @@ class CameraTools(object):
             self.camera_file,
             constructionHistory=0,
             channels=0,
-            constraints=0,
+            constraints=0,  # saves the constraint node from external node, build scene duplicates constraint
             expressions=0,
             shader=1,
             type="mayaAscii",
-            preserveReferences=0,
+            preserveReferences=1,  # saves as reference if enabled
             force=1
         )
 
