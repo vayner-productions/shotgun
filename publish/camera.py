@@ -12,6 +12,10 @@ from PySide2 import QtCore, QtWidgets, QtUiTools
 from pymel.util import path
 from pymel.core import importFile, PyNode, workspace, fileDialog2, importFile, ls, group, select, playbackOptions, \
     warning, delete, sceneName, exportSelected
+from .. import checkout_scene
+
+reload(checkout_scene)
+checkout = checkout_scene.Checkout()
 
 
 def get_window(method):
@@ -222,9 +226,6 @@ class CameraTools(object):
 
         # - increment and save the current working file, and save a copy to the published folder if user's in Cameras
         if "03_Cameras" in workspace.fileRules["scene"]:
-            from .. import checkout_scene
-            reload(checkout_scene)
-            checkout = checkout_scene.Checkout()
             checkout.increment_file()
         else:
             scene_process = workspace.fileRules["scene"].split("/")[1].split("_")[1]  # Lighting
