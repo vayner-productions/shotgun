@@ -492,47 +492,29 @@ class Publish(object):
         # ATTACHMENTS - local files/directories are updated, whereas remote files/directories are uploaded
         # updating each attachment to the version individually in case they're being uploaded from different places
         # remote publishes are wip, and therefore commented out of use, vayner IT deparment needs to check securities!!!
-        if self.maya_file.drive == mapped_letter:
-            sg.update(
-                "Version",
-                version["id"],
-                {
-                    "sg_maya_file": {
-                        "link_type": "local",
-                        "local_path": str(self.maya_file.normpath()),
-                        "name": str(self.maya_file.basename())
-                    }
+        sg.update(
+            "Version",
+            version["id"],
+            {
+                "sg_maya_file": {
+                    "link_type": "local",
+                    "local_path": str(self.maya_file.normpath()),
+                    "name": str(self.maya_file.basename())
                 }
-            )
-        else:
-            sg.upload(
-                "Version",
-                version["id"],
-                self.maya_file,
-                field_name="sg_maya_file",
-                display_name=r"{}".format(path(self.maya_file).basename())
-            )
+            }
+        )
 
-        if self.alembic_directory.drive == mapped_letter:
-            sg.update(
-                "Version",
-                version["id"],
-                {
-                    "sg_alembic_directory": {
-                        "link_type": "local",
-                        "local_path": str(self.alembic_directory.normpath()),
-                        "name": str(self.alembic_directory.basename())
-                    }
+        sg.update(
+            "Version",
+            version["id"],
+            {
+                "sg_alembic_directory": {
+                    "link_type": "local",
+                    "local_path": str(self.alembic_directory.normpath()),
+                    "name": str(self.alembic_directory.basename())
                 }
-            )
-        else:
-            sg.upload(
-                "Version",
-                version["id"],
-                self.alembic_directory,
-                field_name="sg_alembic_directory",
-                display_name=r"{}".format(path(self.alembic_directory).basename())
-            )
+            }
+        )
 
         # THUMBNAIL - ensures versions display the right media icon (movies with the play icon)
         # thumbnail attachments are then shared to the Shot entity's thumbnail

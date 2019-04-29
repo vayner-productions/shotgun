@@ -152,24 +152,15 @@ class CameraTools(object):
         }
         version = sg.create("Version", data)
 
-        # PUBLISH - local and remote files are treated differently on sg
+        # PUBLISH
         camera_display_name = path(self.camera_file).basename()
-        if root is None:
-            # attaching local file
-            self.camera_file = self.camera_file.normpath()
-            sg.update("Version",
-                      version["id"],
-                      {"sg_maya_file": {
-                          "link_type": "local",
-                          "local_path": self.camera_file,
-                          "name": camera_display_name}})
-        else:
-            # uploading manually/remotely
-            sg.upload("Version",
-                      version["id"],
-                      self.camera_file,
-                      field_name="sg_maya_file",
-                      display_name=camera_display_name)
+        self.camera_file = self.camera_file.normpath()
+        sg.update("Version",
+                  version["id"],
+                  {"sg_maya_file": {
+                      "link_type": "local",
+                      "local_path": self.camera_file,
+                      "name": camera_display_name}})
         print ">> Published camera to Shotgun.\n",  # checkout_scene.py called in publish_camera() prints
         return
 
