@@ -488,6 +488,7 @@ class Publish(object):
             "description": self.comment
         }
         version = sg.create("Version", data)
+
         # ATTACHMENTS - local files/directories are updated, whereas remote files/directories are uploaded
         # updating each attachment to the version individually in case they're being uploaded from different places
         # remote publishes are wip, and therefore commented out of use, vayner IT deparment needs to check securities!!!
@@ -570,7 +571,7 @@ class Publish(object):
         print ">> Published animation to Shotgun.\n",
         return
 
-    def animation(self, single=[], multi=[], alembics=[], comment="Alembics:"):
+    def animation(self, single=[], multi=[], comment="Alembics:"):
         """
         Contains .abc as they're created, path comes from self.version():
         04_Maya/published/08_Animation/Shot_###/alembic/ver_###
