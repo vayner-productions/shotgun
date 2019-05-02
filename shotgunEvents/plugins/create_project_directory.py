@@ -223,3 +223,23 @@ class CreateEntity(object):
                 }
             )
         return
+
+    def lighting(self):
+        self.logger.info(">> LIGHTING ENTITY")
+
+        lighting = self.sg.find_one(
+            "Shot",
+            filters=[["id", "is", self.event["entity"]["id"]]],
+            fields=["sg_lighting"]
+        )["sg_lighting"]
+
+        if not lighting:
+            self.sg.create(
+                "CustomEntity03",
+                {
+                    "project": self.event["project"],
+                    "code": self.event["entity"]["name"] + "_Lgt",
+                    "sg_shots": [self.event["entity"]]
+                }
+            )
+        return
