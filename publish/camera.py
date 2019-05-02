@@ -11,7 +11,7 @@ from . import *
 from PySide2 import QtCore, QtWidgets, QtUiTools
 from pymel.util import path
 from pymel.core import importFile, PyNode, workspace, fileDialog2, importFile, ls, group, select, playbackOptions, \
-    warning, delete, sceneName, exportSelected
+    warning, delete, sceneName, exportSelected, openFile, saveFile, FileReference, referenceQuery
 from .. import checkout_scene
 
 reload(checkout_scene)
@@ -234,17 +234,42 @@ class CameraTools(object):
             self.comment += "Published from {}:\n{}\n\n".format(scene_process, scene_name)
 
         select("render_cam_RIG")
-        exportSelected(
-            self.camera_file,
-            constructionHistory=0,
-            channels=0,
-            constraints=0,  # saves the constraint node from external node, build scene duplicates constraint
-            expressions=0,
-            shader=1,
-            type="mayaAscii",
-            preserveReferences=1,  # saves as reference if enabled
-            force=1
-        )
+
+        #TODO: OPEN STANDALONE MAYA INSTEAD OF SAVING AND OPENING ACTIVE FILE
+        if ls("render_cam_RIG", rn=1):
+            exportSelected(
+                self.camera_file,
+                constructionHistory=0,
+                channels=0,
+                constraints=0,  # saves the constraint node from external node, build scene duplicates constraint
+                expressions=0,
+                shader=1,
+                type="mayaAscii",
+                preserveReferences=1,  # saves as reference if enabled
+                force=1
+            )
+
+            active_file = sceneName()
+            saveFile(f=1)
+            openFile(self.camera_file, f=1)
+            reference_node = referenceQuery("render_cam_RIG", rfn=1)
+            reference_node = FileReference(refnode=reference_node)
+            reference_node.importContents()
+            saveFile(f=1)
+            openFile(active_file, f=1)
+            reference_node.load(self.camera_file)  # update build scene tool with the latest file
+        else:
+            exportSelected(
+                self.camera_file,
+                constructionHistory=0,
+                channels=0,
+                constraints=1,  # saves the constraint node from external node, build scene duplicates constraint
+                expressions=0,
+                shader=1,
+                type="mayaAscii",
+                preserveReferences=1,  # saves as reference if enabled
+                force=1
+            )
 
         self.update_shotgun()
         return
