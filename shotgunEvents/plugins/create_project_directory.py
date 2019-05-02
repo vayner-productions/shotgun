@@ -182,6 +182,7 @@ class CreateEntity(object):
         self.event = event
         self.camera()
         self.animation()
+        self.lighting()
         return
 
     def camera(self):
