@@ -119,7 +119,14 @@ class CameraTools(object):
 
         # CAMERA
         # find camera and its latest version linked to the shot
-        camera_entity = shot_entity["sg_camera"][0]  # assumes shots are paired with one camera !!!
+        camera_entity = None
+        try:
+            camera_entity = shot_entity["sg_camera"][0]  # assumes shots are paired with one camera !!!
+        except:
+            warning("Missing camera entity.")
+            delete(self.camera_file)
+            return
+
         version_filters = [
             ["project", "is", project],
             ["entity", "is", camera_entity]
