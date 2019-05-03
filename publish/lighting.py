@@ -44,7 +44,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(MyWindow, self).__init__(**kwargs)
         self.ui = self.import_ui()
-        self.init_ui()
+        # self.init_ui()
 
     def import_ui(self):
         ui_path = __file__.split(".")[0] + ".ui"
