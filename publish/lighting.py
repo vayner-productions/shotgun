@@ -22,6 +22,20 @@ def get_window():
 
 
 class Publish(object):
+    """
+    - check for tasks, their names
+    - update tasks to "cmpt" for complete
+    - save original file
+    - increment processed
+    - create version
+    - update sg_maya_light with original file
+    - update sg_maya_render with latest output path
+    - no need to create thumbnail
+    - no need to create playblast
+    - include automated comment
+    render setup and publish are separated in case output render versions get overwritten..
+    unless there's a way to see the versioning process first in the UI
+    """
     def __init__(self):
         return
 
