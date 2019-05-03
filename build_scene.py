@@ -135,10 +135,10 @@ class MyWindow(QtWidgets.QDialog):
                 [["project", "is", project], ["code", "contains", entity+"_Cam"]],
                 additional_filter_presets=additional_filter_presets,
                 fields=["sg_maya_file"]
-            )["sg_maya_file"]
+            )
 
             if publish is not None:
-                publish = publish["local_path_windows"]
+                publish = publish["sg_maya_file"]["local_path_windows"]
                 current = publish.split(".")[1]  # current version 0008
 
                 # root switching
