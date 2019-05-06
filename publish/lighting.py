@@ -1,15 +1,19 @@
 """
 """
 from . import *
-from .. import checkout_scene
-import pymel.core as pm
+from .. import checkout_scene, render_setup
+from pymel.core import PyNode
 from pymel.core.system import workspace
+from pymel.util import path
 from PySide2 import QtCore, QtWidgets, QtUiTools
 from sgtk.authentication import ShotgunAuthenticator
 
 
 reload(checkout_scene)
 checkout = checkout_scene.Checkout()
+
+reload(render_setup)
+render_settings = render_setup.RenderSettings()
 
 
 def get_window():
@@ -50,6 +54,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         super(MyWindow, self).__init__(**kwargs)
         self.ui = self.import_ui()
         self.tasks = self.get_tasks()
+        self.render_path = self.get_render_path()
         self.init_ui()
         return
 
@@ -93,14 +98,61 @@ class MyWindow(Publish, QtWidgets.QDialog):
         )
         return tasks
 
-    def get_render_path(self):
-        render_path = workspace.path.joinpath(
+    @staticmethod
+    def get_render_path():
+        drg = PyNode("defaultRenderGlobals")
+        img_prefix = drg.imageFilePrefix.get()
+
+        render_path = path(workspace.path.joinpath(
             workspace.fileRules["images"],
-            "render_cam"
-        )
-        print ">>", render_path
+            img_prefix
+        ).split("<Version>")[0]).normpath()
+        return render_path
+
+    def set_render_path(self, version=None):
+        option = self.ui.version_grp.checkedButton().text()
+        if option == "Next":
+            version = self.ui.next_lne.placeholderText()
+        elif option == "Custom":
+            version = self.ui.custom_lne.text()
+        elif option == "Previous":
+            version = self.ui.previous_cbx.currentText()
+        render_path = self.render_path.joinpath(version).normpath()
+        self.ui.render_lbl.setText(render_path)
+        return
+
+    def checked_custom(self):
+        self.ui.custom_rbn.setChecked(1)
+        self.set_render_path()
+        return
+
+    def checked_previous(self):
+        self.ui.previous_rbn.setChecked(1)
+        self.set_render_path()
         return
 
     def init_ui(self):
+        for task in self.tasks:
+            item = QtWidgets.QListWidgetItem(task["content"], self.ui.task_lsw)
+            item.setToolTip(str(task["id"]))
+
+        previous = sorted([version.namebase for version in self.get_render_path().dirs()])[::-1]
+        if previous:
+            self.ui.previous_cbx.addItems(previous)
+        else:
+            self.ui.previous_rbn.deleteLater()
+            self.ui.previous_cbx.deleteLater()
+
+        next = "v001"
+        for pth in sorted(self.get_render_path().dirs("v*"))[::-1]:
+            next = "v" + str(int(pth.namebase[1:]) + 1).zfill(3)
+            break
+
+        self.ui.next_lne.setPlaceholderText(next)
+        self.ui.render_lbl.setText(self.render_path.joinpath(next).normpath())
+
+        self.ui.version_grp.buttonClicked.connect(self.set_render_path)
+        self.ui.custom_lne.textChanged.connect(self.checked_custom)
+        self.ui.previous_cbx.currentIndexChanged.connect(self.checked_previous)
         return
 
