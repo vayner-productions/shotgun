@@ -3,6 +3,7 @@
 from . import *
 from .. import checkout_scene
 import pymel.core as pm
+from pymel.core.system import workspace
 from PySide2 import QtCore, QtWidgets, QtUiTools
 
 
@@ -39,12 +40,27 @@ class Publish(object):
     def __init__(self):
         return
 
+    def update_shotgun(self):
+        return
+
 
 class MyWindow(Publish, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(MyWindow, self).__init__(**kwargs)
         self.ui = self.import_ui()
-        # self.init_ui()
+
+        scene_process, shot_name = workspace.fileRules["scene"].split("/")[1:]  # Shot_###
+        self.scene_process = scene_process.split("_", 1)[-1]  # Lighting
+        self.shot_entity = sg.find_one(
+            "Shot",
+            [
+                ["project", "is", project],
+                ["code", "is", shot_name]
+            ]
+        )
+
+        self.init_ui()
+        return
 
     def import_ui(self):
         ui_path = __file__.split(".")[0] + ".ui"
@@ -54,4 +70,25 @@ class MyWindow(Publish, QtWidgets.QDialog):
         ui = loader.load(ui_file)
         ui_file.close()
         return ui
+
+    def get_tasks(self):
+        task_filters = [
+            ["project", "is", project],  # tasks for this project
+            ["entity", "is", self.shot_entity],  # this shot
+            ["step.Step.code", "is", self.scene_process]  # only lighting tasks
+        ]
+
+        task_fields = [
+            "content"#, "step"
+        ]
+
+        print ">>>", sg.find(
+            "Task",
+            filters=task_filters,
+            fields=task_fields
+        )
+        return
+
+    def init_ui(self):
+        return
 
