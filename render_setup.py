@@ -186,8 +186,6 @@ class RenderSettings(Common, AOVs):
 
         self.common_tab()
         self.aovs_tab()
-
-        print ">> Render setup complete.\n",
         return
 
     def common_tab(self):
