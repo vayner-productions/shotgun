@@ -30,7 +30,7 @@ def get_window():
 class Publish(object):
     def __init__(self):
         self.tasks = self.get_tasks()
-        self.lighting_file = sceneName()
+        self.lighting_file = sceneName()  #TODO: original file instead of processed
         self.lighting_output = self.get_render_path()
         self.comment = ""
         return
@@ -66,13 +66,13 @@ class Publish(object):
         return tasks
 
     @staticmethod
-    def set_task(self, task_name=None, id=None):
+    def set_task(task_name=None, task_id=None):
         sg.find_one(
             "Task",
-            filters=[["project", "is", project], ["content", "is", task_name], ["id", "is", id]]
+            filters=[["project", "is", project], ["content", "is", task_name], ["id", "is", task_id]]
         )
 
-        sg.update("Task", id, {"sg_status_list": "cmp"})
+        sg.update("Task", task_id, {"sg_status_list": "cmp"})
         return
 
     @staticmethod
@@ -129,6 +129,8 @@ class Publish(object):
                 }
             }
         )
+
+        print ">> Render setup complete.\n",
         return
 
 
@@ -179,7 +181,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
             item.setToolTip(str(task["id"]))
 
         # get all the version folders that exist
-        previous = sorted([version.namebase for version in self.get_render_path().dirs()])[::-1]
+        previous = sorted([version.namebase for version in self.render_path.dirs()])[::-1]
 
         # previous only contains folders with content
         # by default, version reflects the next folder which has not been created yet
@@ -209,13 +211,18 @@ class MyWindow(Publish, QtWidgets.QDialog):
         return
 
     def publish_lighting(self):
-        for item in self.ui.task_lsw.selectedItems():
-            self.set_task(task_name=item.text(), id=int(item.toolTip()))
-
         render_settings.drg.renderVersion.set(self.version)
+        self.comment = self.ui.comment_txt.toPlainText() + "\n\n"
 
-        self.comment = self.ui.comment_txt.text()
-        self.lighting_output = self.ui.render_lbl.text()
+        for item in self.ui.task_lsw.selectedItems():
+            task_name, task_id = item.text(), int(item.toolTip())
+            self.set_task(task_name=task_name, task_id=task_id)
+
+            if "Addressed Tasks" not in self.comment:
+                self.comment += "Addressed Task(s):\n"
+            self.comment += task_name
+
+        self.lighting_output = path(self.ui.render_lbl.text())
         self.update_shotgun()
 
         self.ui.close()
