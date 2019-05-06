@@ -76,9 +76,14 @@ class Common(object):
         self.drg.endFrame.set(end)
         return
 
-    def renderable_cameras(self, camera="render_cam"):
-        render_cam = PyNode(camera)
-        render_cam.renderable.set(1)
+    @staticmethod
+    def renderable_cameras(camera="render_cam"):
+        for cam in ls(type="camera"):
+            render_cam = camera in str(cam)
+            if render_cam:
+                cam.renderable.set(1)
+            else:
+                cam.renderable.set(0)
         return
 
 
