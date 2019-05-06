@@ -2,7 +2,7 @@
 """
 from . import *
 from .. import checkout_scene, render_setup
-from pymel.core import PyNode
+from pymel.core import PyNode, sceneName
 from pymel.core.system import workspace
 from pymel.util import path
 from PySide2 import QtCore, QtWidgets, QtUiTools
@@ -28,46 +28,12 @@ def get_window():
 
 
 class Publish(object):
-    """
-    - check for tasks, their names
-    - update tasks to "cmpt" for complete
-    - save original file
-    - increment processed
-    - create version
-    - update sg_maya_light with original file
-    - update sg_maya_render with latest output path
-    - no need to create thumbnail
-    - no need to create playblast
-    - include automated comment
-    render setup and publish are separated in case output render versions get overwritten..
-    unless there's a way to see the versioning process first in the UI
-    """
     def __init__(self):
-        return
-
-    def update_shotgun(self):
-        return
-
-
-class MyWindow(Publish, QtWidgets.QDialog):
-    def __init__(self, **kwargs):
-        super(MyWindow, self).__init__(**kwargs)
-        self.ui = self.import_ui()
         self.tasks = self.get_tasks()
-        self.render_path = self.get_render_path()
-        self.version = render_settings.drg.renderVersion.get()
-        self.init_ui()
+        self.lighting_file = sceneName()
+        self.lighting_output = self.get_render_path()
+        self.comment = ""
         return
-
-    @staticmethod
-    def import_ui():
-        ui_path = __file__.split(".")[0] + ".ui"
-        loader = QtUiTools.QUiLoader()
-        ui_file = QtCore.QFile(ui_path)
-        ui_file.open(QtCore.QFile.ReadOnly)
-        ui = loader.load(ui_file)
-        ui_file.close()
-        return ui
 
     @staticmethod
     def get_tasks():
@@ -100,6 +66,16 @@ class MyWindow(Publish, QtWidgets.QDialog):
         return tasks
 
     @staticmethod
+    def set_task(self, task_name=None, id=None):
+        sg.find_one(
+            "Task",
+            filters=[["project", "is", project], ["content", "is", task_name], ["id", "is", id]]
+        )
+
+        sg.update("Task", id, {"sg_status_list": "cmp"})
+        return
+
+    @staticmethod
     def get_render_path():
         drg = PyNode("defaultRenderGlobals")
         img_prefix = drg.imageFilePrefix.get()
@@ -107,8 +83,73 @@ class MyWindow(Publish, QtWidgets.QDialog):
         render_path = path(workspace.path.joinpath(
             workspace.fileRules["images"],
             img_prefix
-        ).split("<Version>")[0]).normpath()
+        ).split("<Version>")[0]).joinpath(drg.renderVersion.get()).normpath()
         return render_path
+
+    def update_shotgun(self):
+        lighting_name = workspace.fileRules["scene"].split("/")[-1] + "_Lgt"
+
+        lighting_entity = sg.find_one(
+            "CustomEntity03",
+            filters=[["project", "is", project], ["code", "is", lighting_name]],
+        )
+
+        latest_version = sg.find_one(
+            "Version",
+            filters=[["project", "is", project], ["entity", "is", lighting_entity]],
+            fields=["code"],
+            additional_filter_presets=[
+                {
+                    "preset_name": "LATEST",
+                    "latest_by": "ENTITIES_CREATED_AT"
+                }
+            ]
+        )
+
+        version_name = lighting_name + "_v001"
+        if latest_version:
+            version_name = lighting_name + "_v" + str(int(latest_version["code"][-3:]) + 1).zfill(3)
+
+        sg.create(
+            "Version",
+            {
+                "project": project,
+                "entity": lighting_entity,
+                "code": version_name,
+                "description": self.comment,
+                "sg_lighting_file": {
+                    "link_type": "local",
+                    "local_path": str(self.lighting_file.normpath()),
+                    "name": self.lighting_file.namebase
+                },
+                "sg_lighting_output": {
+                    "link_type": "local",
+                    "local_path": str(self.lighting_output.normpath()),
+                    "name": self.lighting_output.namebase
+                }
+            }
+        )
+        return
+
+
+class MyWindow(Publish, QtWidgets.QDialog):
+    def __init__(self, **kwargs):
+        super(MyWindow, self).__init__(**kwargs)
+        self.ui = self.import_ui()
+        self.render_path = self.get_render_path().dirname()
+        self.version = render_settings.drg.renderVersion.get()
+        self.init_ui()
+        return
+
+    @staticmethod
+    def import_ui():
+        ui_path = __file__.split(".")[0] + ".ui"
+        loader = QtUiTools.QUiLoader()
+        ui_file = QtCore.QFile(ui_path)
+        ui_file.open(QtCore.QFile.ReadOnly)
+        ui = loader.load(ui_file)
+        ui_file.close()
+        return ui
 
     def set_render_path(self):
         option = self.ui.version_grp.checkedButton().text()
@@ -164,10 +205,18 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.ui.version_grp.buttonClicked.connect(self.set_render_path)
         self.ui.custom_lne.textChanged.connect(self.checked_custom)
         self.ui.previous_cbx.currentIndexChanged.connect(self.checked_previous)
-        self.ui.publish_btn.clicked.connect(self.clicked_publish)
+        self.ui.publish_btn.clicked.connect(self.publish_lighting)
         return
 
-    def clicked_publish(self):
+    def publish_lighting(self):
+        for item in self.ui.task_lsw.selectedItems():
+            self.set_task(task_name=item.text(), id=int(item.toolTip()))
 
-        # render_settings.drg.renderVersion.set(self.version)
+        render_settings.drg.renderVersion.set(self.version)
+
+        self.comment = self.ui.comment_txt.text()
+        self.lighting_output = self.ui.render_lbl.text()
+        self.update_shotgun()
+
+        self.ui.close()
         return
