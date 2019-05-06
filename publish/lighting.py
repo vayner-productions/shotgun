@@ -5,6 +5,7 @@ from .. import checkout_scene
 import pymel.core as pm
 from pymel.core.system import workspace
 from PySide2 import QtCore, QtWidgets, QtUiTools
+from sgtk.authentication import ShotgunAuthenticator
 
 
 reload(checkout_scene)
@@ -48,21 +49,12 @@ class MyWindow(Publish, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(MyWindow, self).__init__(**kwargs)
         self.ui = self.import_ui()
-
-        scene_process, shot_name = workspace.fileRules["scene"].split("/")[1:]  # Shot_###
-        self.scene_process = scene_process.split("_", 1)[-1]  # Lighting
-        self.shot_entity = sg.find_one(
-            "Shot",
-            [
-                ["project", "is", project],
-                ["code", "is", shot_name]
-            ]
-        )
-
+        self.tasks = self.get_tasks()
         self.init_ui()
         return
 
-    def import_ui(self):
+    @staticmethod
+    def import_ui():
         ui_path = __file__.split(".")[0] + ".ui"
         loader = QtUiTools.QUiLoader()
         ui_file = QtCore.QFile(ui_path)
@@ -71,22 +63,42 @@ class MyWindow(Publish, QtWidgets.QDialog):
         ui_file.close()
         return ui
 
-    def get_tasks(self):
-        task_filters = [
-            ["project", "is", project],  # tasks for this project
-            ["entity", "is", self.shot_entity],  # this shot
-            ["step.Step.code", "is", self.scene_process]  # only lighting tasks
-        ]
-
-        task_fields = [
-            "content"#, "step"
-        ]
-
-        print ">>>", sg.find(
-            "Task",
-            filters=task_filters,
-            fields=task_fields
+    @staticmethod
+    def get_tasks():
+        scene_process, shot_name = workspace.fileRules["scene"].split("/")[1:]  # Shot_###
+        scene_process = scene_process.split("_", 1)[-1]  # Lighting
+        shot_entity = sg.find_one(
+            "Shot",
+            [
+                ["project", "is", project],
+                ["code", "is", shot_name]
+            ]
         )
+
+        auth = ShotgunAuthenticator()
+        user = str(auth.get_user())
+
+        tasks = sg.find(
+            "Task",
+            filters=[
+                ["project", "is", project],  # tasks for this project
+                ["entity", "is", shot_entity],  # this shot
+                ["task_assignees.HumanUser.firstname", "is", user],  # this user
+                ["step.Step.code", "is", scene_process],  # only lighting tasks
+                ["sg_status_list", "is_not", "cmp"],
+                ["sg_status_list", "is_not", "rev"],
+                ["sg_status_list", "is_not", "omt"],
+            ],
+            fields=["content"]
+        )
+        return tasks
+
+    def get_render_path(self):
+        render_path = workspace.path.joinpath(
+            workspace.fileRules["images"],
+            "render_cam"
+        )
+        print ">>", render_path
         return
 
     def init_ui(self):
