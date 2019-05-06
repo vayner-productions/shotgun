@@ -55,6 +55,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.ui = self.import_ui()
         self.tasks = self.get_tasks()
         self.render_path = self.get_render_path()
+        self.version = render_settings.drg.renderVersion.get()
         self.init_ui()
         return
 
@@ -109,15 +110,15 @@ class MyWindow(Publish, QtWidgets.QDialog):
         ).split("<Version>")[0]).normpath()
         return render_path
 
-    def set_render_path(self, version=None):
+    def set_render_path(self):
         option = self.ui.version_grp.checkedButton().text()
         if option == "Next":
-            version = self.ui.next_lne.placeholderText()
+            self.version = self.ui.next_lne.placeholderText()
         elif option == "Custom":
-            version = self.ui.custom_lne.text()
+            self.version = self.ui.custom_lne.text()
         elif option == "Previous":
-            version = self.ui.previous_cbx.currentText()
-        render_path = self.render_path.joinpath(version).normpath()
+            self.version = self.ui.previous_cbx.currentText()
+        render_path = self.render_path.joinpath(self.version).normpath()
         self.ui.render_lbl.setText(render_path)
         return
 
@@ -136,23 +137,37 @@ class MyWindow(Publish, QtWidgets.QDialog):
             item = QtWidgets.QListWidgetItem(task["content"], self.ui.task_lsw)
             item.setToolTip(str(task["id"]))
 
+        # get all the version folders that exist
         previous = sorted([version.namebase for version in self.get_render_path().dirs()])[::-1]
+
+        # previous only contains folders with content
+        # by default, version reflects the next folder which has not been created yet
+        # sometimes the next folder is created and contains nothing
+        # previous will not display the next folder in the ui-dropdown to avoid confusion
+        try:
+            previous.remove(self.version)
+        except:
+            pass
+
+        # display previous ui elements if version folders exist
         if previous:
             self.ui.previous_cbx.addItems(previous)
         else:
             self.ui.previous_rbn.deleteLater()
             self.ui.previous_cbx.deleteLater()
 
-        next = "v001"
-        for pth in sorted(self.get_render_path().dirs("v*"))[::-1]:
-            next = "v" + str(int(pth.namebase[1:]) + 1).zfill(3)
-            break
+        # load ui elements
+        self.ui.next_lne.setPlaceholderText(self.version)
+        self.ui.render_lbl.setText(self.render_path.joinpath(self.version).normpath())
 
-        self.ui.next_lne.setPlaceholderText(next)
-        self.ui.render_lbl.setText(self.render_path.joinpath(next).normpath())
-
+        # connect signals to slots
         self.ui.version_grp.buttonClicked.connect(self.set_render_path)
         self.ui.custom_lne.textChanged.connect(self.checked_custom)
         self.ui.previous_cbx.currentIndexChanged.connect(self.checked_previous)
+        self.ui.publish_btn.clicked.connect(self.clicked_publish)
         return
 
+    def clicked_publish(self):
+
+        # render_settings.drg.renderVersion.set(self.version)
+        return
