@@ -7,11 +7,6 @@ vm.run()
 
 from pymel.core.uitypes import Menu, MenuItem
 
-set_project = """
-import shotgun.set_project as sg; reload(sg)
-sg.get_window()
-"""
-
 checkout = """
 from shotgun import checkout_scene as sg; reload(sg)
 sg.get_window()
@@ -81,16 +76,16 @@ class VaynerMenu:
         self.vayner_menu = None
         try:
             self.vayner_menu = Menu("Vayner")
-            for item in self.vayner_menu.getItemArray()[::-1]:
+            for item in self.vayner_menu.getItemArray()[-2::-1]:
                 item.delete()
         except ValueError:
             self.vayner_menu = Menu("Vayner", parent="MayaWindow", tearOff=1)
 
-        reload_menu_item = MenuItem(
-            label="Reload Vayner Menu",
-            command=reload_menu,
-            parent="Vayner"
-        )
+            reload_menu_item = MenuItem(
+                label="Reload Vayner Menu",
+                command=reload_menu,
+                parent="Vayner"
+            )
         return
 
     def add_lighting_items(self):
