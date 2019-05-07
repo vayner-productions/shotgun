@@ -574,7 +574,7 @@ class Publish(object):
         self.multi_frame(multi)
 
         # Copying alembics from /published to /06_Cache
-        all_directory = path(workspace.expandName(workspace.fileRules["Alembic"]))
+        all_directory = workspace.path.joinpath(workspace.fileRules["Alembic"])
         alembics = self.alembic_directory.files("*.abc")
         if comment == "Proxies:":
             alembics = self.alembic_directory.files("*_PXY.abc")
@@ -582,7 +582,7 @@ class Publish(object):
         # Ensures 06_Cache is created in case shotgun event daemon does not
         for abc in alembics:
             dst = all_directory.joinpath(abc.basename()).normpath()
-            path.mkdir_p(all_directory)
+            all_directory.makedirs_p()
             path.copy(abc, dst)
 
         # Adding automated comment
