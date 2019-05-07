@@ -240,7 +240,7 @@ class CreateEntity(object):
                 {
                     "project": self.event["project"],
                     "code": self.event["entity"]["name"] + "_Lgt",
-                    "sg_shots": [self.event["entity"]]
+                    "sg_shots_1": [self.event["entity"]]
                 }
             )
         return
