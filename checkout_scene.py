@@ -88,7 +88,7 @@ class Checkout(object):
             try:
                 published_file = path(sg.find_one(
                     "Version",
-                    [["project", "is", project], ["code", "contains", entity_name + "_CAM"]],
+                    [["project", "is", project], ["code", "contains", entity_name + "_Cam"]],
                     ["sg_maya_file"],
                     additional_filter_presets=[{"preset_name": "LATEST", "latest_by": "ENTITIES_CREATED_AT"}]
                 )["sg_maya_file"]["local_path"])
@@ -98,7 +98,7 @@ class Checkout(object):
             try:
                 published_file = path(sg.find_one(
                     "Version",
-                    [["project", "is", project], ["code", "contains", entity_name + "_ANIM"]],
+                    [["project", "is", project], ["code", "contains", entity_name + "_Anim"]],
                     ["sg_maya_file"],
                     additional_filter_presets=[{"preset_name": "LATEST", "latest_by": "ENTITIES_CREATED_AT"}]
                 )["sg_maya_file"]["local_path"])
@@ -107,10 +107,11 @@ class Checkout(object):
         elif "Lighting" in scene_process:
             try:
                 published_file = path(sg.find_one(
-                    "Shot",
-                    [["project", "is", project], ["code", "is", entity_name]],
-                    ["sg_maya_light"]
-                )["sg_maya_light"]["local_path"])
+                    "Version",
+                    [["project", "is", project], ["code", "contains", entity_name + "_Lgt"]],
+                    ["sg_lighting_file"],
+                    additional_filter_presets=[{"preset_name": "LATEST", "latest_by": "ENTITIES_CREATED_AT"}]
+                )["sg_lighting_file"]["local_path"])
             except:
                 pass
 
