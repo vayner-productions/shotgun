@@ -14,7 +14,7 @@ lighting.update_shotgun()  # get shotgun to record all relevant info (files, com
 """
 from . import *
 from .. import checkout_scene, render_setup
-from pymel.core import PyNode, sceneName, saveFile
+from pymel.core import PyNode, sceneName, saveFile, openFile
 from pymel.core.system import workspace
 from pymel.util import path
 from PySide2 import QtCore, QtWidgets, QtUiTools
@@ -119,29 +119,25 @@ class Publish(object):
             publish_file = path(".".join(latest_file))
         else:
             publish_file = publish_folder.__div__("{}_original.0001.ma".format(shot))
+
+        publish_file = path(publish_file).normpath()
         return publish_file
 
-    def lighting(self):
+    def lighting(self, version_label=None):
         """
         creates working file, saved as the latest processed file, and copies it as the latest original file
-
-        publish fail will open the return file, the file before any publishing work began,
-        and remove both working and publish file:
-
-        openFile(self.return_file, f=1)
-        remove_p(self.working_file)
-        remove_p(self.lighting_file)
-
         :return:
         """
         reload(render_setup)
-        render_setup.RenderSettings()
+        render_settings = render_setup.RenderSettings()
+        if version_label:
+            render_settings.drg.renderVersion.set(version_label)
 
         # ensures this is the point to return to if there's an error
-        self.working_file = checkout.increment_file()
+        self.working_file = path(checkout.increment_file())
 
         # copies saved working file as original file
-        path(self.working_file).copy2(self.lighting_file)
+        self.working_file.copy2(self.lighting_file)
         return
 
     def update_shotgun(self):
@@ -197,7 +193,13 @@ class MyWindow(Publish, QtWidgets.QDialog):
         super(MyWindow, self).__init__(**kwargs)
         self.ui = self.import_ui()
         self.render_path = self.get_render_path().dirname()
-        self.version = render_settings.drg.renderVersion.get()
+
+        reload(render_setup)
+        common = render_setup.Common()
+        common.file_output()
+        common.metadata()
+        self.version = common.drg.renderVersion.get()
+
         self.init_ui()
         return
 
@@ -269,20 +271,36 @@ class MyWindow(Publish, QtWidgets.QDialog):
         return
 
     def publish_lighting(self):
-        render_settings.drg.renderVersion.set(self.version)
+        # get ui data
+        user_comment = self.ui.comment_txt.toPlainText()
+        completed_tasks = self.ui.task_lsw.selectedItems()
 
-        self.comment = self.ui.comment_txt.toPlainText() + "\n\n"
+        # process comment to update to shotgun first
+        # comments are inconsequential to publish errors
+        if user_comment:
+            self.comment = user_comment + "\n\n"
 
-        for item in self.ui.task_lsw.selectedItems():
-            task_name, task_id = item.text(), int(item.toolTip())
-            self.set_task(task_name=task_name, task_id=task_id)
-
+        for task in completed_tasks:
+            task_name = task.text()
             if "Addressed Tasks" not in self.comment:
-                self.comment += "Addressed Task(s):\n"
-            self.comment += task_name
+                self.comment += "Addressed Task(s):"
+            self.comment += "\n{}".format(task_name)
 
-        self.lighting_output = path(self.ui.render_lbl.text())
-        self.update_shotgun()
+        # do work in Maya
+        # publish fail will open the return file, the file before any publishing work began,
+        # and remove both working and publish file
+        self.lighting(version_label=self.version)
+        try:
+            for task in completed_tasks:
+                task_name, task_id = task.text(), int(task.toolTip())
+                self.set_task(task_name=task_name, task_id=task_id)
+
+            self.lighting_output = path(self.ui.render_lbl.text())
+            self.update_shotgun()
+        except:
+            openFile(self.return_file, f=1)
+            self.working_file.remove_p()
+            self.lighting_file.remove_p()
 
         self.ui.close()
         return
