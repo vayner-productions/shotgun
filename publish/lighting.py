@@ -1,8 +1,20 @@
 """
+
+# PUBLISH BY CODE
+lighting = Publish()
+lighting.comment = "Published from code"  # add personal comment first
+
+# get tasks you've addressed
+# update tasks, add automated message to comments
+task_complete = lighting.tasks[0]
+lighting.set_task(task_name=task_complete["content"], task_id=task_complete["id"])
+
+lighting.lighting()  # work that's done in Maya
+lighting.update_shotgun()  # get shotgun to record all relevant info (files, comments, and tasks)
 """
 from . import *
 from .. import checkout_scene, render_setup
-from pymel.core import PyNode, sceneName
+from pymel.core import PyNode, sceneName, saveFile
 from pymel.core.system import workspace
 from pymel.util import path
 from PySide2 import QtCore, QtWidgets, QtUiTools
@@ -11,9 +23,6 @@ from sgtk.authentication import ShotgunAuthenticator
 
 reload(checkout_scene)
 checkout = checkout_scene.Checkout()
-
-reload(render_setup)
-render_settings = render_setup.RenderSettings()
 
 
 def get_window():
@@ -30,9 +39,11 @@ def get_window():
 class Publish(object):
     def __init__(self):
         self.tasks = self.get_tasks()
-        self.lighting_file = sceneName()  #TODO: original file instead of processed
-        self.lighting_output = self.get_render_path()
+        self.lighting_file = self.get_publish_file()  # maya lighting scene file to be recorded on shotgun
+        self.lighting_output = self.get_render_path()  # maya render output path to be recorded on shotgun
         self.comment = ""
+        self.return_file = sceneName()  # file to return to in case of publish error
+        self.working_file = None
         return
 
     @staticmethod
@@ -77,6 +88,13 @@ class Publish(object):
 
     @staticmethod
     def get_render_path():
+        """
+        A path object stopping at the version folder, example:
+        M:\Animation\Projects\Client\VaynerX\Vayner Productions\0009_Test_Project\Project Directory\02_Production
+        \04_Maya\images\Shots\Shot_001\v001
+
+        :return:
+        """
         drg = PyNode("defaultRenderGlobals")
         img_prefix = drg.imageFilePrefix.get()
 
@@ -85,6 +103,46 @@ class Publish(object):
             img_prefix
         ).split("<Version>")[0]).joinpath(drg.renderVersion.get()).normpath()
         return render_path
+
+    @staticmethod
+    def get_publish_file():
+        publish_folder = path(workspace.path.joinpath(workspace.fileRules["scene"]).replace("scenes", "published"))
+        publish_folder.makedirs_p()
+
+        publish_file, shot = None, publish_folder.namebase
+        publish_files = sorted(publish_folder.files("{}_original.*.ma".format(shot)))[::-1]
+        if publish_files:
+            # incrementing based on the length of published files may overwrite any existing file because it is not
+            # accounting for the version number on the latest file, this way ensures the next original file does
+            latest_file = publish_files[0].split(".")
+            latest_file[1] = str(int(latest_file[1]) + 1).zfill(4)
+            publish_file = path(".".join(latest_file))
+        else:
+            publish_file = publish_folder.__div__("{}_original.0001.ma".format(shot))
+        return publish_file
+
+    def lighting(self):
+        """
+        creates working file, saved as the latest processed file, and copies it as the latest original file
+
+        publish fail will open the return file, the file before any publishing work began,
+        and remove both working and publish file:
+
+        openFile(self.return_file, f=1)
+        remove_p(self.working_file)
+        remove_p(self.lighting_file)
+
+        :return:
+        """
+        reload(render_setup)
+        render_setup.RenderSettings()
+
+        # ensures this is the point to return to if there's an error
+        self.working_file = checkout.increment_file()
+
+        # copies saved working file as original file
+        path(self.working_file).copy2(self.lighting_file)
+        return
 
     def update_shotgun(self):
         lighting_name = workspace.fileRules["scene"].split("/")[-1] + "_Lgt"
@@ -212,6 +270,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
     def publish_lighting(self):
         render_settings.drg.renderVersion.set(self.version)
+
         self.comment = self.ui.comment_txt.toPlainText() + "\n\n"
 
         for item in self.ui.task_lsw.selectedItems():
