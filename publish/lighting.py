@@ -62,7 +62,7 @@ class Publish(object):
             filters=[
                 ["project", "is", project],  # tasks for this project
                 ["entity", "is", shot_entity],  # this shot
-                ["task_assignees.HumanUser.firstname", "is", user],  # this user
+                # ["task_assignees.HumanUser.firstname", "is", user],  # this user
                 ["step.Step.code", "is", scene_process],  # only lighting tasks
                 ["sg_status_list", "is_not", "cmp"],
                 ["sg_status_list", "is_not", "rev"],
