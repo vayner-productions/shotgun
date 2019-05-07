@@ -40,7 +40,7 @@ class Publish(object):
     def __init__(self):
         self.tasks = self.get_tasks()
         self.lighting_file = self.get_publish_file()  # maya lighting scene file to be recorded on shotgun
-        self.lighting_output = self.get_render_path()  # maya render output path to be recorded on shotgun
+        self.lighting_output = None  # maya render output path to be recorded on shotgun
         self.comment = ""
         self.return_file = sceneName()  # file to return to in case of publish error
         self.working_file = None
@@ -133,6 +133,9 @@ class Publish(object):
         if version_label:
             render_settings.drg.renderVersion.set(version_label)
 
+        # maya render output is put together after render setup is run
+        self.lighting_output = self.get_render_path()
+
         # ensures this is the point to return to if there's an error
         self.working_file = path(checkout.increment_file())
 
@@ -192,13 +195,13 @@ class MyWindow(Publish, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(MyWindow, self).__init__(**kwargs)
         self.ui = self.import_ui()
-        self.render_path = self.get_render_path().dirname()
 
         reload(render_setup)
         common = render_setup.Common()
         common.file_output()
         common.metadata()
         self.version = common.drg.renderVersion.get()
+        self.render_path = self.get_render_path().dirname()
 
         self.init_ui()
         return
