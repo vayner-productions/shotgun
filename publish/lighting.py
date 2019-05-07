@@ -21,10 +21,6 @@ from PySide2 import QtCore, QtWidgets, QtUiTools
 from sgtk.authentication import ShotgunAuthenticator
 
 
-reload(checkout_scene)
-checkout = checkout_scene.Checkout()
-
-
 def get_window():
     global mw
     try:
@@ -137,6 +133,8 @@ class Publish(object):
         self.lighting_output = self.get_render_path()
 
         # ensures this is the point to return to if there's an error
+        reload(checkout_scene)
+        checkout = checkout_scene.Checkout()
         self.working_file = path(checkout.increment_file())
 
         # copies saved working file as original file
