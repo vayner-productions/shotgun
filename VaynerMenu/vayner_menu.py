@@ -1,3 +1,10 @@
+"""
+from shotgun.VaynerMenu import vayner_menu
+reload(vayner_menu)
+vm = vayner_menu.VaynerMenu()
+vm.run()
+"""
+
 from pymel.core.uitypes import Menu, MenuItem
 
 set_project = """
@@ -31,9 +38,9 @@ import shotgun.publish_scene as sg; reload(sg)
 sg.get_window()
 """
 
-render_setup = """
-from shotgun import render_setup as sg; reload(sg)
-sg.RenderSettings()
+publish_lighting = """
+from shotgun.publish import lighting as sg; reload(sg)
+sg.get_window()
 """
 
 import_camera = """
@@ -92,14 +99,9 @@ class VaynerMenu:
             command=organize_textures,
         )
 
-        render_setup_item = MenuItem(
-            label="Render Setup",
-            command=render_setup,
-        )
-
         publish_lighting_item = MenuItem(
             label="Publish Lighting",
-            command=publish_scene,
+            command=publish_lighting,
         )
         return
 
