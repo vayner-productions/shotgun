@@ -80,6 +80,9 @@ class Publish(object):
         # alembics previously published into /cache/alembic, but will now contain only the latest version
         # all publishes will be recorded in alembic directory /publish/08_Animation/Shot_###/ver_###
         self.workspace_alembic = path(workspace.expandName(workspace.fileRules["Alembic"]))
+
+        # tasks
+        self.tasks = self.get_tasks()
         return
 
     def version(self, up=1, current=None, next=None):
@@ -585,14 +588,14 @@ class Publish(object):
             all_directory.makedirs_p()
             path.copy(abc, dst)
 
-        # Adding automated comment
-        if self.comment:
-            self.comment += "\n\n"
-
         if alembics:
             self.comment += comment
             for abc in alembics:
                 self.comment += "\n" + abc.basename()
+
+        # Adding automated comment
+        if self.comment:
+            self.comment += "\n\n"
         return alembics
 
     def proxy(self, mode="add", remove=[], add=[], export=[]):
@@ -686,6 +689,42 @@ class Publish(object):
                     self.comment += "\n" + abc.basename()
         else:
             pm.warning(">> Mode is either 'add', 'export', or 'remove'.")
+
+    @staticmethod
+    def get_tasks():
+        scene_process, shot_name = workspace.fileRules["scene"].split("/")[1:]  # Shot_###
+        scene_process = scene_process.split("_", 1)[-1]  # Animation
+        shot_entity = sg.find_one(
+            "Shot",
+            [
+                ["project", "is", project],
+                ["code", "is", shot_name]
+            ]
+        )
+
+        tasks = sg.find(
+            "Task",
+            filters=[
+                ["project", "is", project],  # tasks for this project
+                ["entity", "is", shot_entity],  # this shot
+                ["step.Step.code", "is", scene_process],  # only Animation tasks
+                ["sg_status_list", "is_not", "cmp"],
+                ["sg_status_list", "is_not", "rev"],
+                ["sg_status_list", "is_not", "omt"],
+            ],
+            fields=["content"]
+        )
+        return tasks
+
+    @staticmethod
+    def set_task(task_name=None, task_id=None):
+        sg.find_one(
+            "Task",
+            filters=[["project", "is", project], ["content", "is", task_name], ["id", "is", task_id]]
+        )
+
+        sg.update("Task", task_id, {"sg_status_list": "cmp"})
+        return
 
 
 class MyWindow(Publish, QtWidgets.QDialog):
@@ -796,6 +835,11 @@ class MyWindow(Publish, QtWidgets.QDialog):
         return
 
     def init_ui(self):
+        # TASKS
+        for task in self.tasks:
+            item = QtWidgets.QListWidgetItem(task["content"], self.ui.task_lsw)
+            item.setToolTip(str(task["id"]))
+
         # PROXY
         shot_name = path(workspace.fileRules["scene"]).basename()
         self.ui.input_lne.textChanged.connect(self.change_output)
@@ -861,7 +905,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
         # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
         # start with user comment
-        self.comment += "{}".format(self.ui.comment_txt.toPlainText())
+        self.comment += "{}\n\n".format(self.ui.comment_txt.toPlainText())
 
         # separate proxies from the list view, proxies run their own command from Publish()
         multi_abc, multi_pxy = [], []
@@ -923,6 +967,17 @@ class MyWindow(Publish, QtWidgets.QDialog):
             self.rich_media(playblast=1, size=(1920, 1080), range="playback")
         else:
             self.rich_media(playblast=0)
+
+        completed_tasks = self.ui.task_lsw.selectedItems()
+        for task in completed_tasks:
+            task_name = task.text()
+            if "Addressed Tasks" not in self.comment:
+                self.comment += "Addressed Task(s):"
+            self.comment += "\n{}".format(task_name)
+
+        for task in completed_tasks:
+            task_name, task_id = task.text(), int(task.toolTip())
+            self.set_task(task_name=task_name, task_id=task_id)
 
         # updates shotgun at the end to get all the comments
         self.update_shotgun()
