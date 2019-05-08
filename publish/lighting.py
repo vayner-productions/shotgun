@@ -18,7 +18,7 @@ from pymel.core import PyNode, sceneName, saveFile, openFile
 from pymel.core.system import workspace
 from pymel.util import path
 from PySide2 import QtCore, QtWidgets, QtUiTools
-from sgtk.authentication import ShotgunAuthenticator
+# from sgtk.authentication import ShotgunAuthenticator
 
 
 def get_window():
@@ -54,8 +54,8 @@ class Publish(object):
             ]
         )
 
-        auth = ShotgunAuthenticator()
-        user = str(auth.get_user())
+        # auth = ShotgunAuthenticator()
+        # user = str(auth.get_user())
 
         tasks = sg.find(
             "Task",
