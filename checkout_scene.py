@@ -5,8 +5,6 @@ from pymel.core import workspace, openFile, saveAs, displayInfo, newFile
 from pymel.util import path
 from PySide2 import QtCore, QtWidgets, QtUiTools
 import maya.mel as mel
-from . import update_timeline
-reload(update_timeline)
 
 
 def get_window():
@@ -50,13 +48,6 @@ class Checkout(object):
             # saveAs(self.checkout_file, f=1)
             newFile(f=1)
             displayInfo("No file to checkout, opened new file.")
-
-        try:
-            update_timeline.update_timeline()
-        except TypeError:
-            pass  # not a shot
-        except AttributeError:
-            displayInfo("No frame range set on Shotgun site.")
         return self.checkout_file
 
     def increment_file(self, open_file=1):
