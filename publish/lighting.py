@@ -271,6 +271,20 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.ui.publish_btn.clicked.connect(self.publish_lighting)
         return
 
+    def ui_settings(self):
+        keys = __file__.split("shotgun")[1].split("\\")[1:]
+        keys[-1] = keys[-1].split(".")[0]
+        keys += [self.ui.version_grp.checkedButton().objectName()]
+
+        parent = keys[0]
+        data = {}
+        for key in keys[1:]:
+            data[parent] = key
+            parent = key  # lighting
+
+
+        return
+
     def publish_lighting(self):
         # get ui data
         user_comment = self.ui.comment_txt.toPlainText()
