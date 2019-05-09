@@ -7,9 +7,6 @@ reload(checkout_scene)
 set_project = checkout_scene.SetProject()
 json_file = path(set_project.project_path).joinpath("scripts", "ui_preferences.json").normpath()
 
-auth = ShotgunAuthenticator()
-user = str(auth.get_user())
-
 # data = {
 #     user: {
 #         "checkout": {
@@ -37,25 +34,26 @@ user = str(auth.get_user())
 #     }
 # }
 
-script = None
 
-# reads file
-try:
-    with json_file.open(mode="r") as read_file:
-        data = json.load(read_file)
-        data[user]  # checks for new user
-except (IOError, ValueError):  # file is empty or does not exist, creates file
-    data = {user: {}}
+def update(data=None, dictionary=None):
+    auth = ShotgunAuthenticator()
+    user = str(auth.get_user())
 
-    with json_file.open(mode="a") as new_file:
-        json.dump(data, new_file, indent=4, separators=(',', ': '))
-except KeyError:  # new user, add to file
-    pass
-    # data.update({
-    #     user: {
-    #         "process": process,
-    #         "entity": entity_name
-    #     }
-    # })
-    # with json_file.open(mode="w") as write_file:
-    #     json.dump(data, write_file, indent=4, separators=(',', ': '))
+    try:  # reads file
+        with json_file.open(mode="r") as read_file:
+            data = json.load(read_file)
+            data[user]  # checks for new user
+    except (IOError, ValueError):  # file is empty or does not exist, creates file
+        data = dict({user: dictionary})
+
+        with json_file.open(mode="a") as new_file:
+            json.dump(data, new_file, indent=4, separators=(',', ': '))
+    except KeyError:  # new user, add to file
+        pass
+
+    data[user] = dictionary
+    with json_file.open(mode="w") as write_file:
+        json.dump(data, write_file, indent=4, separators=(',', ': '))
+
+    # print ">> Recorded Vayner Menu preferences for user.\n",
+    return
