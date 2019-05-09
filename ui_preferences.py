@@ -55,5 +55,5 @@ def update(data=None, dictionary=None):
     with json_file.open(mode="w") as write_file:
         json.dump(data, write_file, indent=4, separators=(',', ': '))
 
-    # print ">> Recorded Vayner Menu preferences for user.\n",
+    print ">> Recorded Vayner Menu preferences for user.\n",
     return
