@@ -272,50 +272,51 @@ class MyWindow(Publish, QtWidgets.QDialog):
         return
 
     def ui_settings(self):
-        keys = __file__.split("shotgun")[1].split("\\")[1:]
-        keys[-1] = keys[-1].split(".")[0]
-        keys += [self.ui.version_grp.checkedButton().objectName()]
+        items = __file__.split("shotgun")[1].split("\\")[1:]
+        items[-1] = items[-1].split(".")[0]
+        items += [self.ui.version_grp.checkedButton().objectName()]
 
-        parent = keys[0]
-        data = {}
-        for key in keys[1:]:
-            data[parent] = key
-            parent = key  # lighting
+        nested_dictionary = items[-1]
+        for e, key in enumerate(items[1::-1]):
+            nested_dictionary = {key: nested_dictionary}
 
-
-        return
+        from .. import ui_preferences as prefs
+        reload(prefs)
+        prefs.update(dictionary=nested_dictionary)
+        return nested_dictionary
 
     def publish_lighting(self):
-        # get ui data
-        user_comment = self.ui.comment_txt.toPlainText()
-        completed_tasks = self.ui.task_lsw.selectedItems()
+        # # get ui data
+        # user_comment = self.ui.comment_txt.toPlainText()
+        # completed_tasks = self.ui.task_lsw.selectedItems()
+        #
+        # # process comment to update to shotgun first
+        # # comments are inconsequential to publish errors
+        # if user_comment:
+        #     self.comment = user_comment + "\n\n"
+        #
+        # for task in completed_tasks:
+        #     task_name = task.text()
+        #     if "Addressed Tasks" not in self.comment:
+        #         self.comment += "Addressed Task(s):"
+        #     self.comment += "\n{}".format(task_name)
+        #
+        # # do work in Maya
+        # # publish fail will open the return file, the file before any publishing work began,
+        # # and remove both working and publish file
+        # self.lighting(version_label=self.version)
+        # try:
+        #     for task in completed_tasks:
+        #         task_name, task_id = task.text(), int(task.toolTip())
+        #         self.set_task(task_name=task_name, task_id=task_id)
+        #
+        #     self.lighting_output = path(self.ui.render_lbl.text())
+        #     self.update_shotgun()
+        # except:
+        #     openFile(self.return_file, f=1)
+        #     self.working_file.remove_p()
+        #     self.lighting_file.remove_p()
 
-        # process comment to update to shotgun first
-        # comments are inconsequential to publish errors
-        if user_comment:
-            self.comment = user_comment + "\n\n"
-
-        for task in completed_tasks:
-            task_name = task.text()
-            if "Addressed Tasks" not in self.comment:
-                self.comment += "Addressed Task(s):"
-            self.comment += "\n{}".format(task_name)
-
-        # do work in Maya
-        # publish fail will open the return file, the file before any publishing work began,
-        # and remove both working and publish file
-        self.lighting(version_label=self.version)
-        try:
-            for task in completed_tasks:
-                task_name, task_id = task.text(), int(task.toolTip())
-                self.set_task(task_name=task_name, task_id=task_id)
-
-            self.lighting_output = path(self.ui.render_lbl.text())
-            self.update_shotgun()
-        except:
-            openFile(self.return_file, f=1)
-            self.working_file.remove_p()
-            self.lighting_file.remove_p()
-
+        self.ui_settings()
         self.ui.close()
         return
