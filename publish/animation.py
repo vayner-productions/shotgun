@@ -878,108 +878,142 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.ui.publish_btn.clicked.connect(self.run)
         return
 
+    def ui_settings(self):
+        items = __file__.split("shotgun")[1].split("\\")[1:]
+        items[-1] = items[-1].split(".")[0]
+
+        nested_dictionary = {
+            "multi_lsw": [],
+            "single_lsw": [],
+            "attributes_grp": []
+        }
+
+        for i in range(self.ui.multi_lsw.count()):
+            nested_dictionary["multi_lsw"] += [self.ui.multi_lsw.item(i).text()]
+
+        for i in range(self.ui.single_lsw.count()):
+            nested_dictionary["single_lsw"] += [self.ui.single_lsw.item(i).text()]
+
+        for attr in self.ui.attributes_grp.buttons():
+            if attr.isChecked():
+                nested_dictionary["attributes_grp"] += [attr.text()]
+
+        print nested_dictionary
+        # items += [self.ui.attributes_grp.checkedButton().objectName()]
+        #
+        # nested_dictionary = items[-1]
+        # for e, key in enumerate(items[1::-1]):
+        #     nested_dictionary = {key: nested_dictionary}
+        #
+        # from .. import ui_preferences as prefs
+        # reload(prefs)
+        # prefs.update(dictionary=nested_dictionary)
+        # return nested_dictionary
+
     def run(self):
-        """
-        Automated comments contain what is in the alembic directory
-        """
-        # # TESTING - uses the same maya scene file and version folder
-        # self.version(up=1)
-        # working_file = pm.sceneName()
+        # """
+        # Automated comments contain what is in the alembic directory
+        # """
+        # # # TESTING - uses the same maya scene file and version folder
+        # # self.version(up=1)
+        # # working_file = pm.sceneName()
+        # # published_file = self.alembic_directory.joinpath(
+        # #     "{}_original.{}.ma".format(
+        # #         path(workspace.fileRules["scene"]).basename(),
+        # #         str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
+        # #     )
+        # # )
+        #
+        # # - increment and save the current working file, and save a copy to the published version folder
+        # self.version()
+        # working_file = checkout.increment_file()
         # published_file = self.alembic_directory.joinpath(
         #     "{}_original.{}.ma".format(
         #         path(workspace.fileRules["scene"]).basename(),
         #         str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
         #     )
         # )
+        # path(working_file).copy2(published_file)
+        #
+        # # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
+        # # start with user comment
+        # self.comment += "{}\n\n".format(self.ui.comment_txt.toPlainText())
+        #
+        # # separate proxies from the list view, proxies run their own command from Publish()
+        # multi_abc, multi_pxy = [], []
+        # for i in range(self.ui.multi_lsw.count()):
+        #     maya_obj = self.ui.multi_lsw.item(i).toolTip()
+        #     if "PXY" in maya_obj:
+        #         multi_pxy += [maya_obj]
+        #     else:
+        #         multi_abc += [maya_obj]
+        #
+        # single_abc, single_pxy = [], []
+        # for i in range(self.ui.single_lsw.count()):
+        #     maya_obj = self.ui.single_lsw.item(i).toolTip()
+        #     if "PXY" in maya_obj:
+        #         single_pxy += [maya_obj]
+        #     else:
+        #         single_abc += [maya_obj]
+        #
+        # # all alembic attributes in the UI are checked by default
+        # # collect them and use them to create single and multi alembics
+        # abc_attributes = []
+        # if self.ui.world_cbx.isChecked():
+        #     abc_attributes.append("worldSpace")
+        # if self.ui.writevisibility_cbx.isChecked():
+        #     abc_attributes.append("writeVisibility")
+        # if self.ui.eulerfilter_cbx.isChecked():
+        #     abc_attributes.append("eulerFilter")
+        # if self.ui.uvwrite_cbx.isChecked():
+        #     abc_attributes.append("uvWrite")
+        # if self.ui.namespace_cbx.isChecked():
+        #     abc_attributes.append("stripNamespaces")
+        # if self.ui.writeuvsets_cbx.isChecked():
+        #     abc_attributes.append("writeUVSets")
+        #
+        # # create alembics
+        # self.maya_file = published_file
+        # self.attributes = abc_attributes
+        #
+        # start = datetime.datetime.now()
+        #
+        # self.animation(single=single_abc, multi=multi_abc)
+        # self.proxy(mode="export", export=[single_pxy, multi_pxy])
+        #
+        # end = datetime.datetime.now()
+        # duration = end - start
+        # print "# Exported alembics in {:.2f} seconds. #".format(duration.seconds/60.0)
+        #
+        #
+        # # CAMERAS
+        # # cameras built into animation shots should always have a render_cam_RIG, see camera.py
+        # # process_data() works with imported nodes only
+        # # render_cam_RIG needs to be imported, it is referenced from the build scene tool
+        # if self.ui.camera_cbx.isChecked():
+        #     self.CameraTools.publish_camera(scene_name=self.maya_file.basename())
+        #     self.comment += "Cameras:\n{}\n\n".format(self.CameraTools.version_name)
+        #
+        # # PLAYBLAST - creates playblast and updates shotgun with video, otherwise a thumbnail is used
+        # if self.ui.skip_cbx.isChecked():
+        #     self.rich_media(playblast=1, size=(1920, 1080), range="playback")
+        # else:
+        #     self.rich_media(playblast=0)
+        #
+        # completed_tasks = self.ui.task_lsw.selectedItems()
+        # for task in completed_tasks:
+        #     task_name = task.text()
+        #     if "Addressed Tasks" not in self.comment:
+        #         self.comment += "Addressed Task(s):"
+        #     self.comment += "\n{}".format(task_name)
+        #
+        # for task in completed_tasks:
+        #     task_name, task_id = task.text(), int(task.toolTip())
+        #     self.set_task(task_name=task_name, task_id=task_id)
+        #
+        # # updates shotgun at the end to get all the comments
+        # self.update_shotgun()
 
-        # - increment and save the current working file, and save a copy to the published version folder
-        self.version()
-        working_file = checkout.increment_file()
-        published_file = self.alembic_directory.joinpath(
-            "{}_original.{}.ma".format(
-                path(workspace.fileRules["scene"]).basename(),
-                str(int(self.alembic_directory.basename().split("_")[1])).zfill(4)
-            )
-        )
-        path(working_file).copy2(published_file)
-
-        # ALEMBICS - begin by creating alembics, then camera and playblast, and finally update shotgun
-        # start with user comment
-        self.comment += "{}\n\n".format(self.ui.comment_txt.toPlainText())
-
-        # separate proxies from the list view, proxies run their own command from Publish()
-        multi_abc, multi_pxy = [], []
-        for i in range(self.ui.multi_lsw.count()):
-            maya_obj = self.ui.multi_lsw.item(i).toolTip()
-            if "PXY" in maya_obj:
-                multi_pxy += [maya_obj]
-            else:
-                multi_abc += [maya_obj]
-
-        single_abc, single_pxy = [], []
-        for i in range(self.ui.single_lsw.count()):
-            maya_obj = self.ui.single_lsw.item(i).toolTip()
-            if "PXY" in maya_obj:
-                single_pxy += [maya_obj]
-            else:
-                single_abc += [maya_obj]
-
-        # all alembic attributes in the UI are checked by default
-        # collect them and use them to create single and multi alembics
-        abc_attributes = []
-        if self.ui.world_cbx.isChecked():
-            abc_attributes.append("worldSpace")
-        if self.ui.writevisibility_cbx.isChecked():
-            abc_attributes.append("writeVisibility")
-        if self.ui.eulerfilter_cbx.isChecked():
-            abc_attributes.append("eulerFilter")
-        if self.ui.uvwrite_cbx.isChecked():
-            abc_attributes.append("uvWrite")
-        if self.ui.namespace_cbx.isChecked():
-            abc_attributes.append("stripNamespaces")
-        if self.ui.writeuvsets_cbx.isChecked():
-            abc_attributes.append("writeUVSets")
-
-        # create alembics
-        self.maya_file = published_file
-        self.attributes = abc_attributes
-
-        start = datetime.datetime.now()
-
-        self.animation(single=single_abc, multi=multi_abc)
-        self.proxy(mode="export", export=[single_pxy, multi_pxy])
-
-        end = datetime.datetime.now()
-        duration = end - start
-        print "# Exported alembics in {:.2f} seconds. #".format(duration.seconds/60.0)
-
-
-        # CAMERAS
-        # cameras built into animation shots should always have a render_cam_RIG, see camera.py
-        # process_data() works with imported nodes only
-        # render_cam_RIG needs to be imported, it is referenced from the build scene tool
-        if self.ui.camera_cbx.isChecked():
-            self.CameraTools.publish_camera(scene_name=self.maya_file.basename())
-            self.comment += "Cameras:\n{}\n\n".format(self.CameraTools.version_name)
-
-        # PLAYBLAST - creates playblast and updates shotgun with video, otherwise a thumbnail is used
-        if self.ui.skip_cbx.isChecked():
-            self.rich_media(playblast=1, size=(1920, 1080), range="playback")
-        else:
-            self.rich_media(playblast=0)
-
-        completed_tasks = self.ui.task_lsw.selectedItems()
-        for task in completed_tasks:
-            task_name = task.text()
-            if "Addressed Tasks" not in self.comment:
-                self.comment += "Addressed Task(s):"
-            self.comment += "\n{}".format(task_name)
-
-        for task in completed_tasks:
-            task_name, task_id = task.text(), int(task.toolTip())
-            self.set_task(task_name=task_name, task_id=task_id)
-
-        # updates shotgun at the end to get all the comments
-        self.update_shotgun()
+        self.ui_settings()
         self.ui.close()
         return
