@@ -207,20 +207,39 @@ class MyWindow(SetProject, Checkout, QtWidgets.QDialog):
         self.ui.asset_cbx.addItems(folders)
         return
 
+    def ui_settings(self):
+        items = __file__.split("shotgun")[1].split("\\")[1:]
+        items[-1] = items[-1].split(".")[0]
+
+        nested_dictionary = {
+            "process_cbx": self.ui.process_cbx.currentText(),
+            "asset_cbx": self.ui.asset_cbx.currentText(),
+            "checkout_cbx": self.ui.checkout_cbx.currentText()
+        }
+
+        for e, key in enumerate(items[::-1]):
+            nested_dictionary = {key: nested_dictionary}
+
+        from . import ui_preferences as prefs
+        reload(prefs)
+        prefs.update(dictionary=nested_dictionary)
+        return nested_dictionary
+
     def checkout(self):
-        scene = "/".join([
-            "scenes",
-            self.scene_dict[self.ui.process_cbx.currentText()],
-            self.ui.asset_cbx.currentText()
-        ])
-        alembic = "scenes/06_Cache/08_Animation/{}".format(self.ui.asset_cbx.currentText())
-        self.set_project(scene=scene, alembic=alembic)
-
-        if self.ui.checkout_cbx.currentText() == "Published File":
-            self.published_file()
-        elif self.ui.checkout_cbx.currentText() == "Working File":
-            self.processed_file()
-
+        # scene = "/".join([
+        #     "scenes",
+        #     self.scene_dict[self.ui.process_cbx.currentText()],
+        #     self.ui.asset_cbx.currentText()
+        # ])
+        # alembic = "scenes/06_Cache/08_Animation/{}".format(self.ui.asset_cbx.currentText())
+        # self.set_project(scene=scene, alembic=alembic)
+        #
+        # if self.ui.checkout_cbx.currentText() == "Published File":
+        #     self.published_file()
+        # elif self.ui.checkout_cbx.currentText() == "Working File":
+        #     self.processed_file()
+        #
+        self.ui_settings()
         self.ui.close()
         return
 
