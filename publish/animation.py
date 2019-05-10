@@ -882,11 +882,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         items = __file__.split("shotgun")[1].split("\\")[1:]
         items[-1] = items[-1].split(".")[0]
 
-        nested_dictionary = {
-            "multi_lsw": [],
-            "single_lsw": [],
-            "attributes_grp": []
-        }
+        nested_dictionary = {}
 
         for i in range(self.ui.multi_lsw.count()):
             nested_dictionary["multi_lsw"] += [self.ui.multi_lsw.item(i).text()]
@@ -898,7 +894,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
             if attr.isChecked():
                 nested_dictionary["attributes_grp"] += [attr.text()]
 
-        for e, key in enumerate(items[::-1]):
+        for key in items[::-1]:
             nested_dictionary = {key: nested_dictionary}
 
         from .. import ui_preferences as prefs

@@ -277,7 +277,7 @@ class MyWindow(Publish, QtWidgets.QDialog):
         items += [self.ui.version_grp.checkedButton().objectName()]
 
         nested_dictionary = items[-1]
-        for e, key in enumerate(items[1::-1]):
+        for key in items[1::-1]:
             nested_dictionary = {key: nested_dictionary}
 
         from .. import ui_preferences as prefs

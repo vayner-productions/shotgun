@@ -209,7 +209,7 @@ class MyWindow(SetProject, Checkout, QtWidgets.QDialog):
 
     def ui_settings(self):
         items = __file__.split("shotgun")[1].split("\\")[1:]
-        items[-1] = items[-1].split(".")[0]
+        items[-1] = items[-1].split(".")[0]  # [checkout_scene]
 
         nested_dictionary = {
             "process_cbx": self.ui.process_cbx.currentText(),
@@ -217,7 +217,7 @@ class MyWindow(SetProject, Checkout, QtWidgets.QDialog):
             "checkout_cbx": self.ui.checkout_cbx.currentText()
         }
 
-        for e, key in enumerate(items[::-1]):
+        for key in items[::-1]:
             nested_dictionary = {key: nested_dictionary}
 
         from . import ui_preferences as prefs
