@@ -898,17 +898,13 @@ class MyWindow(Publish, QtWidgets.QDialog):
             if attr.isChecked():
                 nested_dictionary["attributes_grp"] += [attr.text()]
 
-        print nested_dictionary
-        # items += [self.ui.attributes_grp.checkedButton().objectName()]
-        #
-        # nested_dictionary = items[-1]
-        # for e, key in enumerate(items[1::-1]):
-        #     nested_dictionary = {key: nested_dictionary}
-        #
-        # from .. import ui_preferences as prefs
-        # reload(prefs)
-        # prefs.update(dictionary=nested_dictionary)
-        # return nested_dictionary
+        for e, key in enumerate(items[::-1]):
+            nested_dictionary = {key: nested_dictionary}
+
+        from .. import ui_preferences as prefs
+        reload(prefs)
+        prefs.update(dictionary=nested_dictionary)
+        return nested_dictionary
 
     def run(self):
         # """
