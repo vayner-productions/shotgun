@@ -9,7 +9,10 @@ class Update(object):
     def __init__(self):
         reload(checkout_scene)
         set_project = checkout_scene.SetProject()
-        self.json_file = path(set_project.project_path).joinpath("scripts", "ui_preferences.json").normpath()
+        self.ui_preferences = path(set_project.project_path).joinpath("scripts", "ui_preferences.json").normpath()
+
+        auth = ShotgunAuthenticator()
+        self.user = str(auth.get_user())
         return
 
     def dict_merge(self, dct, merge_dct):
@@ -28,63 +31,42 @@ class Update(object):
             else:
                 dct[k] = merge_dct[k]
 
-    def json_file(self):
+    def json_file(self, dictionary=None):
+        data = None
+        try:  # reads file
+            with self.ui_preferences.open(mode="r") as read_file:
+                data = json.load(read_file)
+
+            data[self.user]  # checks for new self.user
+            self.dict_merge(data[self.user], dictionary)
+        except (IOError, ValueError):  # file is empty or does not exist, creates file
+            data = dict({self.user: dictionary})
+
+            with self.ui_preferences.open(mode="a") as new_file:
+                json.dump(data, new_file, indent=4, separators=(',', ': '))
+
+            return
+        except KeyError:  # new self.user, add to file
+            data[self.user] = dictionary
+
+        with self.ui_preferences.open(mode="w") as write_file:
+            json.dump(data, write_file, indent=4, separators=(',', ': '))
+        # print ">> Recorded Vayner Menu preferences for user.\n",
         return
 
+    def ui(self, branch=None):
+        data = None
+        try:  # reads file
+            with self.ui_preferences.open(mode="r") as read_file:
+                data = json.load(read_file)
 
-def update(dictionary=None):
-    auth = ShotgunAuthenticator()
-    user = str(auth.get_user())
+            data[self.user]  # checks for new self.user
+        except:
+            pass
+            return
 
-    data = None
-    try:  # reads file
-        with json_file.open(mode="r") as read_file:
-            data = json.load(read_file)
-            data[user]  # checks for new user
-
-        dict_merge(data[user], dictionary)
-    except (IOError, ValueError):  # file is empty or does not exist, creates file
-        data = dict({user: dictionary})
-
-        with json_file.open(mode="a") as new_file:
-            json.dump(data, new_file, indent=4, separators=(',', ': '))
-
-        return
-    except KeyError:  # new user, add to file
-        data[user] = dictionary
-
-    with json_file.open(mode="w") as write_file:
-        json.dump(data, write_file, indent=4, separators=(',', ': '))
-
-    print ">> Recorded Vayner Menu preferences for user.\n",
-    return
-
-
-def ui(dictionary=None):
-    auth = ShotgunAuthenticator()
-    user = str(auth.get_user())
-
-    data = None
-    try:  # reads file
-        with json_file.open(mode="r") as read_file:
-            data = json.load(read_file)
-            data[user]  # checks for new user
-    except:
-        # pass
-        print ">> Nothing to update.\n",
-        return
-
-    dictionary = data[user]  # kat
-    for i in items:
-        dictionary = dictionary[i]  # kat[checkout]  # kat[publish][lighting]
-
-    value = None
-    if not isinstance(dictionary, dict):
-        value = dictionary
-        dictionary = None
-
-    for k in nested_dictionary.keys():
-        dictionary[k]
-
-    print ">> User preferences applied.\n",
-    return
+        branch_data = data[self.user]
+        for key in branch.split("."):
+            branch_data = branch_data[key]
+        print ">> Loaded Vayner Menu preferences for user.\n",
+        return branch_data
