@@ -217,17 +217,12 @@ class MyWindow(SetProject, Checkout, QtWidgets.QDialog):
         branch = ".".join(["{}".format(item) for item in self.branch])
         data = self.update.ui(branch=branch)
 
-        if not data:
-            return
-
-        for key, value in data.items():
-            ui_element = self.ui.findChild(QtWidgets.QComboBox, key)
-            print ">"
-            for i in range(ui_element.count()):
-                print ui_element.itemText(i), value
-                if value == ui_element.itemText(i):
-                    ui_element.setCurrentIndex(i)
-                    break
+        try:
+            self.ui.process_cbx.setCurrentText(data["process_cbx"])
+            self.ui.asset_cbx.setCurrentText(data["asset_cbx"])
+            self.ui.checkout_cbx.setCurrentText(data["checkout_cbx"])
+        except:
+            pass
         return
 
     def record_preferences(self):
