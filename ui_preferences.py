@@ -78,3 +78,33 @@ def update(dictionary=None):
 
     print ">> Recorded Vayner Menu preferences for user.\n",
     return
+
+
+def ui(dictionary=None):
+    auth = ShotgunAuthenticator()
+    user = str(auth.get_user())
+
+    data = None
+    try:  # reads file
+        with json_file.open(mode="r") as read_file:
+            data = json.load(read_file)
+            data[user]  # checks for new user
+    except:
+        # pass
+        print ">> Nothing to update.\n",
+        return
+
+    dictionary = data[user]  # kat
+    for i in items:
+        dictionary = dictionary[i]  # kat[checkout]  # kat[publish][lighting]
+
+    value = None
+    if not isinstance(dictionary, dict):
+        value = dictionary
+        dictionary = None
+
+    for k in nested_dictionary.keys():
+        dictionary[k]
+
+    print ">> User preferences applied.\n",
+    return
