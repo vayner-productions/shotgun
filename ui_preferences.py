@@ -2,54 +2,34 @@ import json
 from . import checkout_scene
 from pymel.util import path
 from sgtk.authentication import ShotgunAuthenticator
-
-reload(checkout_scene)
-set_project = checkout_scene.SetProject()
-json_file = path(set_project.project_path).joinpath("scripts", "ui_preferences.json").normpath()
-
-# data = {
-#     user: {
-#         "checkout": {
-#             "process": "Animation",
-#             "entity": "Shot_001",
-#             "type": "Working File",
-#         },
-#         "publish": {
-#             "animation": {
-#                 "multi": ["Hero_GEO"],
-#                 "single": ["Shot_PXY"],
-#                 "attributes": [
-#                     "World Space",
-#                     "Write Visibility",
-#                     "Euler Filter",
-#                     "UV Write",
-#                     "Strip Namespaces",
-#                     "Write UV Sets"
-#                 ]
-#             },
-#             "lighting": "next"
-#         }
-#     }
-# }
-
 import collections
 
 
-def dict_merge(dct, merge_dct):
-    """ Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
-    updating only top-level keys, dict_merge recurses down into dicts nested
-    to an arbitrary depth, updating keys. The ``merge_dct`` is merged into
-    ``dct``.
-    :param dct: dict onto which the merge is executed
-    :param merge_dct: dct merged into dct
-    :return: None
-    """
-    for k, v in merge_dct.iteritems():
-        if (k in dct and isinstance(dct[k], dict)
-                and isinstance(merge_dct[k], collections.Mapping)):
-            dict_merge(dct[k], merge_dct[k])
-        else:
-            dct[k] = merge_dct[k]
+class Update(object):
+    def __init__(self):
+        reload(checkout_scene)
+        set_project = checkout_scene.SetProject()
+        self.json_file = path(set_project.project_path).joinpath("scripts", "ui_preferences.json").normpath()
+        return
+
+    def dict_merge(self, dct, merge_dct):
+        """ Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
+        updating only top-level keys, dict_merge recurses down into dicts nested
+        to an arbitrary depth, updating keys. The ``merge_dct`` is merged into
+        ``dct``.
+        :param dct: dict onto which the merge is executed
+        :param merge_dct: dct merged into dct
+        :return: None
+        """
+        for k, v in merge_dct.iteritems():
+            if (k in dct and isinstance(dct[k], dict)
+                    and isinstance(merge_dct[k], collections.Mapping)):
+                self.dict_merge(dct[k], merge_dct[k])
+            else:
+                dct[k] = merge_dct[k]
+
+    def json_file(self):
+        return
 
 
 def update(dictionary=None):
