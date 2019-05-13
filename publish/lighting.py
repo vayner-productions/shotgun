@@ -246,6 +246,9 @@ class MyWindow(Publish, QtWidgets.QDialog):
         branch = ".".join(["{}".format(item) for item in self.branch])
         data = self.update.ui(branch=branch)
 
+        if not data:
+            return
+
         ui_element = self.ui.findChild(QtWidgets.QRadioButton, data)
         ui_element.setChecked(1)
         return

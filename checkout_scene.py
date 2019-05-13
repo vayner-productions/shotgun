@@ -217,6 +217,9 @@ class MyWindow(SetProject, Checkout, QtWidgets.QDialog):
         branch = ".".join(["{}".format(item) for item in self.branch])
         data = self.update.ui(branch=branch)
 
+        if not data:
+            return
+
         for key, value in data.items():
             ui_element = self.ui.findChild(QtWidgets.QComboBox, key)
             for i in range(ui_element.count()):

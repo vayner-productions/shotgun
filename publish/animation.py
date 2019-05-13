@@ -844,6 +844,9 @@ class MyWindow(Publish, QtWidgets.QDialog):
         branch = ".".join(["{}".format(item) for item in self.branch])
         data = self.update.ui(branch=branch)
 
+        if not data:
+            return
+
         for ui_element in self.ui.attributes_grp.buttons():
             if ui_element.text() in data["attributes_grp"]:
                 ui_element.setChecked(1)
