@@ -10,6 +10,7 @@ checkout = checkout_scene.Checkout()
 
 scene_process, entity_name = pm.workspace.fileRules["scene"].split("/")[1:]
 entity_type = "Asset"
+entity = None
 if "Lighting" in scene_process:
     entity = sg.find_one(
         "Shot",
@@ -17,13 +18,13 @@ if "Lighting" in scene_process:
     )
 elif "Asset" in scene_process:
     entity = sg.find_one(
-        "Shot",
-        [["project", "is", project], ["code", "is", entity_name], ["sg_asset_type", "is", "CG_Model"]],
+        "Asset",
+        [["project", "is", project], ["code", "is", entity_name], ["sg_asset_type", "is", "CG Model"]],
     )
 elif "Rig" in scene_process:
     entity = sg.find_one(
-        "Shot",
-        [["project", "is", project], ["code", "is", entity_name], ["sg_asset_type", "is", "CG_Rig"]],
+        "Asset",
+        [["project", "is", project], ["code", "is", entity_name], ["sg_asset_type", "is", "CG Rig"]],
     )
 
 
