@@ -730,6 +730,12 @@ class Publish(object):
 class MyWindow(Publish, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(MyWindow, self).__init__(**kwargs)
+        self.branch = path(__file__.split("shotgun")[1]).stripext().splitall()[1:]  # ["checkout"]
+
+        from .. import ui_preferences as prefs
+        reload(prefs)
+        self.update = prefs.Update()
+
         self.ui = self.import_ui()
         self.init_ui()
         self.CameraTools = camera_tools
@@ -834,6 +840,42 @@ class MyWindow(Publish, QtWidgets.QDialog):
             self.minus()
         return
 
+    def load_preferences(self):
+        branch = ".".join(["{}".format(item) for item in self.branch])
+        data = self.update.ui(branch=branch)
+
+        for ui_element in self.ui.attributes_grp.buttons():
+            if ui_element.text() in data["attributes_grp"]:
+                ui_element.setChecked(1)
+            else:
+                ui_element.setChecked(0)
+
+        for value in data["multi_lsw"]:
+            single = self.ui.single_lsw.findItems(value, QtCore.Qt.MatchExactly)
+            if single:
+                single[0].setSelected(1)
+                self.move("left")
+
+        for value in data["single_lsw"]:
+            multi = self.ui.multi_lsw.findItems(value, QtCore.Qt.MatchExactly)
+            if multi:
+                multi[0].setSelected(1)
+                self.move("right")
+        return
+
+    def record_preferences(self):
+        nested_dictionary = {
+            "multi_lsw": [self.ui.multi_lsw.item(i).text() for i in range(self.ui.multi_lsw.count())],
+            "single_lsw": [self.ui.single_lsw.item(i).text() for i in range(self.ui.single_lsw.count())],
+            "attributes_grp": [attr.text() for attr in self.ui.attributes_grp.buttons() if attr.isChecked()]
+        }
+
+        for key in self.branch[::-1]:
+            nested_dictionary = {key: nested_dictionary}
+
+        self.update.json_file(dictionary=nested_dictionary)
+        return nested_dictionary
+
     def init_ui(self):
         # TASKS
         for task in self.tasks:
@@ -876,31 +918,8 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
         # PUBLISH
         self.ui.publish_btn.clicked.connect(self.run)
+        self.load_preferences()
         return
-
-    def ui_settings(self):
-        items = __file__.split("shotgun")[1].split("\\")[1:]
-        items[-1] = items[-1].split(".")[0]
-
-        nested_dictionary = {}
-
-        for i in range(self.ui.multi_lsw.count()):
-            nested_dictionary["multi_lsw"] += [self.ui.multi_lsw.item(i).text()]
-
-        for i in range(self.ui.single_lsw.count()):
-            nested_dictionary["single_lsw"] += [self.ui.single_lsw.item(i).text()]
-
-        for attr in self.ui.attributes_grp.buttons():
-            if attr.isChecked():
-                nested_dictionary["attributes_grp"] += [attr.text()]
-
-        for key in items[::-1]:
-            nested_dictionary = {key: nested_dictionary}
-
-        from .. import ui_preferences as prefs
-        reload(prefs)
-        prefs.update(dictionary=nested_dictionary)
-        return nested_dictionary
 
     def run(self):
         # """
@@ -1006,6 +1025,6 @@ class MyWindow(Publish, QtWidgets.QDialog):
         # # updates shotgun at the end to get all the comments
         # self.update_shotgun()
 
-        self.ui_settings()
+        self.record_preferences()
         self.ui.close()
         return
