@@ -192,6 +192,12 @@ class Publish(object):
 class MyWindow(Publish, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(MyWindow, self).__init__(**kwargs)
+        self.branch = path(__file__.split("shotgun")[1]).stripext().splitall()[1:]  # ["checkout"]
+
+        from .. import ui_preferences as prefs
+        reload(prefs)
+        self.update = prefs.Update()
+
         self.ui = self.import_ui()
 
         reload(render_setup)
@@ -236,6 +242,22 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.set_render_path()
         return
 
+    def load_preferences(self):
+        branch = ".".join(["{}".format(item) for item in self.branch])
+        data = self.update.ui(branch=branch)
+
+        ui_element = self.ui.findChild(QtWidgets.QRadioButton, data)
+        ui_element.setChecked(1)
+        return
+
+    def record_preferences(self):
+        nested_dictionary = self.ui.version_grp.checkedButton().objectName()
+        for key in self.branch[::-1]:
+            nested_dictionary = {key: nested_dictionary}
+
+        self.update.json_file(dictionary=nested_dictionary)
+        return nested_dictionary
+
     def init_ui(self):
         for task in self.tasks:
             item = QtWidgets.QListWidgetItem(task["content"], self.ui.task_lsw)
@@ -269,54 +291,41 @@ class MyWindow(Publish, QtWidgets.QDialog):
         self.ui.custom_lne.textChanged.connect(self.checked_custom)
         self.ui.previous_cbx.currentIndexChanged.connect(self.checked_previous)
         self.ui.publish_btn.clicked.connect(self.publish_lighting)
+        self.load_preferences()
         return
 
-    def ui_settings(self):
-        items = __file__.split("shotgun")[1].split("\\")[1:]
-        items[-1] = items[-1].split(".")[0]
-        items += [self.ui.version_grp.checkedButton().objectName()]
-
-        nested_dictionary = items[-1]
-        for key in items[1::-1]:
-            nested_dictionary = {key: nested_dictionary}
-
-        from .. import ui_preferences as prefs
-        reload(prefs)
-        prefs.update(dictionary=nested_dictionary)
-        return nested_dictionary
-
     def publish_lighting(self):
-        # # get ui data
-        # user_comment = self.ui.comment_txt.toPlainText()
-        # completed_tasks = self.ui.task_lsw.selectedItems()
-        #
-        # # process comment to update to shotgun first
-        # # comments are inconsequential to publish errors
-        # if user_comment:
-        #     self.comment = user_comment + "\n\n"
-        #
-        # for task in completed_tasks:
-        #     task_name = task.text()
-        #     if "Addressed Tasks" not in self.comment:
-        #         self.comment += "Addressed Task(s):"
-        #     self.comment += "\n{}".format(task_name)
-        #
-        # # do work in Maya
-        # # publish fail will open the return file, the file before any publishing work began,
-        # # and remove both working and publish file
-        # self.lighting(version_label=self.version)
-        # try:
-        #     for task in completed_tasks:
-        #         task_name, task_id = task.text(), int(task.toolTip())
-        #         self.set_task(task_name=task_name, task_id=task_id)
-        #
-        #     self.lighting_output = path(self.ui.render_lbl.text())
-        #     self.update_shotgun()
-        # except:
-        #     openFile(self.return_file, f=1)
-        #     self.working_file.remove_p()
-        #     self.lighting_file.remove_p()
+        # get ui data
+        user_comment = self.ui.comment_txt.toPlainText()
+        completed_tasks = self.ui.task_lsw.selectedItems()
 
-        self.ui_settings()
+        # process comment to update to shotgun first
+        # comments are inconsequential to publish errors
+        if user_comment:
+            self.comment = user_comment + "\n\n"
+
+        for task in completed_tasks:
+            task_name = task.text()
+            if "Addressed Tasks" not in self.comment:
+                self.comment += "Addressed Task(s):"
+            self.comment += "\n{}".format(task_name)
+
+        # do work in Maya
+        # publish fail will open the return file, the file before any publishing work began,
+        # and remove both working and publish file
+        self.lighting(version_label=self.version)
+        try:
+            for task in completed_tasks:
+                task_name, task_id = task.text(), int(task.toolTip())
+                self.set_task(task_name=task_name, task_id=task_id)
+
+            self.lighting_output = path(self.ui.render_lbl.text())
+            self.update_shotgun()
+        except:
+            openFile(self.return_file, f=1)
+            self.working_file.remove_p()
+            self.lighting_file.remove_p()
+
+        self.record_preferences()
         self.ui.close()
         return
