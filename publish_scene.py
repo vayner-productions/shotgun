@@ -10,12 +10,22 @@ checkout = checkout_scene.Checkout()
 
 scene_process, entity_name = pm.workspace.fileRules["scene"].split("/")[1:]
 entity_type = "Asset"
+entity = None
 if "Lighting" in scene_process:
-    entity_type = "Shot"
-entity = sg.find_one(
-    entity_type,
-    [["project", "is", project], ["code", "is", entity_name]],
-)
+    entity = sg.find_one(
+        "Shot",
+        [["project", "is", project], ["code", "is", entity_name]],
+    )
+elif "Asset" in scene_process:
+    entity = sg.find_one(
+        "Asset",
+        [["project", "is", project], ["code", "is", entity_name], ["sg_asset_type", "is", "CG Model"]],
+    )
+elif "Rig" in scene_process:
+    entity = sg.find_one(
+        "Asset",
+        [["project", "is", project], ["code", "is", entity_name], ["sg_asset_type", "is", "CG Rig"]],
+    )
 
 
 def create_thumbnail(file_name=None):
