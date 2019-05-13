@@ -173,6 +173,12 @@ class SetProject(object):
 class MyWindow(SetProject, Checkout, QtWidgets.QDialog):
     def __init__(self, **kwargs):
         super(MyWindow, self).__init__(**kwargs)
+        self.branch = path(__file__.split("shotgun")[1]).stripext().splitall()[1:]  # ["checkout"]
+
+        from . import ui_preferences as prefs
+        reload(prefs)
+        self.update = prefs.Update()
+
         self.ui = self.import_ui()
         self.init_ui()
         return
@@ -207,39 +213,46 @@ class MyWindow(SetProject, Checkout, QtWidgets.QDialog):
         self.ui.asset_cbx.addItems(folders)
         return
 
-    def ui_settings(self):
-        items = __file__.split("shotgun")[1].split("\\")[1:]
-        items[-1] = items[-1].split(".")[0]  # [checkout_scene]
+    def load_preferences(self):
+        branch = ".".join(["{}".format(item) for item in self.branch])
+        data = self.update.ui(branch=branch)
 
+        for key, value in data.items():
+            ui_element = self.ui.findChild(QtWidgets.QComboBox, key)
+            for i in range(ui_element.count()):
+                if value == ui_element.itemText(i):
+                    ui_element.setCurrentIndex(i)
+                    break
+        return
+
+    def record_preferences(self):
         nested_dictionary = {
             "process_cbx": self.ui.process_cbx.currentText(),
             "asset_cbx": self.ui.asset_cbx.currentText(),
             "checkout_cbx": self.ui.checkout_cbx.currentText()
         }
 
-        for key in items[::-1]:
+        for key in self.branch[::-1]:
             nested_dictionary = {key: nested_dictionary}
 
-        from . import ui_preferences as prefs
-        reload(prefs)
-        prefs.update(dictionary=nested_dictionary)
+        self.update.json_file(dictionary=nested_dictionary)
         return nested_dictionary
 
     def checkout(self):
-        # scene = "/".join([
-        #     "scenes",
-        #     self.scene_dict[self.ui.process_cbx.currentText()],
-        #     self.ui.asset_cbx.currentText()
-        # ])
-        # alembic = "scenes/06_Cache/08_Animation/{}".format(self.ui.asset_cbx.currentText())
-        # self.set_project(scene=scene, alembic=alembic)
-        #
-        # if self.ui.checkout_cbx.currentText() == "Published File":
-        #     self.published_file()
-        # elif self.ui.checkout_cbx.currentText() == "Working File":
-        #     self.processed_file()
-        #
-        self.ui_settings()
+        scene = "/".join([
+            "scenes",
+            self.scene_dict[self.ui.process_cbx.currentText()],
+            self.ui.asset_cbx.currentText()
+        ])
+        alembic = "scenes/06_Cache/08_Animation/{}".format(self.ui.asset_cbx.currentText())
+        self.set_project(scene=scene, alembic=alembic)
+
+        if self.ui.checkout_cbx.currentText() == "Published File":
+            self.published_file()
+        elif self.ui.checkout_cbx.currentText() == "Working File":
+            self.processed_file()
+
+        self.record_preferences()
         self.ui.close()
         return
 
@@ -250,4 +263,5 @@ class MyWindow(SetProject, Checkout, QtWidgets.QDialog):
         self.ui.process_cbx.addItems(items)
 
         self.ui.checkout_btn.clicked.connect(self.checkout)
+        self.load_preferences()
         return
