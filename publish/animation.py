@@ -35,7 +35,9 @@ from pymel.util import path
 from imghdr import what
 import datetime
 import pymel.core as pm
+from .. import ui_preferences as prefs
 
+reload(prefs)
 reload(camera)
 reload(checkout_scene)
 camera_tools = camera.CameraTools()
@@ -732,8 +734,6 @@ class MyWindow(Publish, QtWidgets.QDialog):
         super(MyWindow, self).__init__(**kwargs)
         self.branch = path(__file__.split("shotgun")[1]).stripext().splitall()[1:]  # ["checkout"]
 
-        from .. import ui_preferences as prefs
-        reload(prefs)
         self.update = prefs.Update()
 
         self.ui = self.import_ui()

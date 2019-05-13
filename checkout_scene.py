@@ -222,7 +222,9 @@ class MyWindow(SetProject, Checkout, QtWidgets.QDialog):
 
         for key, value in data.items():
             ui_element = self.ui.findChild(QtWidgets.QComboBox, key)
+            print ">"
             for i in range(ui_element.count()):
+                print ui_element.itemText(i), value
                 if value == ui_element.itemText(i):
                     ui_element.setCurrentIndex(i)
                     break

@@ -60,13 +60,12 @@ class Update(object):
             with self.ui_preferences.open(mode="r") as read_file:
                 data = json.load(read_file)
 
-            data[self.user]  # checks for new self.user
+            branch_data = data[self.user]
+            for key in branch.split("."):
+                branch_data = branch_data[key]
         except:
             pass
             return
 
-        branch_data = data[self.user]
-        for key in branch.split("."):
-            branch_data = branch_data[key]
         print ">> Loaded Vayner Menu preferences for user.\n",
         return branch_data
