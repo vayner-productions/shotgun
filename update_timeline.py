@@ -28,8 +28,11 @@ def get_frame_range():
 
 
 def update_timeline(start=None, end=None):
-    if not all([start, end]):
-        start, end = get_frame_range()
-    playbackOptions(ast=start, aet=end)
-    # print ">> Animation timeline changed.\n",
-    return
+    try:
+        if not all([start, end]):
+            start, end = get_frame_range()
+        playbackOptions(ast=start, aet=end)
+        # print ">> Animation timeline changed.\n",
+        return
+    except:
+        pass
