@@ -9,6 +9,7 @@ from . import *  # imports root, sg, and project
 from PySide2 import QtCore, QtGui, QtWidgets, QtUiTools
 import pymel.core as pm
 from pymel.util import path
+from . import ui_preferences as prefs
 
 
 def get_window():
@@ -25,6 +26,12 @@ def get_window():
 
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
+        self.branch = path(__file__.split("shotgun")[1]).stripext().splitall()[1:]  # ["build_scene"]
+        self.scene_process = path(pm.workspace.fileRules["scene"]).splitall()[-2]
+
+        reload(prefs)
+        self.update = prefs.Update()
+
         self.ui = self.import_ui()
         self.init_ui()
 
@@ -89,6 +96,8 @@ class MyWindow(QtWidgets.QDialog):
         combo.setFocusPolicy(QtCore.Qt.NoFocus)
         if combo.currentIndex() > 0:
             frame.setStyleSheet("color: rgb(208, 255, 96)")  # indicates new version available
+
+        # print ">>", row.objectName(), reference, current
 
         vlayout = QtWidgets.QVBoxLayout()
         vlayout.setSpacing(0)
@@ -375,107 +384,109 @@ class MyWindow(QtWidgets.QDialog):
         return
 
     def update_scene(self):
-        rx = QtCore.QRegExp("Row_*")
-        rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
-        for child in self.ui.findChildren(QtWidgets.QWidget, rx):
-            asset_file = pm.util.common.path(child.whatsThis())
-            version = child.findChild(QtWidgets.QComboBox).currentText()
-            search = "*{}{}".format(version, asset_file.ext)
-
-            # FOR LIGHTING
-            reference_file = asset_file
-            rollback = child.findChild(QtWidgets.QComboBox).currentIndex()
-
-            # FOR LIGHTING
-            if rollback > 0 and ".abc" in reference_file:
-                version = "ver_" + version[1:]
-                filename = path(reference_file).basename()
-                shot = path(pm.workspace.fileRules["scene"]).namebase
-
-                reference_file = pm.workspace.path.joinpath(
-                    "published", "08_Animation", shot, version, filename
-                ).normpath()
-
-            # FOR ALL OTHER SCENE PROCESSES
-            if ".abc" not in reference_file:
-                reference_file = asset_file.dirname().files(search)[0]
-
-            reference_node = child.toolTip()
-            if reference_node:
-                # FOR REFERENCE NODES IN IN AN SCENE PROCESS
-                pm.FileReference(refnode=reference_node).load(reference_file)
-            elif "06_Cache" in reference_file:
-                # FOR LIGHTING
-                reference_file = path(reference_file)
-
-                current_shot = reference_file.dirname().basename()  # Shot_###
-                assets = sg.find_one(
-                    "Shot",
-                    [
-                        ["project", "is", project],
-                        ["code", "is", current_shot]
-                    ],
-                    ["assets"]
-                )["assets"]
-                models, rigs = [], []
-                for asset in assets:
-                    asset_type = sg.find_one(
-                        "Asset",
-                        [
-                            ["project", "is", project],
-                            ["id", "is", asset["id"]]
-                        ],
-                        ["sg_asset_type"]
-                    )["sg_asset_type"]
-
-                    if asset_type == "CG Model":
-                        models += [asset["name"]]
-                    elif asset_type == "CG Rig":
-                        sub_assets = sg.find_one(
-                            "Asset",
-                            [
-                                ["project", "is", project],
-                                ["id", "is", asset["id"]]
-                            ],
-                            ["assets"]
-                        )["assets"]
-                        # assumes sub assets are models because rigs reference models
-                        for sub in sub_assets:
-                            models += [sub["name"]]
-                        rigs += [asset["name"]]
-
-                ordered_type = models + rigs
-                search = reference_file.namebase.rsplit("_", 1)[0]  # model_a
-
-                name = None
-                for item in ordered_type:
-                    if search in item:
-                        name = "_{}_".format(item)
-
-                if "_PXY.abc" in reference_file:
-                    name = reference_file.namebase + "_"
-
-                start_file = reference_file.dirname().joinpath(name + ".ma")
-                reference_file.copy2(start_file)
-                pm.createReference(start_file, namespace=":")
-                pm.FileReference(refnode=name + "RN").load(reference_file)
-                start_file.remove_p()
-            else:
-                name = "_{}_".format(reference_file.dirname().namebase)
-                if "Rigs" in reference_file:
-                    name += "RIG_"
-
-                # FOR ALL SCENE PROCESSES AND CAMERA
-
-                if "Shot" in name:
-                    name = name[1:] + "CAM_"
-
-                start_file = reference_file.dirname().joinpath(name + ".ma")
-                reference_file.copy2(start_file)
-                pm.createReference(start_file, namespace=":")
-                pm.FileReference(refnode=name + "RN").load(reference_file)
-                start_file.remove_p()
-        print ">> references loaded/updated",
+        # rx = QtCore.QRegExp("Row_*")
+        # rx.setPatternSyntax(QtCore.QRegExp.Wildcard)
+        # for child in self.ui.findChildren(QtWidgets.QWidget, rx):
+        #     asset_file = pm.util.common.path(child.whatsThis())
+        #     version = child.findChild(QtWidgets.QComboBox).currentText()
+        #     search = "*{}{}".format(version, asset_file.ext)
+        #
+        #     # FOR LIGHTING
+        #     reference_file = asset_file
+        #     rollback = child.findChild(QtWidgets.QComboBox).currentIndex()
+        #
+        #     # FOR LIGHTING
+        #     if rollback > 0 and ".abc" in reference_file:
+        #         version = "ver_" + version[1:]
+        #         filename = path(reference_file).basename()
+        #         shot = path(pm.workspace.fileRules["scene"]).namebase
+        #
+        #         reference_file = pm.workspace.path.joinpath(
+        #             "published", "08_Animation", shot, version, filename
+        #         ).normpath()
+        #
+        #     # FOR ALL OTHER SCENE PROCESSES
+        #     if ".abc" not in reference_file:
+        #         reference_file = asset_file.dirname().files(search)[0]
+        #
+        #     reference_node = child.toolTip()
+        #     if reference_node:
+        #         # FOR REFERENCE NODES IN IN AN SCENE PROCESS
+        #         pm.FileReference(refnode=reference_node).load(reference_file)
+        #     elif "06_Cache" in reference_file:
+        #         # FOR LIGHTING
+        #         reference_file = path(reference_file)
+        #
+        #         current_shot = reference_file.dirname().basename()  # Shot_###
+        #         assets = sg.find_one(
+        #             "Shot",
+        #             [
+        #                 ["project", "is", project],
+        #                 ["code", "is", current_shot]
+        #             ],
+        #             ["assets"]
+        #         )["assets"]
+        #         models, rigs = [], []
+        #         for asset in assets:
+        #             asset_type = sg.find_one(
+        #                 "Asset",
+        #                 [
+        #                     ["project", "is", project],
+        #                     ["id", "is", asset["id"]]
+        #                 ],
+        #                 ["sg_asset_type"]
+        #             )["sg_asset_type"]
+        #
+        #             if asset_type == "CG Model":
+        #                 models += [asset["name"]]
+        #             elif asset_type == "CG Rig":
+        #                 sub_assets = sg.find_one(
+        #                     "Asset",
+        #                     [
+        #                         ["project", "is", project],
+        #                         ["id", "is", asset["id"]]
+        #                     ],
+        #                     ["assets"]
+        #                 )["assets"]
+        #                 # assumes sub assets are models because rigs reference models
+        #                 for sub in sub_assets:
+        #                     models += [sub["name"]]
+        #                 rigs += [asset["name"]]
+        #
+        #         ordered_type = models + rigs
+        #         search = reference_file.namebase.rsplit("_", 1)[0]  # model_a
+        #
+        #         name = None
+        #         for item in ordered_type:
+        #             if search in item:
+        #                 name = "_{}_".format(item)
+        #
+        #         if "_PXY.abc" in reference_file:
+        #             name = reference_file.namebase + "_"
+        #
+        #         start_file = reference_file.dirname().joinpath(name + ".ma")
+        #         reference_file.copy2(start_file)
+        #         pm.createReference(start_file, namespace=":")
+        #         pm.FileReference(refnode=name + "RN").load(reference_file)
+        #         start_file.remove_p()
+        #     else:
+        #         name = "_{}_".format(reference_file.dirname().namebase)
+        #         if "Rigs" in reference_file:
+        #             name += "RIG_"
+        #
+        #         # FOR ALL SCENE PROCESSES AND CAMERA
+        #
+        #         if "Shot" in name:
+        #             name = name[1:] + "CAM_"
+        #
+        #         start_file = reference_file.dirname().joinpath(name + ".ma")
+        #         reference_file.copy2(start_file)
+        #         pm.createReference(start_file, namespace=":")
+        #         pm.FileReference(refnode=name + "RN").load(reference_file)
+        #         start_file.remove_p()
+        #
+        # print ">> references loaded/updated\n",
+        self.record_preferences()
         self.ui.close()
         return
 
@@ -486,6 +497,32 @@ class MyWindow(QtWidgets.QDialog):
             frame.setStyleSheet("color: None")
         else:
             frame.setStyleSheet("color: rgb(208, 255, 96)")
+        return
+
+    def load_preferences(self):
+        if "Lighting" not in self.scene_process:
+            return
+
+        # branch = ".".join(["{}".format(item) for item in self.branch])
+        # data = self.update.ui(branch=branch)
+        #
+        # if not data:
+        #     return
+        #
+        # ui_element = self.ui.findChild(QtWidgets.QRadioButton, data)
+        # ui_element.setChecked(1)
+        return
+
+    def record_preferences(self):
+        if "Lighting" not in self.scene_process:
+            return
+
+        # nested_dictionary = self.ui.version_grp.checkedButton().objectName()
+        # for key in self.branch[::-1]:
+        #     nested_dictionary = {key: nested_dictionary}
+        #
+        # self.update.json_file(dictionary=nested_dictionary)
+        # return nested_dictionary
         return
 
     def init_ui(self):
@@ -499,4 +536,6 @@ class MyWindow(QtWidgets.QDialog):
 
         # # TESTING - COMMENT OUT RUNS AS NORMAL SECTION
         # self.update_scene()
+
+        self.load_preferences()
         return
