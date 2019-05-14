@@ -64,13 +64,6 @@ class MyWindow(QtWidgets.QDialog):
         row.setWhatsThis(publish)
         row.setToolTip(reference)
 
-        # # label quant - max width 25, arial 14, align horizontal center, horizontal expanding
-        # num = QtWidgets.QLabel("{}".format(number))
-        # num.setFont(font)
-        # num.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        # num.setMaximumWidth(25)
-        # num.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-
         # label name - horizontal expanding, arial 14
         name = QtWidgets.QLabel(asset_name)
         name.setFont(font)
@@ -97,8 +90,6 @@ class MyWindow(QtWidgets.QDialog):
         combo.setObjectName("Combo_{:02}".format(index))
         if combo.currentIndex() > 0:
             frame.setStyleSheet("color: rgb(208, 255, 96)")  # indicates new version available
-
-        # print ">>", row.objectName(), reference, current
 
         vlayout = QtWidgets.QVBoxLayout()
         vlayout.setSpacing(0)
@@ -504,27 +495,31 @@ class MyWindow(QtWidgets.QDialog):
         if "Lighting" not in self.scene_process:
             return
 
-        # branch = ".".join(["{}".format(item) for item in self.branch])
-        # data = self.update.ui(branch=branch)
-        #
-        # if not data:
-        #     return
-        #
-        # ui_element = self.ui.findChild(QtWidgets.QRadioButton, data)
-        # ui_element.setChecked(1)
+        branch = ".".join(["{}".format(item) for item in self.branch+[self.scene_process]])
+        data = self.update.ui(branch=branch)
+
+        if not data:
+            return
+
+        for k, v in data.items():
+            ui_element = self.ui.findChild(QtWidgets.QComboBox, k)
+            ui_element.setCurrentText(v)
         return
 
     def record_preferences(self):
         if "Lighting" not in self.scene_process:
             return
 
-        # nested_dictionary = self.ui.version_grp.checkedButton().objectName()
-        # for key in self.branch[::-1]:
-        #     nested_dictionary = {key: nested_dictionary}
-        #
-        # self.update.json_file(dictionary=nested_dictionary)
-        # return nested_dictionary
-        return
+        nested_dictionary = {
+            self.scene_process:
+                {combo.objectName(): combo.currentText() for combo in self.ui.findChildren(QtWidgets.QComboBox)}
+        }
+
+        for key in self.branch[::-1]:
+            nested_dictionary = {key: nested_dictionary}
+
+        self.update.json_file(dictionary=nested_dictionary)
+        return nested_dictionary
 
     def init_ui(self):
         self.init_rows()
