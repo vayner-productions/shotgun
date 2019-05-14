@@ -5,6 +5,7 @@ from pymel.core import workspace, openFile, saveAs, displayInfo, newFile
 from pymel.util import path
 from PySide2 import QtCore, QtWidgets, QtUiTools
 import maya.mel as mel
+from . import update_timeline
 
 
 def get_window():
@@ -251,6 +252,9 @@ class MyWindow(SetProject, Checkout, QtWidgets.QDialog):
             self.published_file()
         elif self.ui.checkout_cbx.currentText() == "Working File":
             self.processed_file()
+
+        reload(update_timeline)
+        update_timeline.update_timeline()
 
         self.record_preferences()
         self.ui.close()
