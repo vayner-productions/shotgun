@@ -881,9 +881,13 @@ class MyWindow(Publish, QtWidgets.QDialog):
 
     def init_ui(self):
         # TASKS
-        for task in self.tasks:
-            item = QtWidgets.QListWidgetItem(task["content"], self.ui.task_lsw)
-            item.setToolTip(str(task["id"]))
+        try:
+            for task in self.tasks:
+                item = QtWidgets.QListWidgetItem(task["content"], self.ui.task_lsw)
+                item.setToolTip(str(task["id"]))
+        except AttributeError:
+            pm.warning("Publish failed - Maya scene is not saved, try 'Vayner Menu/Increment and Save'.")
+            return
 
         # PROXY
         shot_name = path(workspace.fileRules["scene"]).basename()
