@@ -132,6 +132,11 @@ class VaynerMenu:
         return
 
     def add_modeling_items(self):
+        organize_textures_item = MenuItem(
+            label="Organize Textures",
+            command=organize_textures,
+        )
+
         publish_modeling_item = MenuItem(
             label="Publish Model",
             command=publish_scene
