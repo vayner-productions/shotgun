@@ -6,6 +6,12 @@ sg.get_window("publish_camera")
 from shotgun.publish import camera as sg
 reload(sg)
 sg.get_window("load_camera")
+
+#TODO: WHEN AIM LOCATOR IS CONSTRAINED TO AN EXTERNAL NODE NOT IN LIGHTING
+# CREATE A LOCATOR, PARENT TO AIM, BAKE KEYS TO LOCATOR, UNPARENT, AND LOCK ALL SRT (ENSURES OTHER SP WON'T ANIMATE WHAT REPRESENTS ANOTHER ASSET)
+# EXPORT LOCATOR, BORROWING FROM PUBLISHED CAMERA FILE NAME, REPLACE SHOT_###_ORIGINAL WITH LOCATOR
+# IN LIGHTING, REFERENCE LOCATOR MATCHING CAMERA VERSION WITH THE CAMERA
+# LOCATOR CONSTRAINS ALL CHANNELS OF THE AIM LOCATOR
 """
 from . import *
 from PySide2 import QtCore, QtWidgets, QtUiTools
@@ -269,15 +275,14 @@ class CameraTools(object):
             exportSelected(
                 self.camera_file,
                 constructionHistory=0,
-                channels=0,
-                constraints=1,  # saves the constraint node from external node, build scene duplicates constraint
+                channels=1,
+                constraints=0,  # saves the constraint node from external node, build scene duplicates constraint
                 expressions=0,
                 shader=1,
                 type="mayaAscii",
                 preserveReferences=1,  # saves as reference if enabled
                 force=1
             )
-
         self.update_shotgun()
         return
 
