@@ -10,7 +10,7 @@ from . import update_timeline
 
 def get_window():
     if not path(mapped_letter).exists():
-        warning("Checkout failed, connect to {}\\".format(mapped_letter))
+        warning("Checkout failed, connect to {}/".format(mapped_letter))
         return
 
     global mw
