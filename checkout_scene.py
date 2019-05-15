@@ -1,7 +1,7 @@
 """
 """
 from . import *
-from pymel.core import workspace, openFile, saveAs, displayInfo, newFile
+from pymel.core import workspace, openFile, saveAs, displayInfo, newFile, warning
 from pymel.util import path
 from PySide2 import QtCore, QtWidgets, QtUiTools
 import maya.mel as mel
@@ -9,6 +9,10 @@ from . import update_timeline
 
 
 def get_window():
+    if not path(mapped_letter).exists():
+        warning("Checkout failed, connect to {}\\".format(mapped_letter))
+        return
+
     global mw
     try:
         mw.ui.close()
@@ -17,6 +21,7 @@ def get_window():
 
     mw = MyWindow()
     mw.ui.show()
+    return
 
 
 class Checkout(object):
@@ -130,6 +135,7 @@ class SetProject(object):
             "None"
         }
         self.scene_dict = self.get_scene_items()
+        return
 
     def get_project_path(self):
         data = sg.find_one(
