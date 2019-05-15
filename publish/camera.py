@@ -275,8 +275,8 @@ class CameraTools(object):
             exportSelected(
                 self.camera_file,
                 constructionHistory=0,
-                channels=1,
-                constraints=0,  # saves the constraint node from external node, build scene duplicates constraint
+                channels=0,
+                constraints=1,  # saves the constraint node from external node, build scene duplicates constraint
                 expressions=0,
                 shader=1,
                 type="mayaAscii",
