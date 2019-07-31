@@ -117,7 +117,6 @@ def check_top_node(top_node=None, suffix=""):
     scene = pm.sceneName()
     if "07_Lighting" in scene:
         return True
-
     if suffix:
         if "_" not in suffix:
             suffix = "_" + suffix
@@ -127,9 +126,10 @@ def check_top_node(top_node=None, suffix=""):
         elif "02_Rigs" in scene:
             suffix = "_RIG"
 
-    name = "{}{}".format(scene.basename().split("_processed.")[0], suffix)
+    name = "_".join("{}{}".format(scene.basename().split("_processed.")[0], suffix).split(" "))
     incomplete = 0
     prefix, maya_name = name.split("_", 1)
+
     try:
         if prefix.isdigit():
             top_node = pm.PyNode(maya_name)
