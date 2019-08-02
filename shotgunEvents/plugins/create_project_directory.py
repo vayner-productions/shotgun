@@ -44,6 +44,7 @@ def create_project_directory(sg, logger, event, args):
         return
 
     if "Shotgun_Project_Change" == event["event_type"]:
+        logger.info(">> triggered project change")
         directory = CreateDirectory(sg, logger, event)
         directory.project()
     elif "Shotgun_Shot_Change" == event["event_type"]:
@@ -54,7 +55,9 @@ def create_project_directory(sg, logger, event, args):
     elif "Shotgun_Asset_Change" == event["event_type"]:
         directory = CreateDirectory(sg, logger, event)
         directory.asset()
-    # logger.info(event)
+
+    # logger.info(">>", event)  # will not print variable!
+    # logger.info(">> {}".format())
     return
 
 
@@ -79,13 +82,17 @@ class CreateDirectory(object):
             fields=[client, brand, unc_path, project_name]
         )
 
-        self.project_directory = path.normpath(path.join(
-            fields[unc_path],
-            "Animation/Projects/Client",
-            fields[client],
-            fields[brand],
-            fields[project_name]
-        ))
+        self.project_directory = None
+        try:
+            self.project_directory = path.normpath(path.join(
+                fields[unc_path],
+                "Animation/Projects/Client",
+                fields[client],
+                fields[brand],
+                fields[project_name]
+            ))
+        except:
+            pass
         return
 
     def project(self):
@@ -93,6 +100,10 @@ class CreateDirectory(object):
         creates project directory from template for production and another project directory on A: for tracking
         :return:
         """
+        if None is self.project_directory:
+            self.logger.warning(">> Not enough information, skipping.")
+            return
+
         self.logger.info(">> PROJECT CHANGED")
 
         template = path.normpath(
